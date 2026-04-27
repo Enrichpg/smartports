@@ -194,17 +194,47 @@ docker-compose down -v
 docker-compose restart backend
 ```
 
-### 7. First Run - Seed Data (Optional)
+### 7. First Run - Load Seed Data (Recommended)
+
+SmartPort includes 211 pre-generated NGSI-LD entities covering 8 Galician ports:
 
 ```bash
-# TODO: Seed data scripts will be added in next iteration
-# For now, access Orion-LD API directly to create entities
+# Step 1: Validate seed payloads (verify NGSI-LD compliance)
+python3 backend/scripts/validate_payloads.py
+# Expected: ✓ ALL PAYLOADS VALID
 
-# Example: Create a Port entity
-curl -X POST http://localhost/ngsi-ld/v1/entities \
-  -H "Content-Type: application/ld+json" \
-  -d @data/seed/port_example.json
+# Step 2: Generate seed JSON file
+python3 backend/scripts/generate_seed_json.py --pretty
+# Creates: data/seed/galicia_entities.json (217 KB)
+
+# Step 3: Preview what will be loaded (dry-run)
+python3 backend/scripts/load_seed.py --dry-run
+# Shows: 211 entities ready to load
+
+# Step 4: Load to Orion-LD (upsert mode - safe)
+python3 backend/scripts/load_seed.py --upsert
+# Result: 211 entities created in Orion-LD
+
+# Step 5: Verify data was loaded
+curl -H "FIWARE-Service: smartport" \
+     -H "FIWARE-ServicePath: /galicia" \
+     http://localhost:1026/ngsi-ld/v1/entities?type=Port
+# Lists: All 8 Galician ports
 ```
+
+**Seed Coverage:**
+- 8 Ports (A Coruña, Vigo, Ferrol, Marín, Vilagarcía, Ribeira, Burela, Baiona)
+- 71 Berths (6-15 per port)
+- 10 Master Vessels (static registry)
+- 10 Vessel Instances (active ships)
+- 10 BoatAuthorized entities
+- 32 BoatPlacesAvailable entities (4 categories × 8 ports)
+- 32 BoatPlacesPricing entities
+- 11 Devices (air quality & weather sensors)
+- 6 AirQualityObserved measurements
+- 5 WeatherObserved measurements
+
+📚 **More details:** See [data/seed/README.md](data/seed/README.md)
 
 ---
 
