@@ -1,0 +1,47 @@
+# Grafana Datasource Configuration - QuantumLeap (TimescaleDB)
+# For time-series metrics from QuantumLeap
+
+apiVersion: 1
+kind: DataSource
+uid: quantumleap
+name: QuantumLeap TimeSeries
+type: postgres
+typeName: PostgreSQL
+access: proxy
+url: timescaledb:5432
+database: quantumleap
+user: quantumleap
+secureJsonData:
+  password: timescale123
+jsonData:
+  postgresVersion: 1200
+  sslmode: disable
+  timeInterval: 1m
+isDefault: true
+editable: true
+---
+apiVersion: 1
+kind: DataSource
+uid: prometheus
+name: Prometheus
+type: prometheus
+typeName: Prometheus
+access: proxy
+url: http://prometheus:9090
+isDefault: false
+editable: true
+---
+apiVersion: 1
+kind: DataSource
+uid: mongodb
+name: MongoDB
+type: mongodb-datasource
+typeName: MongoDB
+access: proxy
+url: mongodb:27017
+database: smartports
+user: admin
+secureJsonData:
+  password: admin123
+isDefault: false
+editable: true

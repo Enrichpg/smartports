@@ -106,74 +106,104 @@
 - Docker & Docker Compose (v20.10+)
 - Git
 - Python 3.10+ (for local development)
-- 4+ GB RAM, 20 GB disk space
+- 4+ GB RAM, 20 GB disk space recommended
 
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/Enrichpg/smartports
+git clone https://github.com/your-org/SmartPorts.git
 cd SmartPorts
 ```
 
 ### 2. Configure Environment
 
 ```bash
-# Copy example configuration
-cp config/.env.example .env
+# Copy environment template
+cp .env.example .env
 
-# Edit .env with your values (especially secrets)
-nano .env
+# Edit .env with your values (IMPORTANT: change secrets for production)
+# nano .env
+# Key variables:
+#   - SECRET_KEY: Change to a strong random value
+#   - POSTGRES_PASSWORD, TIMESCALE_PASSWORD, MONGO_ROOT_PASSWORD
+#   - REDIS_PASSWORD, GRAFANA_PASSWORD
+#   - PUBLIC_BASE_URL: Set to your domain
 ```
 
-**Key variables to set:**
-- `MQTT_USER`, `MQTT_PASSWORD`
-- `POSTGRES_PASSWORD`, `TIMESCALEDB_PASSWORD`
-- `JWT_SECRET_KEY`
-- `GRAFANA_ADMIN_PASSWORD`
-
-### 3. Start Services
+### 3. Start Infrastructure Stack
 
 ```bash
-# Start all services (first time ~5 min)
-docker-compose -f docker/docker-compose.yml up -d
+# Build and start all services (first run ~5-10 minutes)
+docker-compose up -d
 
-# Check service status
-docker-compose -f docker/docker-compose.yml ps
+# Verify all services are healthy
+docker-compose ps
 
-# View logs (all services)
-docker-compose -f docker/docker-compose.yml logs -f
-
-# View specific service logs
-docker-compose -f docker/docker-compose.yml logs -f backend
+# Check health status
+curl http://localhost/health
 ```
 
-### 4. Verify Installation
+### 4. Access Services
+
+Once running, access SmartPort components at:
+
+| Service | URL | Default Credentials |
+|---------|-----|-------------------|
+| **Frontend (Web UI)** | http://localhost | N/A |
+| **API Docs (Swagger)** | http://localhost/api/v1/docs | N/A |
+| **Grafana Dashboards** | http://localhost/grafana | admin / admin123 |
+| **Prometheus Metrics** | http://localhost/prometheus | N/A |
+| **Orion-LD API** | http://localhost/ngsi-ld/v1/ | N/A |
+| **QuantumLeap API** | http://localhost/ql/v2/ | N/A |
+
+### 5. Service Verification
 
 ```bash
-# Test backend health
-curl http://localhost:8000/health
+# Check all services are running
+docker-compose ps
 
-# Test Orion-LD
-curl http://localhost:1026/version
+# Test backend health endpoint
+curl http://localhost/health
 
-# Test MQTT
-docker exec mosquitto mosquitto_sub -h localhost -t test &
-docker exec mosquitto mosquitto_pub -h localhost -t test -m "Hello"
+# Test Orion-LD context broker
+curl http://localhost/ngsi-ld/v1/entities?limit=1
 
-# Access dashboards
-# - Frontend: http://localhost:80
-# - Grafana: http://localhost:3000 (admin/set_in_.env)
-# - API Docs: http://localhost:8000/docs
+# Test QuantumLeap version
+curl http://localhost/ql/v2/version
+
+# Test MQTT broker (publish test message)
+docker exec smartports_mosquitto mosquitto_pub -h localhost -t test -m "Hello SmartPort"
+
+# View backend logs
+docker-compose logs -f backend
+
+# View all service logs
+docker-compose logs -f
 ```
 
-### 5. Load Sample Data (Optional)
+### 6. Stopping Services
 
 ```bash
-# Populate 11 Galician ports with seed data
-python backend/scripts/load_seed_data.py
+# Stop all running containers (preserves volumes)
+docker-compose down
 
-# Check entities in Orion
-curl http://localhost:1026/ngsi-ld/v1/entities?type=Port
+# Stop and remove all data (careful!)
+docker-compose down -v
+
+# Restart a specific service
+docker-compose restart backend
+```
+
+### 7. First Run - Seed Data (Optional)
+
+```bash
+# TODO: Seed data scripts will be added in next iteration
+# For now, access Orion-LD API directly to create entities
+
+# Example: Create a Port entity
+curl -X POST http://localhost/ngsi-ld/v1/entities \
+  -H "Content-Type: application/ld+json" \
+  -d @data/seed/port_example.json
 ```
 
 ---
@@ -183,79 +213,108 @@ curl http://localhost:1026/ngsi-ld/v1/entities?type=Port
 ```
 SmartPorts/
 ├── agents/
-│   └── AGENTS.md              ← Development rules & obligations
+│   └── AGENTS.md                  ← Development rules & governance
 ├── docs/
-│   ├── PRD.md                 ← Product requirements
-│   ├── data_model.md          ← NGSI-LD 15 entities
-│   ├── architecture.md        ← System design & services
-│   ├── APPLICATION.md         ← Vision & features (when created)
-│   └── README.md              ← This file
-├── backend/
-│   ├── app/
-│   │   ├── main.py            ← FastAPI entry point
-│   │   ├── core/
-│   │   │   ├── config.py      ← Settings from .env
-│   │   │   ├── security.py    ← JWT, RBAC
-│   │   │   └── logger.py      ← Logging config
-│   │   ├── models/
-│   │   │   ├── entities.py    ← Pydantic schemas
-│   │   │   ├── database.py    ← SQLAlchemy models
-│   │   │   └── requests.py    ← API models
-│   │   ├── services/
-│   │   │   ├── orion.py       ← Orion-LD integration
-│   │   │   ├── quantumleap.py ← Time-series queries
-│   │   │   ├── port_service.py
-│   │   │   ├── berth_service.py
-│   │   │   ├── portcall_service.py
-│   │   │   ├── alert_service.py
-│   │   │   └── ml_service.py
-│   │   ├── api/
-│   │   │   ├── routes.py      ← Main routes
-│   │   │   ├── ports.py       ← Port endpoints
-│   │   │   ├── berths.py      ← Berth endpoints
-│   │   │   ├── portcalls.py   ← Port call endpoints
-│   │   │   ├── operations.py  ← Operation endpoints
-│   │   │   ├── vessels.py     ← Vessel endpoints
-│   │   │   ├── alerts.py      ← Alert endpoints
-│   │   │   ├── analytics.py   ← Analytics endpoints
-│   │   │   ├── health.py      ← Health/status endpoints
-│   │   │   └── llm.py         ← LLM chat endpoints
-│   │   ├── websocket/
-│   │   │   └── manager.py     ← WebSocket pool & broadcast
-│   │   └── tasks/
-│   │       ├── __init__.py    ← Celery config
-│   │       ├── forecast.py    ← Prophet forecasting
-│   │       └── recommend.py   ← Berth recommendation
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── scripts/
-│       └── load_seed_data.py  ← Populate initial data
-├── frontend/
-│   ├── index.html
+│   ├── PRD.md                     ← Product requirements  
+│   ├── data_model.md              ← NGSI-LD 15 entity types
+│   └── architecture.md            ← System design & data flows
+├── backend/                       ← FastAPI backend (Python)
+│   ├── main.py                    ← Application entry point
+│   ├── config.py                  ← Settings from .env
+│   ├── api/
+│   │   ├── health.py              ← Health check endpoints
+│   │   └── v1.py                  ← API v1 routes
+│   ├── services/
+│   │   ├── orion.py               ← Orion-LD integration
+│   │   └── quantumleap.py         ← QuantumLeap integration
+│   ├── models/                    ← Pydantic schemas (TBD)
+│   ├── tasks/
+│   │   └── celery.py              ← Async task definitions
+│   ├── requirements.txt            ← Python dependencies
+│   └── Dockerfile                 ← Container image
+├── frontend/                      ← Web UI (HTML/CSS/JS)
+│   ├── index.html                 ← Main page with dashboards
 │   ├── css/
-│   ├── js/
-│   │   ├── app.js             ← Main app logic
-│   │   ├── map.js             ← Leaflet integration
-│   │   ├── websocket.js       ← WebSocket client
-│   │   ├── charts.js          ← Chart.js integration
-│   │   ├── 3d.js              ← Three.js integration
-│   │   └── llm-chat.js        ← LLM chat widget
-│   └── assets/
-├── docker/
-│   └── docker-compose.yml     ← Full orchestration
-├── config/
-│   ├── .env.example           ← Environment template
-│   ├── nginx.conf             ← Nginx reverse proxy config
-│   ├── mosquitto.conf         ← MQTT broker config
-│   ├── prometheus.yml         ← Prometheus scrape config
-│   └── grafana/
-│       └── dashboards/        ← Pre-built dashboards
-├── data/
-│   └── seed/
-│       └── ports.json         ← Sample port data
-├── .gitignore
-└── README.md                  ← This file
+│   │   └── style.css              ← Application styles
+│   └── js/
+│       └── app.js                 ← Frontend logic
+├── nginx/
+│   └── nginx.conf                 ← Reverse proxy config
+├── mosquitto/
+│   └── mosquitto.conf             ← MQTT broker config
+├── prometheus/
+│   └── prometheus.yml             ← Metrics scrape config
+├── grafana/
+│   └── provisioning/
+│       └── datasources/           ← TimescaleDB & Prometheus datasources
+├── docker-compose.yml             ← Container orchestration (13 services)
+├── .env.example                   ← Environment template
+├── .gitignore                     ← Git ignore rules
+├── README.md                      ← This file
+└── data/
+    └── seed/                      ← Sample data (future)
 ```
+
+**Implementation Status:**
+- ✅ Infrastructure stack (13 services, fully operational)
+- ✅ Backend scaffolding (FastAPI, services, tasks)
+- ✅ Frontend template (dashboard UI ready)
+- ✅ FIWARE integration (Orion, QuantumLeap services)
+- ✅ Environment & configuration
+- 🔄 ML pipelines (Prophet, scikit-learn)
+- 🔄 Advanced features (WebSocket, 3D visualization)
+
+---
+
+## 🏛️ Infrastructure Overview
+
+### Deployed Services (Docker Compose)
+
+The complete stack includes **13 containerized services**:
+
+#### Layer 1: IoT & MQTT
+- **mosquitto** (1883, 9001): MQTT broker for sensor ingestion
+- **iot-agent** (4041): IoT Agent JSON (MQTT → NGSI-LD)
+
+#### Layer 2: FIWARE Context
+- **orion-ld** (1026): Orion-LD context broker
+- **quantumleap** (8668): Time-series manager + TimescaleDB persistence
+
+#### Layer 3: Databases
+- **postgresql** (5432): Operational DB
+- **timescaledb** (5433): Time-series storage
+- **mongodb** (27017): Document store
+- **redis** (6379): Cache & task queue
+
+#### Layer 4: Backend & Workers
+- **backend** (8000): FastAPI REST + WebSocket
+- **celery-worker**: Async tasks (ML, forecasting)
+
+#### Layer 5: Presentation
+- **nginx**: Reverse proxy (80/443)
+- **grafana** (3000): Dashboards
+- **prometheus** (9090): Metrics
+
+### Complete Data Flow
+
+```
+Sensors → MQTT → Mosquitto → IoT Agent → Orion-LD ↔ PostgreSQL
+                                            ↓
+                                        QuantumLeap → TimescaleDB
+                                            ↓
+                                         Backend ↔ Redis
+                                            ↓
+                                    Nginx (Reverse Proxy)
+                                       ↙        ↘
+                                   Frontend   Grafana/Prometheus
+```
+
+### Persistent Volumes
+
+- `mongodb_data`, `mongodb_config`
+- `postgres_data`, `timescaledb_data`, `redis_data`
+- `mosquitto_data`, `mosquitto_logs`
+- `grafana_storage`, `prometheus_data`, `nginx_cache`
 
 ---
 
@@ -263,57 +322,50 @@ SmartPorts/
 
 ### Environment Variables
 
-See [config/.env.example](config/.env.example) for all available variables.
+See [.env.example](.env.example) for all available variables with descriptions.
 
-**Critical variables for production:**
+**Quick start (.env):**
 ```bash
-# FIWARE
-ORION_HOST=orion-ld
-ORION_PORT=1026
+# Copy the template
+cp .env.example .env
 
-# Security
-JWT_SECRET_KEY=<random_secret_key_128_chars_minimum>
-JWT_ALGORITHM=HS256
-
-# Databases
+# For development, the defaults are acceptable
+# For production, CHANGE THESE:
+SECRET_KEY=<generate_secure_random_key>
 POSTGRES_PASSWORD=<strong_password>
-TIMESCALEDB_PASSWORD=<strong_password>
-MONGODB_PASSWORD=<strong_password>
+TIMESCALE_PASSWORD=<strong_password>
+MONGO_ROOT_PASSWORD=<strong_password>
 REDIS_PASSWORD=<strong_password>
-MQTT_PASSWORD=<strong_password>
-
-# Machine Learning
-PROPHET_FORECAST_DAYS=7
-
-# LLM
-OLLAMA_MODEL=llama2:13b
-
-# Application
-SITE_URL=https://smartport.your-domain.com
+GRAFANA_PASSWORD=<admin_password>
+ENVIRONMENT=production
+DEBUG=false
 ```
 
-### Ports & Services
+### Service Ports (Internal Network)
 
-| Service | Port | Protocol | Purpose |
-|---------|------|----------|---------|
-| Nginx (HTTP) | 80 | HTTP | Redirect to HTTPS |
-| Nginx (HTTPS) | 443 | HTTPS | Reverse proxy, static files |
-| FastAPI | 8000 | HTTP | REST API (internal) |
-| WebSocket | 8001 | WS | Real-time updates (internal) |
-| Orion-LD | 1026 | HTTP | Context broker (internal) |
-| QuantumLeap | 8668 | HTTP | Time-series (internal) |
-| Grafana | 3000 | HTTP | Analytics dashboards (internal) |
-| Mosquitto | 1883 | MQTT | Message broker (internal) |
-| PostgreSQL | 5432 | TCP | Operational DB (internal) |
-| TimescaleDB | 5432 | TCP | Time-series DB (internal) |
-| MongoDB | 27017 | TCP | Document store (internal) |
-| Redis | 6379 | TCP | Cache & queue (internal) |
+| Service | Port | Access |
+|---------|------|--------|
+| **Nginx (Frontend)** | 80 → 443 | External |
+| **Backend API** | 8000 | Internal |
+| **Orion-LD** | 1026 | Internal |
+| **QuantumLeap** | 8668 | Internal |
+| **Grafana** | 3000 | Internal (via Nginx) |
+| **Prometheus** | 9090 | Internal (via Nginx) |
+| **Mosquitto (MQTT)** | 1883, 9001 | Internal |
+| **PostgreSQL** | 5432 | Internal |
+| **TimescaleDB** | 5433 | Internal |
+| **MongoDB** | 27017 | Internal |
+| **Redis** | 6379 | Internal |
 
-**External access (via Nginx):**
-- `https://smartport.your-domain.com/` → Frontend
-- `https://smartport.your-domain.com/api/` → API
-- `https://smartport.your-domain.com/ws` → WebSocket
-- `https://smartport.your-domain.com/grafana/` → Grafana
+**Public endpoints (via Nginx reverse proxy):**
+- `http://localhost/` → Frontend
+- `http://localhost/api/v1/` → Backend API
+- `http://localhost/api/v1/docs` → Swagger API docs
+- `http://localhost/api/ws` → WebSocket
+- `http://localhost/grafana/` → Grafana dashboards
+- `http://localhost/prometheus/` → Prometheus metrics
+- `http://localhost/ngsi-ld/` → Orion-LD API
+- `http://localhost/ql/` → QuantumLeap API
 
 ---
 
