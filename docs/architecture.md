@@ -872,6 +872,239 @@ Alerts:
   - Celery task backlog growing
 ```
 
+### 5.4 Realtime Infrastructure (Iteration 2)
+
+This section describes the realtime infrastructure added in Iteration 2 for live event streaming, audit logging, caching, and async task processing.
+
+#### WebSocket Server
+
+```yaml
+Endpoint: /api/v1/realtime/ws
+Protocol: WebSocket (upgraded from HTTP)
+Purpose: Real-time event streaming to clients
+
+Features:
+  - Multiple concurrent connections (1000+ supported)
+  - Subscription filtering (by port, entity type, event)
+  - Automatic reconnection support
+  - Message type routing (event, ping/pong, subscribe/unsubscribe)
+  - Connection lifecycle management
+
+Message Format (Event):
+  {
+    "type": "event",
+    "data": {
+      "event": "berth.updated",
+      "timestamp": "2026-04-28T14:00:00Z",
+      "entity": {"type": "Berth", "id": "urn:ngsi-ld:Berth:coruna:berth-001"},
+      "scope": {"port_id": "urn:ngsi-ld:Port:coruna"},
+      "payload": {"status": "occupied", "previous_status": "reserved"}
+    }
+  }
+
+Event Types Supported:
+  - berth.updated
+  - portcall.created, portcall.updated, portcall.closed
+  - alert.created, alert.updated
+  - availability.updated
+  - port.summary.updated
+  - authorization.validation.failed
+```
+
+#### Audit Logging (PostgreSQL)
+
+```yaml
+Database: postgres (same as operational DB)
+Tables:
+  - audit_log: Main audit trail for all operations
+  - task_execution_log: Background task execution history
+  - authentication_log: Authorization check history
+
+Features:
+  - Structured JSONB snapshots (before/after state)
+  - Correlation ID linking (trace related events)
+  - Port-scoped queries
+  - Timestamp UTC, TTL-based retention (90 days default)
+  - Actor tracking (who/what triggered action)
+
+REST Endpoints:
+  GET /api/v1/admin/audit - Query audit logs with filters
+  GET /api/v1/admin/audit/{entity_type}/{entity_id} - Entity history
+  GET /api/v1/admin/audit/port/{port_id} - Port operations history
+
+Use Cases:
+  - Compliance & regulatory audits
+  - Operational troubleshooting
+  - Security incident investigation
+  - Change tracking (who modified what, when)
+```
+
+#### Redis Cache Layer
+
+```yaml
+Service: redis
+Database Allocation:
+  - DB 0: General cache (port summaries, availability, alerts)
+  - DB 1: Celery broker queue
+  - DB 2: Celery result backend
+
+Cache Keys & TTLs:
+  - port:summary:{port_id} (600s) - Port overview, KPIs
+  - port:availability:{port_id} (600s) - Berth availability by category
+  - port:alerts:active:{port_id} (300s) - Active alerts for port
+  - dashboard:galicia:overview (600s) - Global KPI aggregates
+  - port:berths:{port_id} (600s) - Berth list and status
+
+Invalidation Strategy:
+  - Event-driven: On entity change, invalidate related caches
+  - Pattern-based: Delete all keys matching port:* when port summary changes
+  - TTL-based: Automatic expiration
+
+REST Endpoints:
+  GET /api/v1/admin/cache/health - Cache memory, connection status
+  DELETE /api/v1/admin/cache/invalidate?pattern=port:* - Manual invalidation
+  POST /api/v1/admin/cache/warm/{key_type}/{resource_id} - Pre-populate cache
+
+Graceful Degradation:
+  - If Redis unavailable, backend continues operating
+  - Cache requests return None, services fall back to DB queries
+  - No user-facing errors; transparently slower
+```
+
+#### Celery Background Tasks
+
+```yaml
+Broker: Redis (DB 1)
+Result Backend: Redis (DB 2)
+Worker Image: Same as backend (backend service with Celery command override)
+
+Task Categories:
+
+1. Domain Tasks (domain_tasks.py):
+   - recalculate_port_availability(port_id)
+   - check_port_alerts(port_id)
+   - refresh_port_summary_cache(port_id)
+   - broadcast_port_summary_update(port_id)
+   - orchestrate_berth_status_change(port_id, berth_id)
+   - orchestrate_portcall_lifecycle(portcall_id, event_type)
+
+2. Cache Tasks (cache_tasks.py):
+   - warm_cache_key(key, ttl, data)
+   - invalidate_cache_pattern(pattern)
+   - periodic_cache_maintenance()
+
+3. Alert Tasks (alert_tasks.py):
+   - analyze_port_conditions(port_id)
+   - check_vessel_authorization_issues(port_id)
+   - check_berth_utilization(port_id)
+   - generate_operational_report(port_id, period_hours)
+   - cleanup_expired_alerts()
+
+4. Ingest Tasks (existing):
+   - ingest_weather_data(port_id)
+   - ingest_air_quality_data(port_id)
+
+Execution Model:
+  - Sync endpoint: Validates & persists critical data (berth status, port call creation)
+  - Async orchestration: Launches task chain after successful operation
+  - Correlation ID: Links original request to all downstream tasks
+
+Example Flow (Berth Status Change):
+  1. PATCH /api/v1/berths/{berth_id}/status (sync, returns 200)
+     - Validates authorization
+     - Updates berth status in DB
+     - Emits event via WebSocket
+  2. Event triggers Celery task chain (async):
+     - recalculate_port_availability(port_id) 
+     - check_port_alerts(port_id)
+     - refresh_port_summary_cache(port_id)
+     - broadcast_port_summary_update(port_id)
+  3. Each task can log to audit_log and emit derived events
+  4. Frontend receives updates via WebSocket as tasks complete
+
+Task Timeouts:
+  - Hard limit: 30 minutes (1800s)
+  - Soft limit: 25 minutes (1500s)
+  - Retry: 3 attempts with exponential backoff
+
+REST Endpoints:
+  GET /api/v1/admin/tasks/{task_id} - Check task status
+  POST /api/v1/admin/tasks/check-alerts/{port_id} - Manual alert check
+  POST /api/v1/admin/tasks/recalculate-availability/{port_id} - Manual recalc
+
+Configuration (.env):
+  CELERY_BROKER_URL=redis://...:6379/1
+  CELERY_RESULT_BACKEND=redis://...:6379/2
+  CELERY_CONCURRENCY=4 (number of worker processes)
+  CELERY_WORKER_LOG_LEVEL=info
+```
+
+#### Event Bus (Internal Pub/Sub)
+
+```yaml
+Purpose: Decouple event publication from WebSocket, audit, and task execution
+
+Components:
+  - Publisher: Services create events via event_bus.publish(...)
+  - Subscribers:
+    * WebSocket manager (broadcasts to connected clients)
+    * Audit service (logs to PostgreSQL)
+    * Celery orchestrator (triggers background tasks)
+
+Event Publishing API:
+  await event_bus.publish(
+    event_type="berth.updated",
+    entity_type="Berth",
+    entity_id="berth-1",
+    port_id="port-a",
+    payload={"status": "occupied"},
+    correlation_id="req-123"
+  )
+
+  # Or use typed helpers:
+  await event_bus.publish_berth_updated(berth_id, port_id, status)
+  await event_bus.publish_portcall_created(portcall_id, port_id, vessel_id, payload)
+  await event_bus.publish_alert_created(alert_id, port_id, alert_type, payload)
+  # ... etc
+
+Hook Registration:
+  event_bus.subscribe_audit(audit_callback)      # Receives all events for logging
+  event_bus.subscribe_tasks(task_orchestrator)   # Receives events for task triggering
+
+Benefits:
+  - Separation of concerns (event publication ≠ broadcast/audit/tasks)
+  - Easy to extend (add new hooks without touching publishing code)
+  - Non-blocking (hooks run async, don't block the request)
+  - Testable (can mock publishers/subscribers independently)
+```
+
+#### Integration with Existing Services
+
+All domain services (berth_service.py, portcall_service.py, alert_service.py, etc.) integrate with realtime infrastructure as follows:
+
+```python
+# Example: berth_service.py
+
+async def update_berth_status(berth_id: str, status: str):
+    # 1. Validate and persist
+    berth = await db.update_berth(berth_id, status)
+    
+    # 2. Emit event
+    await event_bus.publish_berth_updated(
+        berth_id=berth_id,
+        port_id=berth.port_id,
+        status=status,
+        previous_status=berth.previous_status,
+        correlation_id=context_id,  # Trace back to original request
+    )
+    
+    # 3. Audit is logged automatically by event_bus
+    # 4. WebSocket clients receive update automatically
+    # 5. Celery tasks triggered automatically (recalc, alerts, etc.)
+    
+    return berth
+```
+
 ---
 
 ## 6. Data Flow Diagrams

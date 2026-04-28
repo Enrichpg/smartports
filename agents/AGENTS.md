@@ -1,7 +1,7 @@
 # SmartPort Galicia Operations Center — AGENTS.md
 
-**Version:** 1.0  
-**Last Updated:** 2026-04-27  
+**Version:** 1.1  
+**Last Updated:** 2026-04-28  
 **Status:** Active  
 **Authority:** Project Lead  
 
@@ -857,9 +857,10 @@ If ambiguity arises:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-27 | Initial comprehensive governance document |
+| 1.1 | 2026-04-28 | Updated for Iteration 2: Realtime infrastructure (WebSocket, audit, cache, Celery) implemented |
 
 ---
 
-**Last Review:** 2026-04-27  
-**Next Review:** After Phase 1 completion  
+**Last Review:** 2026-04-28  
+**Next Review:** After ML & Assistant integration (Iteration 3)  
 **Status:** ACTIVE - Binding for all contributors

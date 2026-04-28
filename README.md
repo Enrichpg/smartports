@@ -8,9 +8,9 @@
 
 **SmartPort Galicia** is a FIWARE-based, NGSI-LD-compliant platform for managing multiple Galician ports as a unified system. It combines real-time operational control, historical analytics, machine learning forecasting, and intelligent decision support.
 
-**Status:** Foundation Complete (Phase 1)  
-**Version:** 1.0  
-**Last Updated:** 2026-04-27
+**Status:** Iteration 2 Complete - Realtime Infrastructure Active  
+**Version:** 1.1  
+**Last Updated:** 2026-04-28
 
 ---
 
@@ -31,7 +31,25 @@
 
 ## ✨ Features
 
-### 🔴 **NEW: Real Data Integration (Phase 2)**
+### � **NEW: Realtime Infrastructure & Operational Robustness (Iteration 2)**
+- ✅ **WebSocket Real-Time Events** - Live event streaming to connected clients
+  - Event types: berth updates, port calls, alerts, availability changes
+  - Subscription filtering by port, entity type, and event
+  - Graceful connection lifecycle management
+- ✅ **PostgreSQL Audit Trail** - Immutable operational history
+  - Logs all critical operations (berth changes, port calls, authorization failures)
+  - JSONB state snapshots, correlation ID tracking
+  - REST API for audit queries and compliance
+- ✅ **Redis Caching** - Reduced latency and load
+  - Selective caching: port summaries, availability, active alerts
+  - Event-driven invalidation, TTL management
+  - Graceful fallback if Redis unavailable
+- ✅ **Celery Background Tasks** - Async processing without blocking
+  - Alert checking, availability recalculation, cache warming
+  - Task orchestration after domain operations
+  - Scheduled jobs for periodic analysis
+
+### 🔴 **Real Data Integration**
 - ✅ **AEMET OpenData** - Spanish meteorological service (JWT authenticated)
 - ✅ **MeteoGalicia** - Galician regional weather & oceanographic forecasts
 - ✅ **Puertos del Estado** - Official port authority sea conditions (waves, wind, currents)
