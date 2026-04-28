@@ -10,7 +10,7 @@ from sqlalchemy import select, and_, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import AuditLog, TaskExecutionLog, AuthenticationLog
-from ..realtime.models import RealtimeEvent
+from realtime.models import RealtimeEvent
 
 logger = logging.getLogger(__name__)
 

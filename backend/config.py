@@ -75,10 +75,16 @@ class Settings(BaseSettings):
     air_quality_update_frequency: int = Field(default=3600, alias="AIR_QUALITY_UPDATE_FREQUENCY")  # 1 hour
     ocean_conditions_update_frequency: int = Field(default=900, alias="OCEAN_CONDITIONS_UPDATE_FREQUENCY")  # 15 min
     berth_status_update_frequency: int = Field(default=300, alias="BERTH_STATUS_UPDATE_FREQUENCY")  # 5 min
+    marine_weather_update_frequency: int = Field(default=1800, alias="MARINE_WEATHER_UPDATE_FREQUENCY")  # 30 min
+
+    # Open-Meteo Marine API
+    openmeteo_base_url: str = Field(default="https://marine-api.open-meteo.com/v1/marine", alias="OPENMETEO_BASE_URL")
+    openmeteo_cache_ttl: int = Field(default=3600, alias="OPENMETEO_CACHE_TTL")
 
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"
 
 
 def get_settings() -> Settings:

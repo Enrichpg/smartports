@@ -66,4 +66,4 @@ class FilterParams(BaseModel):
     search: Optional[str] = Field(None, description="Free-text search")
     status: Optional[str] = Field(None, description="Filter by status")
     sort_by: Optional[str] = Field(None, description="Sort field")
-    sort_order: Optional[str] = Field("asc", regex="^(asc|desc)$", description="Sort order")
+    sort_order: Optional[str] = Field("asc", pattern="^(asc|desc)$", description="Sort order")

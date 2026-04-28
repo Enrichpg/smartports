@@ -46,8 +46,8 @@ class AuditLog(Base):
     before_state = Column(JSON)  # State before the operation
     after_state = Column(JSON)   # State after the operation
     
-    # Metadata
-    metadata = Column(JSON)  # Additional context
+    # Extra context
+    extra_data = Column(JSON)  # Additional context
     severity = Column(String(20), default="info")  # info, warning, error
     
     # Extra details
@@ -90,10 +90,8 @@ class TaskExecutionLog(Base):
     # Context
     correlation_id = Column(String(255), index=True)  # Link to event that triggered it
     scope = Column(JSON)  # Scope like port_id, etc.
-    
-    # Metadata
-    metadata = Column(JSON)
-    
+    extra_data = Column(JSON)
+
     __table_args__ = (
         Index('idx_task_log_timestamp', 'started_at'),
         Index('idx_task_log_correlation_id', 'correlation_id'),
@@ -120,8 +118,8 @@ class AuthenticationLog(Base):
     
     # Context
     correlation_id = Column(String(255), index=True)
-    metadata = Column(JSON)
-    
+    extra_data = Column(JSON)
+
     __table_args__ = (
         Index('idx_auth_log_timestamp', 'timestamp'),
         Index('idx_auth_log_vessel_id', 'vessel_id'),

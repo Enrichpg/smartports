@@ -39,7 +39,8 @@ class PortService:
         try:
             # Get port info
             port_entity = await orion_client.get_entity(port_id)
-            port_name = port_entity.get("name", {}).get("value", "Unknown")
+            _nk = "name" if "name" in port_entity else "https://uri.etsi.org/ngsi-ld/name"
+            port_name = port_entity.get(_nk, {}).get("value", "Unknown")
 
             # Get all berths in this port
             berth_entities = await orion_client.query_entities(
@@ -105,9 +106,11 @@ class PortService:
 
     def _entity_to_port_response(self, entity: Dict[str, Any]) -> PortResponse:
         """Convert Orion-LD entity to PortResponse schema"""
+        # Orion-LD may return NGSI-LD core terms as full URIs
+        _name_key = "name" if "name" in entity else "https://uri.etsi.org/ngsi-ld/name"
         return PortResponse(
             id=entity.get("id", ""),
-            name=entity.get("name", {}).get("value", ""),
+            name=entity.get(_name_key, {}).get("value", ""),
             country=entity.get("country", {}).get("value", "ES"),
             location=entity.get("location"),
             url=entity.get("url", {}).get("value"),
