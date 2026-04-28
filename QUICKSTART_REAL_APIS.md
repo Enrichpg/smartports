@@ -7,7 +7,7 @@
 
 ## 🚀 You're Ready to Use Real Data!
 
-SmartPorts now has **4 real APIs integrated** with your **AEMET credentials pre-configured**:
+SmartPorts now has **5 real APIs integrated** with your **AEMET credentials pre-configured**:
 
 ### ✅ Real APIs Active
 
@@ -30,6 +30,11 @@ SmartPorts now has **4 real APIs integrated** with your **AEMET credentials pre-
    - Free (no auth needed)
    - Updates: Every 30 minutes
    - Provides: Wave data, forecasts, offshore conditions
+
+5. **Open-Meteo Air Quality** (Free air quality data) ✨ NEW
+   - Free (no auth needed)
+   - Updates: Every 1 hour
+   - Provides: PM10, PM2.5, NO2, O3, SO2, CO, AQI, UV Index
 
 ---
 
@@ -129,10 +134,10 @@ All tasks run automatically via Celery Beat:
 | MeteoGalicia | Now | Every 30 min | Real API ✅ |
 | Puertos del Estado | Now | Every 15 min | Real API ✅ |
 | Open-Meteo Marine | Now | Every 30 min | Real API ✅ |
+| Open-Meteo Air Quality | Now | Every 1 hour | Real API ✅ |
 | Berth Status | Now | Every 5 min | Simulator |
 | Availability | Now | Every 5 min | Simulator |
 | Vessel Data | Now | Every 1 min | Simulator |
-| Air Quality | Now | Every 1 hour | Simulator |
 
 ---
 
@@ -173,6 +178,26 @@ All tasks run automatically via Celery Beat:
 4. Available via: GET /api/v1/ports/{port_id}/live/ocean
 ```
 
+### Open-Meteo Air Quality (Every 1 hour)
+```
+1. Fetch from: https://air-quality-api.open-meteo.com/v1/air-quality
+   Locations: Vigo, Ferrol, Coruña, Pontevedra, Lugo
+   
+2. Transform to NGSI-LD AirQualityObserved
+   - pm10 (coarse particulates)
+   - pm2_5 (fine particulates)
+   - nitrogen_dioxide (NO2)
+   - ozone (O3)
+   - sulphur_dioxide (SO2)
+   - carbon_monoxide (CO)
+   - uv_index
+   - AQI (calculated from PM2.5)
+   - AQI level (Good, Fair, Moderate, Unhealthy, Hazardous, etc.)
+
+3. Publish to Orion-LD
+4. Available via: GET /api/v1/ports/{port_id}/live/air-quality (future endpoint)
+```
+
 ---
 
 ## 📊 Example Responses
@@ -201,11 +226,17 @@ All tasks run automatically via Celery Beat:
       "update_frequency": "900s",
       "entities": ["SeaConditionObserved"]
     },
-    "OpenMeteo": {
+    "OpenMeteo_Marine": {
       "type": "real",
       "status": "enabled",
       "update_frequency": "1800s",
       "entities": ["SeaConditionObserved"]
+    },
+    "OpenMeteo_AirQuality": {
+      "type": "real",
+      "status": "enabled",
+      "update_frequency": "3600s",
+      "entities": ["AirQualityObserved"]
     }
   }
 }
@@ -242,6 +273,28 @@ All tasks run automatically via Celery Beat:
   },
   "source": "OpenMeteo",
   "data_types": ["wave_height", "wave_period", "wind_waves", "swell"]
+}
+```
+
+### GET `/api/v1/ports/80003/live/air-quality` (Future Endpoint)
+```json
+{
+  "port_id": "80003",
+  "timestamp": "2026-04-28T14:30:00Z",
+  "air_quality": {
+    "aqi": 42,
+    "aqi_level": "Good",
+    "pm2_5": 8.5,
+    "pm10": 15.2,
+    "nitrogen_dioxide": 12.3,
+    "ozone": 65.4,
+    "sulphur_dioxide": 2.1,
+    "carbon_monoxide": 0.3,
+    "uv_index": 3.2
+  },
+  "source": "OpenMeteo",
+  "confidence": 0.85,
+  "location": "Vigo"
 }
 ```
 
@@ -319,8 +372,9 @@ curl http://orion-ld:1026/ngsi-ld/v1/entities
 4. ⏭️ Alerts will trigger on real data thresholds
 
 **The system is now:**
-- ✅ Collecting real weather data (AEMET)
-- ✅ Collecting real oceanographic data (Puertos del Estado, Open-Meteo)
+- ✅ Collecting real weather data (AEMET, MeteoGalicia)
+- ✅ Collecting real oceanographic data (Puertos del Estado, Open-Meteo Marine)
+- ✅ Collecting real air quality data (Open-Meteo Air Quality) ✨ NEW
 - ✅ Publishing to Orion-LD
 - ✅ Persisting history to QuantumLeap
 - ✅ Exposing via REST API
