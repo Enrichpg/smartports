@@ -23,6 +23,11 @@ aiohttp==3.9.1
 httpx==0.25.2
 requests==2.31.0
 
+# External APIs
+openmeteo-requests==1.0.1
+requests-cache==1.1.10
+retry-requests==2.0.0
+
 # Task Queue
 celery==5.3.4
 kombu==5.3.5

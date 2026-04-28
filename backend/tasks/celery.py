@@ -47,6 +47,11 @@ celery_app.conf.beat_schedule = {
         "schedule": settings.ocean_conditions_update_frequency,  # 15 minutes default
         "options": {"queue": "real_data"}
     },
+    "marine-weather-openmeteo-every-30min": {
+        "task": "ingest_marine_weather_openmeteo",
+        "schedule": getattr(settings, "marine_weather_update_frequency", 1800),  # 30 minutes default
+        "options": {"queue": "real_data"}
+    },
     
     # Simulated/Operational data ingestion
     "berth-status-every-5min": {

@@ -369,3 +369,89 @@ def ingest_air_quality():
     except Exception as e:
         logger.error(f"Air quality ingestion failed: {str(e)}")
         return {"task": "ingest_air_quality", "status": "failed", "error": str(e)}
+
+
+# ============================================================================
+# OPEN-METEO MARINE WEATHER INGESTION
+# ============================================================================
+
+@celery_app.task(name="ingest_marine_weather_openmeteo")
+def ingest_marine_weather_openmeteo():
+    """
+    Ingest marine weather data from Open-Meteo API.
+    Provides wave height, direction, period, and related data.
+    
+    Open-Meteo is a free, open-source API with no authentication required.
+    Perfect complement to official sources for marine data.
+    """
+    if not settings.enable_real_data_ingestion:
+        return {"status": "skipped"}
+    
+    logger.info("Starting Open-Meteo marine weather ingestion...")
+    
+    try:
+        from backend.connectors.openmeteo_connector import OpenMeteoConnector, GALICIAN_LOCATIONS
+        
+        connector = OpenMeteoConnector(cache_ttl=3600)
+        orion = OrionService()
+        results = []
+        
+        # Fetch marine data for each Galician location
+        for location_name, location_info in GALICIAN_LOCATIONS.items():
+            try:
+                loop = asyncio.get_event_loop()
+                marine_data = loop.run_until_complete(
+                    connector.get_marine_weather(
+                        latitude=location_info["latitude"],
+                        longitude=location_info["longitude"],
+                        hours=168,
+                        past_days=0
+                    )
+                )
+                
+                if marine_data.get("status") == "success":
+                    # Normalize the data
+                    normalized = await connector.normalize_data(marine_data)
+                    
+                    # Transform to NGSI-LD SeaConditionObserved
+                    ngsi_entity = OceanTransformer.from_generic(
+                        data=normalized,
+                        entity_id=f"urn:ngsi-ld:SeaConditionObserved:openmeteo-{location_name}",
+                        source="OpenMeteo",
+                        port_code=location_info.get("port", "")
+                    )
+                    
+                    # Publish to Orion
+                    if ngsi_entity:
+                        response = orion.update_entity(ngsi_entity)
+                        results.append({
+                            "location": location_name,
+                            "status": "published",
+                        })
+                        logger.info(f"Open-Meteo marine data published for {location_name}")
+                else:
+                    logger.warning(f"Open-Meteo failed for {location_name}: {marine_data.get('error')}")
+                    results.append({
+                        "location": location_name,
+                        "status": "failed",
+                        "error": marine_data.get("error")
+                    })
+            
+            except Exception as e:
+                logger.error(f"Error processing Open-Meteo for {location_name}: {str(e)}")
+                results.append({
+                    "location": location_name,
+                    "status": "error",
+                    "error": str(e)
+                })
+        
+        return {
+            "task": "ingest_marine_weather_openmeteo",
+            "status": "completed",
+            "timestamp": datetime.utcnow().isoformat(),
+            "results": results
+        }
+    
+    except Exception as e:
+        logger.error(f"Open-Meteo marine weather ingestion failed: {str(e)}")
+        return {"task": "ingest_marine_weather_openmeteo", "status": "failed", "error": str(e)}

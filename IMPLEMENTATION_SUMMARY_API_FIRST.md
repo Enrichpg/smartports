@@ -197,7 +197,7 @@ Transformers       ←        NGSI-LD Format
 | Entity Type | Primary Source | Fallback | Update Freq | Confidence |
 |---|---|---|---|---|
 | WeatherObserved | AEMET + MeteoGalicia | Simulator | 30 min | 0.95 |
-| SeaConditionObserved | Puertos del Estado | Simulator | 15 min | 0.90 |
+| SeaConditionObserved | Puertos del Estado + Open-Meteo | Simulator | 15 min | 0.90 |
 | Berth | Simulator (real unavailable) | N/A | 5 min | 0.30 |
 | BoatPlacesAvailable | Simulator | N/A | 5 min | 0.30 |
 | Vessel | Simulator (AIS partial) | N/A | 1 min | 0.40 |
@@ -276,12 +276,12 @@ curl http://localhost:8000/api/v1/ports/80003/live/operations
 
 | Metric | Value | Notes |
 |---|---|---|
-| Real API Connectors | 3 | AEMET, MeteoGalicia, Puertos del Estado |
+| Real API Connectors | 4 | AEMET, MeteoGalicia, Puertos del Estado, Open-Meteo |
 | NGSI-LD Transformers | 3 | Weather, Ocean, Availability |
 | Fallback Simulators | 4 | Berth, Availability, Vessel, Air Quality |
-| Celery Tasks | 7 | Periodic ingestion tasks |
+| Celery Tasks | 8 | Periodic ingestion tasks (4 real APIs + 4 simulators) |
 | Backend API Endpoints | 10+ | Data exposure and status |
-| Update Frequencies | 5 | From 1min to 1hour |
+| Update Frequencies | 6 | From 1min to 1hour |
 | QuantumLeap Subscriptions | 6 | Entities with historical tracking |
 
 ---

@@ -5,10 +5,12 @@ from .base_connector import BaseConnector
 from .aemet_connector import AEMETConnector
 from .meteogalicia_connector import MeteoGaliciaConnector
 from .puertos_estado_connector import PuertosEstadoConnector
+from .openmeteo_connector import OpenMeteoConnector
 
 __all__ = [
     "BaseConnector",
     "AEMETConnector",
     "MeteoGaliciaConnector",
     "PuertosEstadoConnector",
+    "OpenMeteoConnector",
 ]

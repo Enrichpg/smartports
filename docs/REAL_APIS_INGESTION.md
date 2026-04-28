@@ -118,6 +118,74 @@ OCEAN_CONDITIONS_UPDATE_FREQUENCY=900  # 15 minutes
 
 ---
 
+### 4. Open-Meteo Marine Weather API (NEW - Apr 28, 2026)
+
+**Type:** Free, open-source API  
+**Authentication:** None (completely free, public)  
+**Update Frequency:** 30 minutes (cache-friendly, configurable)  
+**Coverage:** Global coverage, including Galician waters  
+
+**Why Open-Meteo?**
+- No API key required (unlike many commercial APIs)
+- Excellent marine weather data specifically designed for offshore operations
+- Free tier with no rate limits
+- Well-documented and actively maintained
+- Complementary to Puertos del Estado (offshore vs. port-specific)
+
+**What We Ingest:**
+- Wave height (significant, wind waves, swell)
+- Wave direction and period
+- Wind speed and direction at sea
+- Sea surface temperature (where available)
+- Wave forecast data (hourly, up to 7 days)
+
+**NGSI-LD Entity:** `SeaConditionObserved`
+
+**Galician Monitoring Locations:**
+- Vigo Offshore (42.2°N, 8.8°W) → Port 80003
+- Ferrol Offshore (43.5°N, 8.3°W) → Port 80001
+- Coruña Offshore (43.4°N, 8.2°W) → Port 80004
+- Atlantic Reference Point (42.5°N, 9.5°W) → Offshore
+
+**API Endpoint:**
+```
+https://marine-api.open-meteo.com/v1/marine
+```
+
+**Configuration:**
+```bash
+OPENMETEO_BASE_URL=https://marine-api.open-meteo.com/v1/marine
+OPENMETEO_CACHE_TTL=3600  # Cache for 1 hour (API-friendly)
+MARINE_WEATHER_UPDATE_FREQUENCY=1800  # 30 minutes
+```
+
+**Example Request:**
+```python
+import openmeteo_requests
+
+client = openmeteo_requests.Client()
+url = "https://marine-api.open-meteo.com/v1/marine"
+params = {
+    "latitude": 42.2,
+    "longitude": -8.8,
+    "hourly": "wave_height,wave_direction,wave_period",
+    "forecast_days": 7,
+    "timezone": "UTC"
+}
+responses = client.weather_api(url, params=params)
+```
+
+**Task:** `ingest_marine_weather_openmeteo` (Celery Beat, 30min interval)
+
+**Integration Notes:**
+- Open-Meteo data complements Puertos del Estado (offshore vs port buoys)
+- Provides forecasts when Puertos del Estado gives real-time observations
+- Zero cost and no authentication makes it ideal as primary offshore source
+- Data marked as "OpenMeteo" source in NGSI-LD entities
+- Ideal for vessel route planning and weather-sensitive operations
+
+---
+
 ## 🤖 Fallback Simulators (When APIs Insufficient)
 
 When real APIs don't provide direct data (e.g., exact berth occupancy), we use **realistic simulators** that:
@@ -238,13 +306,14 @@ AIR_QUALITY_UPDATE_FREQUENCY=3600      # 1 hour
 
 | Task | Frequency | Queue | Purpose |
 |---|---|---|---|
-| `ingest_weather_aemet` | 30 min | `real_data` | Real weather |
-| `ingest_weather_meteogalicia` | 30 min | `real_data` | Regional weather |
-| `ingest_sea_conditions` | 15 min | `real_data` | Ocean conditions |
-| `ingest_berth_status` | 5 min | `operational` | Berth occupancy |
-| `ingest_availability` | 5 min | `operational` | Boat places |
-| `ingest_vessel_data` | 1 min | `operational` | Vessel positions |
-| `ingest_air_quality` | 1 hour | `environmental` | Air quality |
+| `ingest_weather_aemet` | 30 min | `real_data` | Real weather (official) |
+| `ingest_weather_meteogalicia` | 30 min | `real_data` | Regional weather (Galicia) |
+| `ingest_sea_conditions` | 15 min | `real_data` | Ocean conditions (buoys) |
+| `ingest_marine_weather_openmeteo` | 30 min | `real_data` | Marine weather (offshore) |
+| `ingest_berth_status` | 5 min | `operational` | Berth occupancy (simulator) |
+| `ingest_availability` | 5 min | `operational` | Boat places (simulator) |
+| `ingest_vessel_data` | 1 min | `operational` | Vessel positions (simulator) |
+| `ingest_air_quality` | 1 hour | `environmental` | Air quality (simulator) |
 
 ---
 
