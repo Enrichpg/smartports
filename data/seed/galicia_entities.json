@@ -876,7 +876,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202670Z"
+        "observedAt": "2026-04-28T10:28:52.362312Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -911,7 +911,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202684Z"
+        "observedAt": "2026-04-28T10:28:52.362327Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -946,7 +946,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202689Z"
+        "observedAt": "2026-04-28T10:28:52.362332Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -981,7 +981,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202693Z"
+        "observedAt": "2026-04-28T10:28:52.362337Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1016,7 +1016,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202695Z"
+        "observedAt": "2026-04-28T10:28:52.362340Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1051,7 +1051,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202698Z"
+        "observedAt": "2026-04-28T10:28:52.362343Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1086,7 +1086,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202700Z"
+        "observedAt": "2026-04-28T10:28:52.362345Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1121,7 +1121,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202702Z"
+        "observedAt": "2026-04-28T10:28:52.362349Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1156,7 +1156,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202744Z"
+        "observedAt": "2026-04-28T10:28:52.362352Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1191,7 +1191,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202749Z"
+        "observedAt": "2026-04-28T10:28:52.362355Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1226,7 +1226,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202752Z"
+        "observedAt": "2026-04-28T10:28:52.362358Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1261,7 +1261,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202757Z"
+        "observedAt": "2026-04-28T10:28:52.362360Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1296,7 +1296,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202762Z"
+        "observedAt": "2026-04-28T10:28:52.362364Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1331,7 +1331,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202765Z"
+        "observedAt": "2026-04-28T10:28:52.362366Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1366,7 +1366,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202767Z"
+        "observedAt": "2026-04-28T10:28:52.362372Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1401,7 +1401,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202770Z"
+        "observedAt": "2026-04-28T10:28:52.362374Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1436,7 +1436,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202773Z"
+        "observedAt": "2026-04-28T10:28:52.362377Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1471,7 +1471,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202775Z"
+        "observedAt": "2026-04-28T10:28:52.362381Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1506,7 +1506,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202779Z"
+        "observedAt": "2026-04-28T10:28:52.362385Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1541,7 +1541,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202781Z"
+        "observedAt": "2026-04-28T10:28:52.362387Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1576,7 +1576,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202784Z"
+        "observedAt": "2026-04-28T10:28:52.362391Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1611,7 +1611,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202789Z"
+        "observedAt": "2026-04-28T10:28:52.362394Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1646,7 +1646,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202791Z"
+        "observedAt": "2026-04-28T10:28:52.362397Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1681,7 +1681,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202793Z"
+        "observedAt": "2026-04-28T10:28:52.362400Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1716,7 +1716,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202796Z"
+        "observedAt": "2026-04-28T10:28:52.362402Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1751,7 +1751,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202798Z"
+        "observedAt": "2026-04-28T10:28:52.362404Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1786,7 +1786,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202801Z"
+        "observedAt": "2026-04-28T10:28:52.362408Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1821,7 +1821,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202805Z"
+        "observedAt": "2026-04-28T10:28:52.362412Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1856,7 +1856,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202819Z"
+        "observedAt": "2026-04-28T10:28:52.362415Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1891,7 +1891,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202821Z"
+        "observedAt": "2026-04-28T10:28:52.362418Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1926,7 +1926,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202823Z"
+        "observedAt": "2026-04-28T10:28:52.362421Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1961,7 +1961,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202825Z"
+        "observedAt": "2026-04-28T10:28:52.362423Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -1996,7 +1996,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202829Z"
+        "observedAt": "2026-04-28T10:28:52.362427Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2031,7 +2031,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202832Z"
+        "observedAt": "2026-04-28T10:28:52.362431Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2066,7 +2066,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202835Z"
+        "observedAt": "2026-04-28T10:28:52.362460Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2101,7 +2101,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202837Z"
+        "observedAt": "2026-04-28T10:28:52.362463Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2136,7 +2136,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202839Z"
+        "observedAt": "2026-04-28T10:28:52.362466Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2171,7 +2171,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202843Z"
+        "observedAt": "2026-04-28T10:28:52.362470Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2206,7 +2206,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202846Z"
+        "observedAt": "2026-04-28T10:28:52.362472Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2241,7 +2241,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202848Z"
+        "observedAt": "2026-04-28T10:28:52.362477Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2276,7 +2276,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202851Z"
+        "observedAt": "2026-04-28T10:28:52.362480Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2311,7 +2311,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202854Z"
+        "observedAt": "2026-04-28T10:28:52.362482Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2346,7 +2346,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202856Z"
+        "observedAt": "2026-04-28T10:28:52.362486Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2381,7 +2381,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202860Z"
+        "observedAt": "2026-04-28T10:28:52.362489Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2416,7 +2416,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202862Z"
+        "observedAt": "2026-04-28T10:28:52.362492Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2451,7 +2451,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202864Z"
+        "observedAt": "2026-04-28T10:28:52.362495Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2486,7 +2486,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202867Z"
+        "observedAt": "2026-04-28T10:28:52.362498Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2521,7 +2521,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202871Z"
+        "observedAt": "2026-04-28T10:28:52.362500Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2556,7 +2556,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202873Z"
+        "observedAt": "2026-04-28T10:28:52.362502Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2591,7 +2591,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202875Z"
+        "observedAt": "2026-04-28T10:28:52.362505Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2626,7 +2626,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202879Z"
+        "observedAt": "2026-04-28T10:28:52.362510Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2661,7 +2661,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202881Z"
+        "observedAt": "2026-04-28T10:28:52.362512Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2696,7 +2696,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202883Z"
+        "observedAt": "2026-04-28T10:28:52.362517Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2731,7 +2731,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202914Z"
+        "observedAt": "2026-04-28T10:28:52.362519Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2766,7 +2766,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202919Z"
+        "observedAt": "2026-04-28T10:28:52.362522Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2801,7 +2801,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202922Z"
+        "observedAt": "2026-04-28T10:28:52.362524Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2836,7 +2836,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202926Z"
+        "observedAt": "2026-04-28T10:28:52.362527Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2871,7 +2871,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202930Z"
+        "observedAt": "2026-04-28T10:28:52.362529Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2906,7 +2906,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202934Z"
+        "observedAt": "2026-04-28T10:28:52.362547Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2941,7 +2941,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202938Z"
+        "observedAt": "2026-04-28T10:28:52.362600Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -2976,7 +2976,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202941Z"
+        "observedAt": "2026-04-28T10:28:52.362604Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3011,7 +3011,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202974Z"
+        "observedAt": "2026-04-28T10:28:52.362610Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3046,7 +3046,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202979Z"
+        "observedAt": "2026-04-28T10:28:52.362613Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3081,7 +3081,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202983Z"
+        "observedAt": "2026-04-28T10:28:52.362616Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3116,7 +3116,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.202987Z"
+        "observedAt": "2026-04-28T10:28:52.362620Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3151,7 +3151,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.202990Z"
+        "observedAt": "2026-04-28T10:28:52.362623Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3186,7 +3186,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.202993Z"
+        "observedAt": "2026-04-28T10:28:52.362625Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3221,7 +3221,7 @@
       "status": {
         "type": "Property",
         "value": "occupied",
-        "observedAt": "2026-04-27T15:49:21.202995Z"
+        "observedAt": "2026-04-28T10:28:52.362628Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3256,7 +3256,7 @@
       "status": {
         "type": "Property",
         "value": "maintenance",
-        "observedAt": "2026-04-27T15:49:21.203002Z"
+        "observedAt": "2026-04-28T10:28:52.362630Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3291,7 +3291,7 @@
       "status": {
         "type": "Property",
         "value": "reserved",
-        "observedAt": "2026-04-27T15:49:21.203004Z"
+        "observedAt": "2026-04-28T10:28:52.362633Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3326,7 +3326,7 @@
       "status": {
         "type": "Property",
         "value": "free",
-        "observedAt": "2026-04-27T15:49:21.203006Z"
+        "observedAt": "2026-04-28T10:28:52.362635Z"
       },
       "belongsTo": {
         "type": "Relationship",
@@ -3938,7 +3938,7 @@
           -8.3936,
           43.3613
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -3998,7 +3998,7 @@
           -8.767,
           42.2362
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4058,7 +4058,7 @@
           -9.2717,
           42.5544
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4118,7 +4118,7 @@
           -8.2444,
           43.4667
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4178,7 +4178,7 @@
           -8.3936,
           43.3613
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4238,7 +4238,7 @@
           -8.767,
           42.2362
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4298,7 +4298,7 @@
           -8.2444,
           43.4667
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4358,7 +4358,7 @@
           -8.7681,
           42.6153
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4418,7 +4418,7 @@
           -8.7033,
           42.3967
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4478,7 +4478,7 @@
           -8.835,
           42.1205
         ],
-        "observedAt": "2026-04-27T15:49:21.203230Z"
+        "observedAt": "2026-04-28T10:28:52.362844Z"
       }
     },
     {
@@ -4504,7 +4504,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4538,7 +4538,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4572,7 +4572,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4606,7 +4606,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4640,7 +4640,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4674,7 +4674,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4708,7 +4708,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4742,7 +4742,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4776,7 +4776,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4810,7 +4810,7 @@
       },
       "validFrom": {
         "type": "Property",
-        "value": "2026-04-27T15:49:21.203471Z"
+        "value": "2026-04-28T10:28:52.362948Z"
       },
       "validUntil": {
         "type": "Property",
@@ -4849,7 +4849,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 42,
-        "observedAt": "2026-04-27T15:49:21.203566Z"
+        "observedAt": "2026-04-28T10:28:52.363033Z"
       }
     },
     {
@@ -4880,7 +4880,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 42,
-        "observedAt": "2026-04-27T15:49:21.203573Z"
+        "observedAt": "2026-04-28T10:28:52.363038Z"
       }
     },
     {
@@ -4911,7 +4911,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 42,
-        "observedAt": "2026-04-27T15:49:21.203583Z"
+        "observedAt": "2026-04-28T10:28:52.363042Z"
       }
     },
     {
@@ -4942,7 +4942,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 42,
-        "observedAt": "2026-04-27T15:49:21.203586Z"
+        "observedAt": "2026-04-28T10:28:52.363045Z"
       }
     },
     {
@@ -4973,7 +4973,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 50,
-        "observedAt": "2026-04-27T15:49:21.203591Z"
+        "observedAt": "2026-04-28T10:28:52.363049Z"
       }
     },
     {
@@ -5004,7 +5004,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 50,
-        "observedAt": "2026-04-27T15:49:21.203594Z"
+        "observedAt": "2026-04-28T10:28:52.363052Z"
       }
     },
     {
@@ -5035,7 +5035,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 50,
-        "observedAt": "2026-04-27T15:49:21.203596Z"
+        "observedAt": "2026-04-28T10:28:52.363054Z"
       }
     },
     {
@@ -5066,7 +5066,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 50,
-        "observedAt": "2026-04-27T15:49:21.203598Z"
+        "observedAt": "2026-04-28T10:28:52.363056Z"
       }
     },
     {
@@ -5097,7 +5097,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 34,
-        "observedAt": "2026-04-27T15:49:21.203603Z"
+        "observedAt": "2026-04-28T10:28:52.363062Z"
       }
     },
     {
@@ -5128,7 +5128,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 34,
-        "observedAt": "2026-04-27T15:49:21.203606Z"
+        "observedAt": "2026-04-28T10:28:52.363064Z"
       }
     },
     {
@@ -5159,7 +5159,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 34,
-        "observedAt": "2026-04-27T15:49:21.203609Z"
+        "observedAt": "2026-04-28T10:28:52.363068Z"
       }
     },
     {
@@ -5190,7 +5190,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 34,
-        "observedAt": "2026-04-27T15:49:21.203612Z"
+        "observedAt": "2026-04-28T10:28:52.363070Z"
       }
     },
     {
@@ -5221,7 +5221,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203616Z"
+        "observedAt": "2026-04-28T10:28:52.363073Z"
       }
     },
     {
@@ -5252,7 +5252,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203618Z"
+        "observedAt": "2026-04-28T10:28:52.363075Z"
       }
     },
     {
@@ -5283,7 +5283,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203620Z"
+        "observedAt": "2026-04-28T10:28:52.363077Z"
       }
     },
     {
@@ -5314,7 +5314,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203625Z"
+        "observedAt": "2026-04-28T10:28:52.363079Z"
       }
     },
     {
@@ -5345,7 +5345,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 25,
-        "observedAt": "2026-04-27T15:49:21.203628Z"
+        "observedAt": "2026-04-28T10:28:52.363083Z"
       }
     },
     {
@@ -5376,7 +5376,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 25,
-        "observedAt": "2026-04-27T15:49:21.203631Z"
+        "observedAt": "2026-04-28T10:28:52.363085Z"
       }
     },
     {
@@ -5407,7 +5407,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 25,
-        "observedAt": "2026-04-27T15:49:21.203634Z"
+        "observedAt": "2026-04-28T10:28:52.363087Z"
       }
     },
     {
@@ -5438,7 +5438,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 25,
-        "observedAt": "2026-04-27T15:49:21.203636Z"
+        "observedAt": "2026-04-28T10:28:52.363090Z"
       }
     },
     {
@@ -5469,7 +5469,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 20,
-        "observedAt": "2026-04-27T15:49:21.203639Z"
+        "observedAt": "2026-04-28T10:28:52.363093Z"
       }
     },
     {
@@ -5500,7 +5500,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 20,
-        "observedAt": "2026-04-27T15:49:21.203641Z"
+        "observedAt": "2026-04-28T10:28:52.363117Z"
       }
     },
     {
@@ -5531,7 +5531,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 20,
-        "observedAt": "2026-04-27T15:49:21.203643Z"
+        "observedAt": "2026-04-28T10:28:52.363121Z"
       }
     },
     {
@@ -5562,7 +5562,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 20,
-        "observedAt": "2026-04-27T15:49:21.203645Z"
+        "observedAt": "2026-04-28T10:28:52.363123Z"
       }
     },
     {
@@ -5593,7 +5593,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 14,
-        "observedAt": "2026-04-27T15:49:21.203648Z"
+        "observedAt": "2026-04-28T10:28:52.363128Z"
       }
     },
     {
@@ -5624,7 +5624,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 14,
-        "observedAt": "2026-04-27T15:49:21.203652Z"
+        "observedAt": "2026-04-28T10:28:52.363130Z"
       }
     },
     {
@@ -5655,7 +5655,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 14,
-        "observedAt": "2026-04-27T15:49:21.203655Z"
+        "observedAt": "2026-04-28T10:28:52.363133Z"
       }
     },
     {
@@ -5686,7 +5686,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 14,
-        "observedAt": "2026-04-27T15:49:21.203657Z"
+        "observedAt": "2026-04-28T10:28:52.363135Z"
       }
     },
     {
@@ -5717,7 +5717,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203660Z"
+        "observedAt": "2026-04-28T10:28:52.363138Z"
       }
     },
     {
@@ -5748,7 +5748,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203662Z"
+        "observedAt": "2026-04-28T10:28:52.363139Z"
       }
     },
     {
@@ -5779,7 +5779,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203664Z"
+        "observedAt": "2026-04-28T10:28:52.363141Z"
       }
     },
     {
@@ -5810,7 +5810,7 @@
       "availablePlaces": {
         "type": "Property",
         "value": 17,
-        "observedAt": "2026-04-27T15:49:21.203666Z"
+        "observedAt": "2026-04-28T10:28:52.363144Z"
       }
     },
     {
@@ -7420,26 +7420,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7469,31 +7469,31 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "temperature": {
         "type": "Property",
         "value": 19.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "relativeHumidity": {
         "type": "Property",
         "value": 67.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windSpeed": {
         "type": "Property",
         "value": 13.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windDirection": {
         "type": "Property",
         "value": 190.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "atmosphericPressure": {
         "type": "Property",
         "value": 1013.25,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7523,26 +7523,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7572,31 +7572,31 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "temperature": {
         "type": "Property",
         "value": 19.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "relativeHumidity": {
         "type": "Property",
         "value": 67.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windSpeed": {
         "type": "Property",
         "value": 13.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windDirection": {
         "type": "Property",
         "value": 190.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "atmosphericPressure": {
         "type": "Property",
         "value": 1013.25,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7626,26 +7626,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7675,31 +7675,31 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "temperature": {
         "type": "Property",
         "value": 19.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "relativeHumidity": {
         "type": "Property",
         "value": 67.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windSpeed": {
         "type": "Property",
         "value": 13.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windDirection": {
         "type": "Property",
         "value": 190.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "atmosphericPressure": {
         "type": "Property",
         "value": 1013.25,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7729,26 +7729,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7778,26 +7778,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7827,31 +7827,31 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "temperature": {
         "type": "Property",
         "value": 18.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "relativeHumidity": {
         "type": "Property",
         "value": 65.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windSpeed": {
         "type": "Property",
         "value": 12.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windDirection": {
         "type": "Property",
         "value": 180.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "atmosphericPressure": {
         "type": "Property",
         "value": 1013.25,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7881,26 +7881,26 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "pm25": {
         "type": "Property",
         "value": 15.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "pm10": {
         "type": "Property",
         "value": 25.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "no2": {
         "type": "Property",
         "value": 35.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "co": {
         "type": "Property",
         "value": 0.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     },
     {
@@ -7930,31 +7930,31 @@
           ]
         }
       },
-      "observedAt": "2026-04-27T15:49:21.204056Z",
+      "observedAt": "2026-04-28T10:28:52.364018Z",
       "temperature": {
         "type": "Property",
         "value": 18.5,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "relativeHumidity": {
         "type": "Property",
         "value": 65.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windSpeed": {
         "type": "Property",
         "value": 12.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "windDirection": {
         "type": "Property",
         "value": 180.0,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       },
       "atmosphericPressure": {
         "type": "Property",
         "value": 1013.25,
-        "observedAt": "2026-04-27T15:49:21.204056Z"
+        "observedAt": "2026-04-28T10:28:52.364018Z"
       }
     }
   ]

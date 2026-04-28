@@ -53,6 +53,29 @@ class Settings(BaseSettings):
     enable_ml_forecasting: bool = Field(default=True, alias="ENABLE_ML_FORECASTING")
     enable_ml_recommendations: bool = Field(default=True, alias="ENABLE_ML_RECOMMENDATIONS")
 
+    # Real APIs Configuration
+    aemet_api_key: str = Field(default="", alias="AEMET_API_KEY")
+    aemet_base_url: str = Field(default="https://opendata.aemet.es/opendata", alias="AEMET_BASE_URL")
+    
+    meteogalicia_base_url: str = Field(default="http://forecast.cirrus.uvigo.es/thredds/wcs", alias="METEOGALICIA_BASE_URL")
+    meteogalicia_wms_url: str = Field(default="http://forecast.cirrus.uvigo.es/thredds/wms", alias="METEOGALICIA_WMS_URL")
+    
+    puertos_estado_base_url: str = Field(default="https://www.puertos.es", alias="PUERTOS_ESTADO_BASE_URL")
+    
+    # API request timeouts and retries
+    api_request_timeout: int = Field(default=30, alias="API_REQUEST_TIMEOUT")
+    api_max_retries: int = Field(default=3, alias="API_MAX_RETRIES")
+    
+    # Data sources configuration
+    enable_real_data_ingestion: bool = Field(default=True, alias="ENABLE_REAL_DATA_INGESTION")
+    enable_fallback_simulators: bool = Field(default=True, alias="ENABLE_FALLBACK_SIMULATORS")
+    
+    # Ingestion frequencies (seconds)
+    weather_update_frequency: int = Field(default=1800, alias="WEATHER_UPDATE_FREQUENCY")  # 30 min
+    air_quality_update_frequency: int = Field(default=3600, alias="AIR_QUALITY_UPDATE_FREQUENCY")  # 1 hour
+    ocean_conditions_update_frequency: int = Field(default=900, alias="OCEAN_CONDITIONS_UPDATE_FREQUENCY")  # 15 min
+    berth_status_update_frequency: int = Field(default=300, alias="BERTH_STATUS_UPDATE_FREQUENCY")  # 5 min
+
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -12,7 +12,7 @@
 This document defines the **operational rules and constraints** for any AI agent, developer, or contributor working on the SmartPort Galicia Operations Center repository. It ensures coherence, technical rigor, NGSI-LD compliance, and traceability across all development iterations.
 
 **This is not optional.** These rules are binding for every contribution.
-
+   
 ---
 
 ## 🎯 Project Overview
