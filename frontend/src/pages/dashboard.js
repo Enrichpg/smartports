@@ -162,23 +162,34 @@ export class DashboardPage {
 
   async initializeData() {
     try {
-      // Load all initial data in parallel
-      const [ports, alerts, availability] = await Promise.all([
+      // Load ports and alerts in parallel; availability is best-effort
+      const [ports, alerts] = await Promise.all([
         apiClient.getPorts(100),
-        apiClient.getAlerts(100),
-        apiClient.getAvailability(),
+        apiClient.getAlerts(),
       ]);
 
-      store.setPorts(ports.ports || ports);
-
-      // Load berths for each port
       const allPorts = ports.ports || ports;
+      store.setPorts(allPorts);
+      store.setAlerts(alerts.alerts || alerts);
+
+      // Load berths per port in parallel (best-effort, don't crash on failure)
       if (allPorts.length > 0) {
-        const berthsData = await apiClient.getBerths(null, null, 500);
-        store.setBerths(berthsData.berths || berthsData);
+        const berthResults = await Promise.all(
+          allPorts.map((p) =>
+            apiClient.getBerths(p.id, null, 100).catch(() => ({ berths: [] }))
+          )
+        );
+        const allBerths = berthResults.flatMap((r) => r.berths || []);
+        store.setBerths(allBerths);
       }
 
-      store.setAlerts(alerts.alerts || alerts);
+      // Availability per port (best-effort)
+      const availResults = await Promise.allSettled(
+        allPorts.map((p) => apiClient.getAvailabilityByPort(p.id))
+      );
+      const availability = availResults
+        .filter((r) => r.status === 'fulfilled')
+        .map((r) => r.value);
       store.setAvailability(availability);
 
       this.render();

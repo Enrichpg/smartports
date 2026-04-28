@@ -34,20 +34,16 @@ class BerthService:
     async def get_berths_by_port(
         self, port_id: str, limit: int = 100, offset: int = 0
     ) -> tuple[List[BerthResponse], int]:
-        """Get all berths in a port"""
+        """Get all berths in a port via Port → SeaportFacilities → Berth chain"""
         try:
-            berth_entities = await orion_client.query_entities(
-                entity_type="Berth", limit=1000
-            )
-            # Filter by port
-            port_berths = [
-                b for b in berth_entities
-                if b.get("relatedTo", {}).get("object") == port_id
-            ]
-            total = len(port_berths)
-            berths_data = port_berths[offset : offset + limit]
-            berths = [self._entity_to_berth_response(b) for b in berths_data]
-            return berths, total
+            # Get port entity to find its SeaportFacilities
+            port_entity = await orion_client.get_entity(port_id)
+            facility_id = port_entity.get("hasFacilities", {}).get("object")
+
+            if not facility_id:
+                return [], 0
+
+            return await self.get_berths_by_facility(facility_id, limit=limit, offset=offset)
         except Exception as e:
             logger.error(f"Error fetching berths for port {port_id}: {e}")
             raise
@@ -134,10 +130,11 @@ class BerthService:
             berth_entities = await orion_client.query_entities(
                 entity_type="Berth", limit=1000
             )
-            # Filter by facility
+            # Berths reference their facility via belongsTo or partOf
             facility_berths = [
                 b for b in berth_entities
-                if b.get("partOf", {}).get("object") == facility_id
+                if (b.get("belongsTo", {}).get("object") == facility_id
+                    or b.get("partOf", {}).get("object") == facility_id)
             ]
             total = len(facility_berths)
             berths_data = facility_berths[offset : offset + limit]
@@ -164,11 +161,14 @@ class BerthService:
         except ValueError:
             status = BerthStatus.FREE
 
+        _nk = "name" if "name" in entity else "https://uri.etsi.org/ngsi-ld/name"
+        facility_id = (entity.get("belongsTo", {}).get("object")
+                       or entity.get("partOf", {}).get("object"))
         return BerthResponse(
             id=entity.get("id", ""),
-            name=entity.get("name", {}).get("value", ""),
+            name=entity.get(_nk, {}).get("value", ""),
             port_id=entity.get("relatedTo", {}).get("object", ""),
-            facility_id=entity.get("partOf", {}).get("object"),
+            facility_id=facility_id,
             berth_type=entity.get("berthType", {}).get("value", "unknown"),
             status=status,
             depth=entity.get("depth", {}).get("value"),
