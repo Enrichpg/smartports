@@ -369,6 +369,62 @@ Config:
   - Subservice: /galicia
 ```
 
+#### Real APIs Integration Layer (NEW - Apr 28, 2026)
+
+**Priority:** API-First architecture with Fallback to Simulation
+
+```yaml
+Purpose: Integrate real official data sources with realistic simulator fallback
+
+Architecture:
+  1. Connectors (API-specific)
+     - AEMET Connector: Spanish meteorological service
+     - MeteoGalicia Connector: Galician regional weather/ocean data
+     - Puertos del Estado Connector: Spanish Port Authority sea conditions
+  
+  2. Transformers (NGSI-LD conversion)
+     - WeatherTransformer: AEMET/MeteoGalicia → WeatherObserved
+     - OceanTransformer: Puertos del Estado → SeaConditionObserved
+     - AvailabilityTransformer: Simulators → Berth, BoatPlacesAvailable
+  
+  3. Simulators (Fallback when APIs unavailable)
+     - BerthStatusSimulator: Coherent berth occupancy
+     - AvailabilitySimulator: Boat places availability
+     - VesselSimulator: Realistic vessel positions/status
+     - AirQualitySimulator: Plausible air quality data
+  
+  4. Celery Beat Schedule (Periodic ingestion)
+     - ingest_weather_aemet: Every 30 min (real API)
+     - ingest_weather_meteogalicia: Every 30 min (real API)
+     - ingest_sea_conditions: Every 15 min (real API)
+     - ingest_berth_status: Every 5 min (simulator)
+     - ingest_availability: Every 5 min (simulator)
+     - ingest_vessel_data: Every 1 min (simulator)
+     - ingest_air_quality: Every 1 hour (simulator)
+
+Data Provenance:
+  - Every entity includes dataProvider and source fields
+  - Confidence scores indicate data quality (0-1 scale)
+  - "simulator" marked for synthetic data
+  - "AEMET", "MeteoGalicia", "Puertos_del_Estado" for real APIs
+
+Files Created:
+  - backend/connectors/ (AEMET, MeteoGalicia, PuertosDelEstado)
+  - backend/services/transformers/ (Weather, Ocean, Availability)
+  - backend/simulators/ (Berth, Availability, Vessel, AirQuality)
+  - backend/tasks/ingest_tasks.py (Celery task definitions)
+  - backend/scripts/setup_quantumleap_subscriptions.py (Historical setup)
+  - docs/REAL_APIS_INGESTION.md (Comprehensive guide)
+
+Configuration (.env):
+  - AEMET_API_KEY: API key for AEMET OpenData
+  - ENABLE_REAL_DATA_INGESTION: true/false
+  - ENABLE_FALLBACK_SIMULATORS: true/false
+  - WEATHER_UPDATE_FREQUENCY: 1800 (30 min)
+  - OCEAN_CONDITIONS_UPDATE_FREQUENCY: 900 (15 min)
+  - BERTH_STATUS_UPDATE_FREQUENCY: 300 (5 min)
+```
+
 #### Orion-LD (Context Broker)
 
 ```yaml

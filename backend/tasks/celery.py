@@ -3,6 +3,7 @@
 
 import os
 from celery import Celery
+from celery.schedules import crontab
 from config import settings
 
 # Create Celery app
@@ -23,6 +24,52 @@ celery_app.conf.update(
     task_time_limit=30 * 60,  # 30 minutes
     task_soft_time_limit=25 * 60,  # 25 minutes
 )
+
+# ============================================================================
+# CELERY BEAT SCHEDULE - Periodic Task Configuration
+# ============================================================================
+# Define frequency of data ingestion from real APIs and simulators
+
+celery_app.conf.beat_schedule = {
+    # Real API ingestion tasks
+    "weather-aemet-every-30min": {
+        "task": "ingest_weather_aemet",
+        "schedule": settings.weather_update_frequency,  # 30 minutes default
+        "options": {"queue": "real_data"}
+    },
+    "weather-meteogalicia-every-30min": {
+        "task": "ingest_weather_meteogalicia",
+        "schedule": settings.weather_update_frequency,
+        "options": {"queue": "real_data"}
+    },
+    "sea-conditions-every-15min": {
+        "task": "ingest_sea_conditions",
+        "schedule": settings.ocean_conditions_update_frequency,  # 15 minutes default
+        "options": {"queue": "real_data"}
+    },
+    
+    # Simulated/Operational data ingestion
+    "berth-status-every-5min": {
+        "task": "ingest_berth_status",
+        "schedule": settings.berth_status_update_frequency,  # 5 minutes default
+        "options": {"queue": "operational"}
+    },
+    "availability-every-5min": {
+        "task": "ingest_availability",
+        "schedule": settings.berth_status_update_frequency,
+        "options": {"queue": "operational"}
+    },
+    "vessel-data-every-1min": {
+        "task": "ingest_vessel_data",
+        "schedule": 60,  # 1 minute for dynamic data
+        "options": {"queue": "operational"}
+    },
+    "air-quality-every-1hour": {
+        "task": "ingest_air_quality",
+        "schedule": settings.air_quality_update_frequency,  # 1 hour default
+        "options": {"queue": "environmental"}
+    },
+}
 
 
 # Task definitions
