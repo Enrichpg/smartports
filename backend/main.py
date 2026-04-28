@@ -98,13 +98,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware
+# CORS: allow_origins=["*"] is incompatible with allow_credentials=True in browsers.
+# In development we allow all via wildcard without credentials; in production set
+# CORS_ALLOW_ORIGINS env var to explicit origins (e.g. https://smartport.example.com).
+_cors_origins_raw = os.environ.get("CORS_ALLOW_ORIGINS", "")
+_cors_origins = (
+    [o.strip() for o in _cors_origins_raw.split(",") if o.strip()]
+    if _cors_origins_raw
+    else ["*"]
+)
+_allow_credentials = _cors_origins != ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_cors_origins,
+    allow_credentials=_allow_credentials,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
 )
 
 # Add trusted host middleware

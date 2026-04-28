@@ -25,7 +25,7 @@ requests==2.31.0
 
 # External APIs
 openmeteo-requests==1.0.1
-requests-cache==1.1.10
+requests-cache==1.1.1
 retry-requests==2.0.0
 
 # Task Queue
@@ -54,7 +54,7 @@ pytz==2023.3
 
 # Validation & Serialization
 marshmallow==3.20.1
-marshmallow-enum==1.6.1
+marshmallow-enum==1.5.1
 
 # WebSocket support
 websockets==12.0
@@ -67,6 +67,3 @@ pytest-cov==4.1.0
 black==23.12.0
 flake8==6.1.0
 mypy==1.7.1
-
-# Documentation
-python-multipart==0.0.6

@@ -20,6 +20,26 @@ async def health():
     }
 
 
+@router.get("/api/health", name="API Health Check")
+async def api_health():
+    """Explicit API health endpoint for reverse proxies and external checks."""
+    return {
+        "status": "healthy",
+        "component": "api",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
+@router.get("/api/ping", name="API Connectivity Check")
+async def api_ping():
+    """Simple connectivity probe for future integrations."""
+    return {
+        "status": "ok",
+        "component": "backend",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
 @router.get("/health/live", name="Liveness Probe")
 async def health_live():
     """

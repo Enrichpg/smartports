@@ -147,7 +147,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "hasSeaportFacilities": {
     "type": "Relationship",
-    "value": [
+    "object": [
       "urn:smartdatamodels:SeaportFacilities:CorA:dock_A",
       "urn:smartdatamodels:SeaportFacilities:CorA:dock_B"
     ]
@@ -197,7 +197,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "manages": {
     "type": "Relationship",
-    "value": ["urn:smartdatamodels:Port:Galicia:CorA"]
+    "object": ["urn:smartdatamodels:Port:Galicia:CorA"]
   },
   "address": {
     "type": "Property",
@@ -259,7 +259,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "hasBerths": {
     "type": "Relationship",
-    "value": [
+    "object": [
       "urn:smartdatamodels:Berth:CorA:A1",
       "urn:smartdatamodels:Berth:CorA:A2"
     ]
@@ -421,7 +421,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "authorizedPorts": {
     "type": "Relationship",
-    "value": [
+    "object": [
       "urn:smartdatamodels:Port:Galicia:CorA",
       "urn:smartdatamodels:Port:Galicia:Vigo",
       "urn:smartdatamodels:Port:Galicia:Ferrol"
@@ -758,7 +758,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "hasOperations": {
     "type": "Relationship",
-    "value": [
+    "object": [
       "urn:smartdatamodels:Operation:corA_20260427_imo9876543_op1"
     ]
   }
@@ -836,7 +836,7 @@ All relationships use NGSI-LD `Relationship` type with `object` field:
   },
   "hasDevice": {
     "type": "Relationship",
-    "value": [
+    "object": [
       "urn:smartdatamodels:Device:CorA:crane_01",
       "urn:smartdatamodels:Device:CorA:crane_02"
     ]

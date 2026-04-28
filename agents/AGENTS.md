@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — AGENTS.md
 
-**Version:** 1.1  
-**Last Updated:** 2026-04-28  
-**Status:** Active  
+**Version:** 1.2
+**Last Updated:** 2026-04-28
+**Status:** Active
 **Authority:** Project Lead  
 
 ---
@@ -841,6 +841,38 @@ pytest --cov=services              # Coverage report
 
 ---
 
+---
+
+## 🔍 Audit Notes (2026-04-28)
+
+The following issues were identified and resolved in the full-repo audit (2026-04-28):
+
+### Fixed
+| # | File | Issue | Fix |
+|---|------|-------|-----|
+| 1 | `backend/api/v1.py` | Missing imports (`settings`, `logger`, `orion_service`, `HTTPException`, `Query`); hardcoded port list; duplicate route definitions conflicting with sub-routers | Rewrote file as pure router aggregator; moved unique endpoints to `api/routes/ports.py`; removed duplicates |
+| 2 | `nginx/nginx.conf` | Two `server` blocks both listening on port 80 → nginx fails to start | Removed redundant health-only server block; fixed WebSocket path (`/api/ws` → `/api/v1/realtime/ws`) |
+| 3 | `docker-compose.yml` | Redis healthcheck used `redis-cli --raw incr ping` (mutates data, no password); Mosquitto healthcheck sends MQTT message each check; nginx `depends_on` backend without `condition: service_healthy`; Orion healthcheck URL imprecise | Fixed all healthchecks; added correct `condition: service_healthy` for nginx |
+| 4 | `backend/main.py` | `allow_origins=["*"]` with `allow_credentials=True` — browsers reject this combination | Fixed CORS to disable credentials when origins is wildcard; made origins configurable via `CORS_ALLOW_ORIGINS` env var |
+| 5 | `backend/requirements.txt` | `python-multipart` listed twice | Removed duplicate |
+| 6 | `docs/data_model.md` | Multiple NGSI-LD Relationship examples used `value` field instead of required `object` field (`manages`, `hasSeaportFacilities`, `hasBerths`, `authorizedPorts`, `hasOperations`, `hasDevice`) | Fixed all 6 occurrences |
+| 7 | Root directory | 7 session-note `.md` files (`BACKEND_IMPLEMENTATION.md`, `DATA_FLOW_ARCHITECTURE.md`, etc.) cluttering root | Moved to `docs/history/` |
+| 8 | `frontend/js/app.js`, `frontend/css/style.css` | Stale old frontend files superseded by `frontend/src/` structure | Removed via `git rm` |
+| 9 | `docker/docker-compose.yml` | Stale duplicate compose file (old version with hardcoded ports) | Removed entire `docker/` subdirectory |
+| 10 | `docs/architecture.md` | Section 5.4 appeared twice (duplicate heading); nginx routes out of date | Fixed section number (5.4→5.7); corrected route table |
+
+### Known Pending Items
+- QuantumLeap historical query integration (`/ports/{id}/history/*` endpoints return `status: not_implemented`)
+- Audit service DB session wiring (TODO in `main.py` startup)
+- Cache warming endpoint fully implemented (currently triggers placeholder)
+- ML forecasting (Prophet/scikit-learn) not yet connected to live Celery tasks
+- Ollama LLM integration not deployed (optional service, requires GPU)
+- No CI/CD pipeline configured (GitHub Actions planned)
+- Tests use mocks; no integration tests against running services
+- No HTTPS/TLS certificates configured for production
+
+---
+
 ## 📞 Questions / Clarifications
 
 If ambiguity arises:
@@ -858,6 +890,7 @@ If ambiguity arises:
 |---------|------|---------|
 | 1.0 | 2026-04-27 | Initial comprehensive governance document |
 | 1.1 | 2026-04-28 | Updated for Iteration 2: Realtime infrastructure (WebSocket, audit, cache, Celery) implemented |
+| 1.2 | 2026-04-28 | Full repository audit: fixed critical backend import errors, CORS config, nginx duplicate server block, Redis healthcheck, NGSI-LD Relationship `object` field inconsistencies in docs, removed stale session-note files from root |
 
 ---
 

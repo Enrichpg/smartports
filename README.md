@@ -8,8 +8,8 @@
 
 **SmartPort Galicia** is a FIWARE-based, NGSI-LD-compliant platform for managing multiple Galician ports as a unified system. It combines real-time operational control, historical analytics, machine learning forecasting, and intelligent decision support.
 
-**Status:** Iteration 2 Complete - Realtime Infrastructure Active  
-**Version:** 1.1  
+**Status:** Active — Iteration 2 complete (real-time infrastructure, real API integrations)
+**Version:** 1.2
 **Last Updated:** 2026-04-28
 
 ---
@@ -128,16 +128,16 @@
 
 ## 🚀 Quick Start
 
-### 🔴 **NEW: Real APIs Integration Complete!**
+### Real API Integrations
 
-SmartPort now includes **4 real-time API integrations** with your AEMET credentials pre-configured:
+SmartPort includes 4 live data integrations with intelligent simulator fallback:
 
-- 🌡️ **AEMET** (Spanish meteorology) - Every 30 min
-- 🌊 **Puertos del Estado** (Sea conditions) - Every 15 min
-- 🌍 **MeteoGalicia** (Regional weather) - Every 30 min
-- 🌀 **Open-Meteo** (Marine forecasts) - Every 30 min
+- **AEMET** (Spanish meteorology) — updated every 30 min
+- **Puertos del Estado** (Sea conditions) — updated every 15 min
+- **MeteoGalicia** (Regional weather/ocean) — updated every 30 min
+- **Open-Meteo Marine API** (Wave forecasts) — updated every 30 min
 
-**👉 See [QUICKSTART_REAL_APIS.md](QUICKSTART_REAL_APIS.md) for complete startup instructions with real data!**
+Set `AEMET_API_KEY` in `.env` to activate AEMET. Other sources work without keys.
 
 ---
 

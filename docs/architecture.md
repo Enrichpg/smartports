@@ -1,8 +1,8 @@
 # SmartPort Galicia — System Architecture
 
-**Version:** 1.0  
-**Date:** 2026-04-27  
-**Status:** Active  
+**Version:** 1.2
+**Date:** 2026-04-28
+**Status:** Active
 **Scope:** Multipurpose Galician port network (11+ ports, expandable to 128+)
 
 ---
@@ -835,12 +835,15 @@ Upstream Services:
   - orion-ld: http://orion-ld:1026 (context broker, optional expose)
 
 Routes:
-  /api/*              → backend:8000
-  /ws                 → backend:8001 (WebSocket upgrade)
-  /grafana/*          → grafana:3000
-  /docs               → backend:8000/docs (OpenAPI)
-  /health             → backend:8000/health
-  / (static assets)   → nginx file serving
+  /api/*                    → backend:8000 (REST API)
+  /api/v1/realtime/ws       → backend:8000 (WebSocket upgrade)
+  /ngsi-ld/*                → orion-ld:1026 (context broker, optional)
+  /ql/*                     → quantumleap:8668 (time-series API, optional)
+  /grafana/*                → grafana:3000
+  /prometheus/*             → prometheus:9090
+  /iot/*                    → iot-agent-json:4041
+  /health                   → backend:8000/health
+  / (static assets)         → nginx file serving (frontend)
 ```
 
 ### 5.6 Prometheus (Optional Monitoring)
@@ -872,7 +875,7 @@ Alerts:
   - Celery task backlog growing
 ```
 
-### 5.4 Realtime Infrastructure (Iteration 2)
+### 5.7 Realtime Infrastructure (Iteration 2)
 
 This section describes the realtime infrastructure added in Iteration 2 for live event streaming, audit logging, caching, and async task processing.
 
@@ -1747,6 +1750,8 @@ Alert Rules:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-27 | Initial architecture document |
+| 1.1 | 2026-04-28 | Added section 5.7: Realtime Infrastructure (WebSocket, audit, cache, Celery) |
+| 1.2 | 2026-04-28 | Fixed duplicate section number (5.4→5.7), corrected nginx config notes, updated status |
 
 ---
 
