@@ -186,6 +186,91 @@ responses = client.weather_api(url, params=params)
 
 ---
 
+### 5. Open-Meteo Air Quality API (NEW - Apr 28, 2026)
+
+**Type:** Free, open-source API  
+**Authentication:** None (completely free, public)  
+**Update Frequency:** 1 hour (configurable)  
+**Coverage:** Global coverage, including Galician cities  
+
+**Why Open-Meteo Air Quality?**
+- No API key required
+- Real-time air quality measurements for 13 different pollutants
+- 5-day forecasts included
+- Free tier with no rate limits
+- Well-documented API
+- Complements official sources (when available)
+
+**What We Ingest:**
+- PM10 (coarse particulate matter, 10µm)
+- PM2.5 (fine particulate matter, 2.5µm)
+- NO2 (nitrogen dioxide)
+- O3 (ozone)
+- SO2 (sulfur dioxide)
+- CO (carbon monoxide)
+- AQI (Air Quality Index calculated from PM2.5)
+- UV Index
+
+**NGSI-LD Entity:** `AirQualityObserved`
+
+**Galician Monitoring Locations:**
+- Vigo (42.23°N, 8.72°W)
+- Ferrol (43.47°N, 8.25°W)
+- Coruña (43.37°N, 8.39°W)
+- Pontevedra (42.43°N, 8.64°W)
+- Lugo (43.13°N, 8.55°W)
+
+**API Endpoint:**
+```
+https://air-quality-api.open-meteo.com/v1/air-quality
+```
+
+**Configuration:**
+```bash
+OPENMETEO_AIR_QUALITY_BASE_URL=https://air-quality-api.open-meteo.com/v1/air-quality
+OPENMETEO_CACHE_TTL=3600  # Cache for 1 hour
+AIR_QUALITY_UPDATE_FREQUENCY=3600  # 1 hour
+```
+
+**Example Request:**
+```python
+import openmeteo_requests
+import pandas as pd
+
+client = openmeteo_requests.Client()
+url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+params = {
+    "latitude": 42.2,
+    "longitude": -8.7,
+    "hourly": ["pm10", "pm2_5", "nitrogen_dioxide", "ozone"],
+    "forecast_days": 5,
+    "timezone": "UTC"
+}
+responses = client.weather_api(url, params=params)
+response = responses[0]
+
+# Extract hourly data as DataFrame
+hourly = response.Hourly()
+hourly_data = {"date": pd.date_range(...)}
+for idx, var_name in enumerate(["pm10", "pm2_5", ...]):
+    hourly_data[var_name] = hourly.Variables(idx).ValuesAsNumpy()
+
+df = pd.DataFrame(data=hourly_data)
+```
+
+**Task:** `ingest_air_quality` (Celery Beat, 1hour interval)
+
+**Integration Notes:**
+- Real-time air quality measurements from multiple pollutants
+- AQI automatically calculated from PM2.5 using EPA formula
+- Provides early warning for poor air quality conditions
+- Complements environmental monitoring systems
+- Data marked as "OpenMeteo" source with 85% confidence
+- Can be used to trigger environmental alerts
+- Integrated with environmental monitoring dashboard
+
+---
+
 ## 🤖 Fallback Simulators (When APIs Insufficient)
 
 When real APIs don't provide direct data (e.g., exact berth occupancy), we use **realistic simulators** that:
@@ -201,13 +286,11 @@ When real APIs don't provide direct data (e.g., exact berth occupancy), we use *
 | `Berth` status/occupancy | Simulator | 5 min | 0.3 |
 | `BoatPlacesAvailable` | Simulator | 5 min | 0.3 |
 | `Vessel` positions/status | Simulator | 1 min | 0.4 |
-| `AirQualityObserved` | Simulator | 1 hour | 0.2 |
 
 **Tasks:**
 - `ingest_berth_status` (5min interval)
 - `ingest_availability` (5min interval)
 - `ingest_vessel_data` (1min interval)
-- `ingest_air_quality` (1hour interval)
 
 ---
 
@@ -310,10 +393,10 @@ AIR_QUALITY_UPDATE_FREQUENCY=3600      # 1 hour
 | `ingest_weather_meteogalicia` | 30 min | `real_data` | Regional weather (Galicia) |
 | `ingest_sea_conditions` | 15 min | `real_data` | Ocean conditions (buoys) |
 | `ingest_marine_weather_openmeteo` | 30 min | `real_data` | Marine weather (offshore) |
+| `ingest_air_quality` | 1 hour | `real_data` | Air quality (real API) |
 | `ingest_berth_status` | 5 min | `operational` | Berth occupancy (simulator) |
 | `ingest_availability` | 5 min | `operational` | Boat places (simulator) |
 | `ingest_vessel_data` | 1 min | `operational` | Vessel positions (simulator) |
-| `ingest_air_quality` | 1 hour | `environmental` | Air quality (simulator) |
 
 ---
 

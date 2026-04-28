@@ -4,9 +4,11 @@
 from .weather_transformer import WeatherTransformer
 from .ocean_transformer import OceanTransformer
 from .availability_transformer import AvailabilityTransformer
+from .air_quality_transformer import AirQualityTransformer
 
 __all__ = [
     "WeatherTransformer",
     "OceanTransformer",
     "AvailabilityTransformer",
+    "AirQualityTransformer",
 ]

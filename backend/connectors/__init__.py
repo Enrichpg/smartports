@@ -6,6 +6,7 @@ from .aemet_connector import AEMETConnector
 from .meteogalicia_connector import MeteoGaliciaConnector
 from .puertos_estado_connector import PuertosEstadoConnector
 from .openmeteo_connector import OpenMeteoConnector
+from .openmeteo_air_quality_connector import OpenMeteoAirQualityConnector
 
 __all__ = [
     "BaseConnector",
@@ -13,4 +14,5 @@ __all__ = [
     "MeteoGaliciaConnector",
     "PuertosEstadoConnector",
     "OpenMeteoConnector",
+    "OpenMeteoAirQualityConnector",
 ]

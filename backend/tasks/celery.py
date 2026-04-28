@@ -72,7 +72,7 @@ celery_app.conf.beat_schedule = {
     "air-quality-every-1hour": {
         "task": "ingest_air_quality",
         "schedule": settings.air_quality_update_frequency,  # 1 hour default
-        "options": {"queue": "environmental"}
+        "options": {"queue": "real_data"}
     },
 }
 

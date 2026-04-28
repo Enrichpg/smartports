@@ -7,7 +7,7 @@ import asyncio
 from typing import Dict, Any
 
 from backend.connectors import AEMETConnector, MeteoGaliciaConnector, PuertosEstadoConnector
-from backend.services.transformers import WeatherTransformer, OceanTransformer, AvailabilityTransformer
+from backend.services.transformers import WeatherTransformer, OceanTransformer, AvailabilityTransformer, AirQualityTransformer
 from backend.services.orion import OrionService
 from backend.simulators import (
     BerthStatusSimulator,
@@ -344,27 +344,87 @@ def ingest_vessel_data():
 @celery_app.task(name="ingest_air_quality")
 def ingest_air_quality():
     """
-    Ingest air quality data.
-    Simulated when API data unavailable.
+    Ingest air quality data from Open-Meteo API.
+    Provides real-time and forecast air quality measurements.
+    
+    Open-Meteo is a free, open-source API with no authentication required.
+    Covers PM2.5, PM10, NO2, O3, SO2, CO, and AQI.
     """
-    if not settings.enable_fallback_simulators:
+    if not settings.enable_real_data_ingestion:
         return {"status": "skipped"}
     
-    logger.info("Starting air quality ingestion...")
+    logger.info("Starting Open-Meteo air quality ingestion...")
     
     try:
+        import asyncio
+        from backend.connectors.openmeteo_air_quality_connector import (
+            OpenMeteoAirQualityConnector,
+            GALICIAN_LOCATIONS
+        )
+        from backend.services.transformers import AirQualityTransformer
+        
+        connector = OpenMeteoAirQualityConnector(cache_ttl=3600)
         orion = OrionService()
-        ports = ["80003", "80001", "80004", "80002"]
+        results = []
         
-        for port_code in ports:
+        # Fetch air quality data for each Galician location
+        loop = asyncio.get_event_loop()
+        
+        for location_name, location_info in GALICIAN_LOCATIONS.items():
             try:
-                simulator = AirQualitySimulator(port_code=port_code)
-                aq_data = simulator.get_air_quality()
+                air_quality_data = loop.run_until_complete(
+                    connector.get_air_quality(
+                        latitude=location_info["latitude"],
+                        longitude=location_info["longitude"],
+                        location_name=location_name,
+                        forecast_days=5
+                    )
+                )
                 
-                # Would transform to NGSI-LD AirQualityObserved here
-                # orion.update_entity(...)
+                if air_quality_data.get("status") == "success":
+                    # Normalize the data (synchronously)
+                    normalized = loop.run_until_complete(
+                        connector.normalize_data(air_quality_data)
+                    )
+                    
+                    # Transform to NGSI-LD AirQualityObserved
+                    ngsi_entity = AirQualityTransformer.from_openmeteo(
+                        normalized_data=normalized,
+                        location_id=location_name,
+                        port_code=location_info.get("port", "")
+                    )
+                    
+                    # Publish to Orion
+                    if ngsi_entity:
+                        response = orion.update_entity(ngsi_entity)
+                        results.append({
+                            "location": location_name,
+                            "status": "published",
+                            "aqi": ngsi_entity.get("aqi", {}).get("value")
+                        })
+                        logger.info(f"Open-Meteo air quality published for {location_name}")
+                else:
+                    logger.warning(f"Open-Meteo failed for {location_name}: {air_quality_data.get('error')}")
+                    results.append({
+                        "location": location_name,
+                        "status": "failed",
+                        "error": air_quality_data.get("error")
+                    })
+            
+            except Exception as e:
+                logger.error(f"Error processing Open-Meteo air quality for {location_name}: {str(e)}")
+                results.append({
+                    "location": location_name,
+                    "status": "error",
+                    "error": str(e)
+                })
         
-        return {"task": "ingest_air_quality", "status": "completed"}
+        return {
+            "task": "ingest_air_quality",
+            "status": "completed",
+            "timestamp": datetime.utcnow().isoformat(),
+            "results": results
+        }
     
     except Exception as e:
         logger.error(f"Air quality ingestion failed: {str(e)}")
