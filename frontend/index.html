@@ -6,240 +6,42 @@
     <meta name="description" content="SmartPort Galicia Operations Center - Real-time multipurpose port network management">
     <meta name="theme-color" content="#1a5490">
     <title>SmartPort Galicia Operations Center</title>
-    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    
+    <!-- Custom Dashboard CSS -->
+    <link rel="stylesheet" href="/src/styles/dashboard.css">
+    
+    <!-- Environment Configuration -->
+    <script>
+        window.ENV = {
+            BACKEND_URL: window.location.protocol + '//' + window.location.host + '/api/v1',
+            WS_URL: (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws',
+            DEBUG: false
+        };
+    </script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-dark bg-primary sticky-top">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">
-                <i class="fas fa-ship"></i> SmartPort Galicia Operations Center
-            </span>
-            <div class="text-white">
-                <span id="system-status" class="badge bg-success">Operativo</span>
-            </div>
-        </div>
-    </nav>
+    <!-- Main Application Container -->
+    <div id="app"></div>
 
-    <!-- Main Container -->
-    <div class="container-fluid mt-4">
-        <!-- Status Panel -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h4 class="mb-0">
-                            <i class="fas fa-circle-notch"></i> Estado del Sistema
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="system-info" class="row">
-                            <div class="col-md-3 mb-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Backend</h5>
-                                        <p class="card-text">
-                                            <span id="backend-status" class="badge bg-warning">Verificando...</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Orion-LD</h5>
-                                        <p class="card-text">
-                                            <span id="orion-status" class="badge bg-warning">Verificando...</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="card-title">QuantumLeap</h5>
-                                        <p class="card-text">
-                                            <span id="ql-status" class="badge bg-warning">Verificando...</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card text-center">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Grafana</h5>
-                                        <p class="card-text">
-                                            <span id="grafana-status" class="badge bg-warning">Verificando...</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- KPIs Row -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card border-left-primary h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-primary text-uppercase mb-1">
-                            <small><strong>Puertos Activos</strong></small>
-                        </div>
-                        <div class="h3 mb-0">
-                            <span id="active-ports">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-left-success h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-success text-uppercase mb-1">
-                            <small><strong>Atraques Disponibles</strong></small>
-                        </div>
-                        <div class="h3 mb-0">
-                            <span id="available-berths">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-left-warning h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-warning text-uppercase mb-1">
-                            <small><strong>Buques en Puerto</strong></small>
-                        </div>
-                        <div class="h3 mb-0">
-                            <span id="vessels-in-port">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-left-danger h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-danger text-uppercase mb-1">
-                            <small><strong>Alertas Activas</strong></small>
-                        </div>
-                        <div class="h3 mb-0">
-                            <span id="active-alerts">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content Row -->
-        <div class="row">
-            <!-- Map Section -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-map"></i> Mapa de Puertos Gallegos
-                        </h5>
-                    </div>
-                    <div class="card-body" style="height: 500px; background: #f0f0f0;">
-                        <div id="map-placeholder" class="h-100 d-flex align-items-center justify-content-center">
-                            <div class="text-center">
-                                <i class="fas fa-map fa-5x text-muted mb-3"></i>
-                                <p class="text-muted">Mapa interactivo - Próximamente con Leaflet + OpenStreetMap</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Alerts & Notifications -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell"></i> Alertas Recientes
-                        </h5>
-                    </div>
-                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
-                        <div id="alerts-container">
-                            <p class="text-muted">Sin alertas en este momento</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Operations Section -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tasks"></i> Operaciones Activas
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="operations-table">
-                            <p class="text-muted">Cargando operaciones...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Links to Services -->
-        <div class="row mt-4 mb-4">
-            <div class="col-md-12">
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="fas fa-link"></i> Enlaces a Servicios
-                        </h5>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <a href="/api/v1/docs" class="btn btn-outline-primary w-100" target="_blank">
-                                    <i class="fas fa-book"></i> API Docs (Swagger)
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/grafana/" class="btn btn-outline-info w-100" target="_blank">
-                                    <i class="fas fa-chart-line"></i> Grafana Dashboards
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/prometheus/" class="btn btn-outline-warning w-100" target="_blank">
-                                    <i class="fas fa-fire"></i> Prometheus Metrics
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/ngsi-ld/v1/" class="btn btn-outline-success w-100" target="_blank">
-                                    <i class="fas fa-cube"></i> Orion-LD API
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <footer class="text-center text-muted py-3 mt-5">
-            <hr>
-            <p>
-                <small>
-                    SmartPort Galicia Operations Center v1.0.0 |
-                    <span id="current-time"></span> |
-                    <a href="#" class="text-muted">Documentación</a>
-                </small>
-            </p>
-        </footer>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/app.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Main Application Module -->
+    <script type="module" src="/src/app.js"></script>
 </body>
 </html>

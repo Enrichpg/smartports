@@ -298,6 +298,221 @@ Commit: "docs: add lastAISUpdate to Vessel in data_model.md"
 - ✅ Return typed responses
 - ✅ Include HTTP status codes (200, 201, 400, 404, 500, etc.)
 - ✅ Include docstrings with description, parameters, returns
+
+---
+
+## 🎨 Frontend Development Rules
+
+**All frontend development follows these mandatory rules. Frontend is NOT separate from backend — it's an integral layer.**
+
+### 1. Modular Architecture
+
+**The frontend must follow strict modular organization:**
+
+```
+frontend/src/
+├── services/          # External integrations (API, WebSocket, etc)
+├── store/             # Global state management
+├── components/        # Reusable UI components
+├── pages/             # Full pages/views
+├── utils/             # Helper functions
+└── styles/            # CSS organization
+```
+
+**Rules:**
+- ✅ Services are isolated, testable, and reusable
+- ✅ Components are pure functions returning HTML strings or DOM elements
+- ✅ Pages import components, not components importing pages
+- ✅ Store is the single source of truth
+- ✅ No circular dependencies
+- ❌ No page-specific logic in components
+- ❌ No hardcoded data or URLs
+
+### 2. API Integration
+
+**Frontend must consume backend REST API through centralized client:**
+
+- ✅ All REST calls go through `services/api.js`
+- ✅ API client wraps fetch with error handling and transformations
+- ✅ No direct fetch() calls scattered in components
+- ✅ API client methods match backend routes 1:1
+- ✅ Base URL configurable via environment (`window.ENV`)
+- ✅ Implement retry logic for failures
+- ✅ Log all API errors with context
+
+**Example from api.js:**
+```javascript
+async getPortById(portId) {
+  try {
+    return await this.get(`/ports/${portId}`);
+  } catch (error) {
+    console.error('Failed to fetch port:', error);
+    throw error;
+  }
+}
+```
+
+### 3. Real-Time WebSocket
+
+**Frontend must maintain robust WebSocket connection:**
+
+- ✅ Auto-connect on page load
+- ✅ Implement auto-reconnect with exponential backoff
+- ✅ Subscribe to events by type (e.g., `berth.updated`)
+- ✅ Queue messages if disconnected
+- ✅ Provide connection status indicator
+- ✅ Handle malformed messages gracefully
+- ✅ Clean up listeners on component destroy
+
+**Expected events from backend:**
+```
+berth.updated
+portcall.created/updated/closed
+alert.created
+availability.updated
+port.summary.updated
+```
+
+### 4. Global State (Store)
+
+**Frontend must have single source of truth for state:**
+
+- ✅ Store is in `store/store.js` singleton
+- ✅ Components subscribe to store events (getters + subscribe)
+- ✅ Updates go through store setters
+- ✅ Store auto-calculates KPIs
+- ✅ Store emits events on data changes
+- ✅ Components listen and re-render on changes
+- ❌ No component-local state for shared data
+- ❌ No prop drilling for global data
+
+**Example usage:**
+```javascript
+// Get data
+const ports = store.getPorts();
+
+// Subscribe to changes
+store.subscribe('portsChanged', () => {
+  renderPorts();  // re-render
+});
+
+// Update data
+store.setPorts(newPorts);
+```
+
+### 5. Component Design
+
+**Components are pure functions returning HTML:**
+
+- ✅ Components take props and return HTML string or DOM element
+- ✅ Components are small, focused, single-responsibility
+- ✅ Component names describe their role (KpiCard, BerthTable, etc)
+- ✅ Props include data, handlers, and options
+- ✅ No internal state (all state in store)
+- ✅ Error boundaries for graceful degradation
+- ❌ No side effects (fetch, timer) in component functions
+- ❌ No component-level APIs or internal stores
+
+**Component pattern:**
+```javascript
+export function KpiCard({ title, value, icon, color, onClick }) {
+  const clickHandler = onClick ? `onclick="(${onClick})();"` : '';
+  return `<div class="kpi-card" ${clickHandler}>...</div>`;
+}
+```
+
+### 6. Pages and Routing
+
+**Pages manage full page lifecycle:**
+
+- ✅ Pages are classes with `mount()`, `destroy()` methods
+- ✅ Page routing via URL path and history API
+- ✅ Pages load data, initialize components, setup listeners
+- ✅ Pages cleanup on destroy (unsubscribe, cleanup WebSocket)
+- ✅ Each page is independent
+- ✅ SPA architecture with client-side routing
+
+**Page pattern:**
+```javascript
+export class DashboardPage {
+  async mount(containerId) {
+    // Render HTML
+    // Load initial data
+    // Setup listeners
+  }
+  
+  destroy() {
+    // Cleanup
+  }
+}
+```
+
+### 7. Performance
+
+**Frontend must perform efficiently:**
+
+- ✅ No full page reload on every data change
+- ✅ Incremental updates (only changed elements)
+- ✅ Data caching in store
+- ✅ Debounce/throttle frequent events
+- ✅ Lazy load components/data
+- ✅ Minimal DOM manipulation
+- ✅ Optimize CSS/JS bundle size
+
+**Performance targets:**
+- TTI < 3 seconds
+- FID < 100ms
+- LCP < 2.5 seconds
+
+### 8. Responsive Design
+
+**Frontend must work on all screen sizes:**
+
+- ✅ Mobile-first approach (design for small first)
+- ✅ Bootstrap grid system for layout
+- ✅ Media queries for breakpoints (xs, sm, md, lg, xl)
+- ✅ Touch-friendly interactions (48px minimum tap target)
+- ✅ No horizontal scroll on small screens
+- ✅ Readable fonts on all sizes
+- ✓ Test on real devices (not just browser)
+
+### 9. Accessibility
+
+**Frontend must be accessible to all users:**
+
+- ✅ Semantic HTML (button, form, table, etc - not just divs)
+- ✅ ARIA labels and roles
+- ✅ Color contrast WCAG AA minimum
+- ✅ Keyboard navigation support
+- ✅ Focus indicators visible
+- ✅ Alt text for images
+- ✅ Form labels associated with inputs
+- ✓ Test with screen reader
+
+### 10. Error Handling
+
+**Frontend must handle errors gracefully:**
+
+- ✅ Try-catch on all async operations
+- ✅ Display user-friendly error messages
+- ✅ Log errors with context for debugging
+- ✅ Provide recovery options (retry, go back)
+- ✅ Empty states when no data
+- ✅ Loading states during fetch
+- ❌ Never show stack traces to user
+- ❌ Never swallow errors silently
+
+### 11. Documentation
+
+**Frontend code must be self-documenting and have README:**
+
+- ✅ `frontend/README.md` with architecture and usage
+- ✅ JSDoc comments for all functions
+- ✅ Component parameter documentation
+- ✅ API client method documentation
+- ✅ Store methods documented
+- ✅ Update docs when adding features
+- ❌ No mystery code without explanation
 - ✅ Log request start/end with duration
 - ✅ Handle errors gracefully with meaningful messages
 
@@ -388,7 +603,206 @@ Before production push:
 
 ---
 
-## 🚫 Anti-Patterns (Never Do These)
+## � Backend Implementation Status (2026-04-28)
+
+### ✅ COMPLETED: Domain Business API Layer
+
+The SmartPort backend is now **operationalized** with a complete REST API implementing domain business logic.
+
+**Implemented Components:**
+
+#### 1. Pydantic Schemas (100% coverage)
+```
+✅ Port schemas (PortResponse, PortSummaryResponse)
+✅ Berth schemas (BerthResponse, state changes)
+✅ Availability schemas (BoatPlacesAvailable, summaries)
+✅ Vessel schemas (VesselResponse, queries)
+✅ Authorization schemas (validation, status)
+✅ PortCall schemas (lifecycle, state changes)
+✅ Alert schemas (types, severity levels)
+✅ Common schemas (NGSI-LD base, error responses)
+```
+
+#### 2. Service Layer (7 Services)
+```
+✅ OrionLDClient      - NGSI-LD HTTP operations
+✅ PortService        - Port queries & KPI calculation
+✅ BerthService       - Berth state machine + validation
+✅ AvailabilityService - Recalculation engine
+✅ VesselService      - Vessel registry queries
+✅ AuthorizationService - Authorization validation (CRITICAL)
+✅ PortCallService    - PortCall lifecycle management (CRITICAL)
+✅ AlertService       - Rule-based alert generation
+```
+
+#### 3. REST API Endpoints (28 endpoints)
+```
+✅ Ports API          - GET /api/v1/ports, /ports/{id}, /ports/{id}/summary
+✅ Berths API         - GET/PATCH /api/v1/berths, /berths/{id}/status
+✅ Availability API   - GET/POST /api/v1/availability/*
+✅ Vessels API        - GET /api/v1/vessels, /vessels/{id}, /vessels/imo/{imo}
+✅ Authorization API  - GET /api/v1/authorizations, POST /authorizations/validate
+✅ PortCall API       - GET/POST /api/v1/portcalls, /portcalls/{id}/status, /close
+✅ Alerts API         - GET/POST /api/v1/alerts, /alerts/{id}/acknowledge, /resolve
+```
+
+#### 4. Business Logic & Validation
+```
+✅ Berth state machine      - free ↔ reserved ↔ occupied ↔ outOfService
+✅ PortCall state machine   - scheduled → expected → active → completed
+✅ Authorization validation - Existence, expiration, revocation, insurance
+✅ Availability calculation - Real-time from berth states
+✅ Alert generation rules   - Authorization, occupancy, conflicts
+```
+
+#### 5. Unit Tests (23 tests)
+```
+✅ Berth state transitions (6 tests)
+✅ PortCall state transitions (5 tests)
+✅ Authorization validation (3 tests)
+✅ Availability calculation (4 tests)
+✅ Alert generation (3 tests)
+✅ PortCall ID generation (2 tests)
+```
+
+### 📚 Documentation Provided
+
+```
+✅ BACKEND_IMPLEMENTATION.md  - Complete backend guide
+✅ docs/API_REFERENCE.md      - Full API endpoint documentation
+✅ docs/data_model_backend.md - State machines, entities, business rules
+✅ docs/architecture.md       - Updated with service layer
+✅ docs/data_model.md         - NGSI-LD entity definitions
+✅ tests/conftest.py          - Pytest fixtures for 7 entity types
+✅ tests/test_domain_logic.py - 23 comprehensive unit tests
+```
+
+### 🚀 Production Ready Features
+
+**Authorization Validation:**
+```python
+POST /api/v1/authorizations/validate
+{
+  "is_authorized": boolean,
+  "reason": string (if not authorized),
+  "details": {
+    "expiration_date": date,
+    "insurance_valid": boolean,
+    "insurance_expiration": date
+  }
+}
+```
+
+**PortCall Lifecycle:**
+```python
+# Create with authorization check
+POST /api/v1/portcalls
+
+# Change status with state machine validation
+PATCH /api/v1/portcalls/{id}/status
+
+# Close (frees berth, records departure)
+POST /api/v1/portcalls/{id}/close
+```
+
+**Real-Time Availability:**
+```python
+# Get current availability
+GET /api/v1/availability/ports/{port_id}
+
+# Recalculate from berth states
+POST /api/v1/availability/recalculate/{port_id}
+```
+
+**Port Operational Summary:**
+```python
+GET /api/v1/ports/{port_id}/summary
+Returns:
+- total_berths, berths_free, berths_occupied, berths_reserved
+- occupancy_rate
+- active_vessels (PortCall count)
+- active_alerts (problem count)
+- last_updated timestamp
+```
+
+### 📝 Key Architectural Decisions
+
+1. **Service Layer Separation:** Business logic decoupled from routes
+2. **State Machines:** Explicit berth and PortCall transitions
+3. **Authorization-First:** Cannot create PortCall without validation
+4. **Real-Time Availability:** Computed from berth states, not cached
+5. **Rule-Based Alerts:** Triggered by conditions, stored in Orion-LD
+6. **NGSI-LD Native:** All persistence via Orion-LD context broker
+
+### 🔧 How to Use
+
+**Running the Backend:**
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+# API available at http://localhost:8000
+# Docs at http://localhost:8000/docs
+```
+
+**API Documentation:**
+- Interactive Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Reference: Read `docs/API_REFERENCE.md`
+
+**Testing:**
+```bash
+pytest tests/ -v                    # Run all tests
+pytest tests/test_domain_logic.py   # Run business logic tests
+pytest --cov=services              # Coverage report
+```
+
+### 🎯 Next Iterations Should Build On
+
+**Do NOT rebuild:**
+- ❌ State machines (already complete)
+- ❌ Authorization validation (already rigorous)
+- ❌ API route structure (already modular)
+- ❌ Service layer organization (already clean)
+
+**Recommended next steps:**
+- ✅ Add WebSocket support for real-time updates
+- ✅ Integrate PostgreSQL for audit trail
+- ✅ Add Celery background tasks for alert generation
+- ✅ Implement Redis caching layer
+- ✅ Add frontend integration tests
+- ✅ Performance optimization for high-volume ports
+- ✅ ML integration (forecasting, recommendations)
+
+### 📌 Critical Information for Future Developers
+
+**Authorization is the KEY gatekeeper:**
+- Read `services/authorization_service.py` carefully
+- Authorization failures block PortCall creation
+- Insurance expiration is checked on every validation
+- Tests for this in `tests/test_domain_logic.py`
+
+**PortCall lifecycle is complex but well-tested:**
+- state machine in `services/portcall_service.py`
+- Closing a PortCall automatically frees the berth
+- State transitions validated strictly
+- See tests for all valid transitions
+
+**Berth state conflicts must be prevented:**
+- Cannot assign occupied berth
+- Cannot have multiple PortCalls on same berth
+- Closing PortCall frees berth
+- Implemented in `BerthService` and `PortCallService`
+
+**Availability is recalculated on demand:**
+- Not cached (always fresh)
+- Computed from current berth states
+- Grouped by category
+- See `services/availability_service.py`
+
+---
+
+## �🚫 Anti-Patterns (Never Do These)
 
 | Anti-Pattern | Why Forbidden | Alternative |
 |--------------|---------------|-------------|

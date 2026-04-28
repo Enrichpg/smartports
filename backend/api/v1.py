@@ -1,53 +1,48 @@
-# API v1 Routes - Real-time Data Exposure Layer
-# Exposes real and simulated data from Orion-LD via clean REST interface
+# API v1 Routes - SmartPort Domain Business API
+# Main router for domain operations: ports, berths, availability, vessels, PortCalls, alerts
 
-from fastapi import APIRouter, Query, HTTPException
-from typing import List, Optional, Dict, Any
-import httpx
-import logging
-from datetime import datetime, timedelta
+from fastapi import APIRouter
+from datetime import datetime
+from api.routes import ports, berths, availability, vessels, portcalls, alerts
 
-from services.orion import OrionService
-from config import settings
-
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Initialize Orion service
-orion_service = OrionService()
+# Include domain routers
+router.include_router(ports.router)
+router.include_router(berths.router)
+router.include_router(availability.router)
+router.include_router(vessels.router)
+router.include_router(portcalls.router)
+router.include_router(alerts.router)
 
 
-# ============================================================================
-# ROOT ENDPOINTS
-# ============================================================================
-
+# Root endpoint
 @router.get("/", name="API v1 Root")
 async def api_v1_root():
-    """SmartPort API v1 root - Overview of available services"""
+    """SmartPort API v1 root - Domain operations API"""
     return {
         "version": "1.0.0",
         "status": "operational",
         "timestamp": datetime.utcnow().isoformat(),
-        "services": {
-            "sources": "Data source status and integration overview",
-            "ports": "Port list and operational data",
-            "live": "Real-time observations and measurements",
-            "history": "Historical time series data",
+        "api_type": "Domain Business API",
+        "description": "Real-time port operations including berth management, availability, vessel authorization, port calls, and alerts",
+        "domain_areas": {
+            "ports": "Port management and operational summaries",
+            "berths": "Berth status and allocation",
+            "availability": "Berth availability by category",
+            "vessels": "Vessel registry and authorizations",
+            "portcalls": "Port call lifecycle management",
+            "alerts": "Operational alerts and monitoring",
         },
         "endpoints": {
-            "status": "/sources/status",
             "ports": "/ports",
-            "weather": "/ports/{port_id}/live/weather",
-            "ocean": "/ports/{port_id}/live/ocean",
-            "operations": "/ports/{port_id}/live/operations",
-            "history": "/ports/{port_id}/history/weather",
+            "berths": "/berths",
+            "availability": "/availability",
+            "vessels": "/vessels",
+            "portcalls": "/portcalls",
+            "alerts": "/alerts",
         }
     }
-
-
-# ============================================================================
-# DATA SOURCES STATUS
-# ============================================================================
 
 @router.get("/sources/status", name="Data Sources Status")
 async def get_sources_status():
