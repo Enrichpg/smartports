@@ -31,6 +31,15 @@
 
 ## ✨ Features
 
+### 🔴 **NEW: Real Data Integration (Phase 2)**
+- ✅ **AEMET OpenData** - Spanish meteorological service (JWT authenticated)
+- ✅ **MeteoGalicia** - Galician regional weather & oceanographic forecasts
+- ✅ **Puertos del Estado** - Official port authority sea conditions (waves, wind, currents)
+- ✅ **Open-Meteo Marine API** - Free offshore marine weather (wave data, forecasts)
+- ✅ Intelligent fallback to realistic simulators when APIs unavailable
+- ✅ Full data provenance tracking (source, confidence level, timestamp)
+- ✅ 8 periodic ingestion tasks (4 real APIs + 4 simulator fallbacks)
+
 ### Core Operational
 - ✅ Real-time multipurpose port network visualization (11+ Galician ports)
 - ✅ Berth availability & occupancy management
@@ -100,6 +109,19 @@
 ---
 
 ## 🚀 Quick Start
+
+### 🔴 **NEW: Real APIs Integration Complete!**
+
+SmartPort now includes **4 real-time API integrations** with your AEMET credentials pre-configured:
+
+- 🌡️ **AEMET** (Spanish meteorology) - Every 30 min
+- 🌊 **Puertos del Estado** (Sea conditions) - Every 15 min
+- 🌍 **MeteoGalicia** (Regional weather) - Every 30 min
+- 🌀 **Open-Meteo** (Marine forecasts) - Every 30 min
+
+**👉 See [QUICKSTART_REAL_APIS.md](QUICKSTART_REAL_APIS.md) for complete startup instructions with real data!**
+
+---
 
 ### Prerequisites
 
