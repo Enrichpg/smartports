@@ -12,10 +12,14 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, '/home/enrique/XDEI/SmartPorts')
+# Ensure /app (backend root) is in sys.path when running inside the container
+# or the repo root's backend/ dir when running locally.
+_APP_ROOT = Path(__file__).resolve().parent.parent
+if str(_APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_APP_ROOT))
 
-from backend.scripts.load_seed import SeedGenerator
-from backend.services.orion_service import OrionService
+from scripts.load_seed import SeedGenerator
+from services.orion_service import OrionService
 
 
 def generate_and_save_seed(

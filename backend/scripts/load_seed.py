@@ -12,19 +12,23 @@ import asyncio
 import argparse
 import logging
 import sys
+from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any
 
-# Import builders and catalog
-sys.path.insert(0, '/home/enrique/XDEI/SmartPorts')
+# Ensure /app (backend root) is in sys.path when running inside the container
+# or the repo root's backend/ dir when running locally.
+_APP_ROOT = Path(__file__).resolve().parent.parent
+if str(_APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_APP_ROOT))
 
-from backend.services.ngsi_builders import (
+from services.ngsi_builders import (
     PortBuilder, PortAuthorityBuilder, SeaportFacilitiesBuilder,
     BerthBuilder, VesselBuilder, MasterVesselBuilder, BoatAuthorizedBuilder,
     BoatPlacesAvailableBuilder, BoatPlacesPricingBuilder, DeviceBuilder,
     AirQualityObservedBuilder, WeatherObservedBuilder, AlertBuilder
 )
-from backend.services.orion_service import OrionService
+from services.orion_service import OrionService
 from data.catalogs.galicia_ports import (
     GALICIAN_PORTS, PRICING_CATEGORIES, MASTER_VESSELS, VESSEL_INSTANCES,
     AUTHORIZED_BOATS, SENSOR_DEVICES

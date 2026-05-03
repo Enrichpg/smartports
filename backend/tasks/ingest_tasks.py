@@ -6,17 +6,17 @@ from datetime import datetime, timedelta
 import asyncio
 from typing import Dict, Any
 
-from backend.connectors import AEMETConnector, MeteoGaliciaConnector, PuertosEstadoConnector
-from backend.services.transformers import WeatherTransformer, OceanTransformer, AvailabilityTransformer, AirQualityTransformer
-from backend.services.orion import OrionService
-from backend.simulators import (
+from connectors import AEMETConnector, MeteoGaliciaConnector, PuertosEstadoConnector
+from services.transformers import WeatherTransformer, OceanTransformer, AvailabilityTransformer, AirQualityTransformer
+from services.orion import OrionService
+from simulators import (
     BerthStatusSimulator,
     AvailabilitySimulator,
     VesselSimulator,
     AirQualitySimulator,
 )
-from backend.tasks.celery import celery_app
-from backend.config import settings
+from tasks.celery import celery_app
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -281,10 +281,10 @@ def ingest_availability():
         for port_code in ports:
             try:
                 simulator = AvailabilitySimulator(port_code=port_code)
-                
+
                 for place_type in ["berth", "mooring", "anchorage"]:
                     availability = simulator.get_available_places(place_type)
-                    
+
                     ngsi_entity = AvailabilityTransformer.boat_places_available(
                         port_code=port_code,
                         port_type=place_type,
@@ -292,9 +292,12 @@ def ingest_availability():
                         total_places=availability["total_places"],
                         data_source="simulator"
                     )
-                    
+
                     orion.update_entity(ngsi_entity)
-        
+
+            except Exception as e:
+                logger.error(f"Error processing availability for {port_code}: {str(e)}")
+
         return {"task": "ingest_availability", "status": "completed"}
     
     except Exception as e:
@@ -321,7 +324,7 @@ def ingest_vessel_data():
             try:
                 simulator = VesselSimulator(port_code=port_code)
                 vessels = simulator.get_all_vessels()
-                
+
                 for vessel_data in vessels:
                     ngsi_entity = AvailabilityTransformer.vessel_status(
                         vessel_id=vessel_data["vessel_id"],
@@ -331,9 +334,12 @@ def ingest_vessel_data():
                         current_berth=vessel_data["current_berth"],
                         data_source="simulator"
                     )
-                    
+
                     orion.update_entity(ngsi_entity)
-        
+
+            except Exception as e:
+                logger.error(f"Error processing vessel data for {port_code}: {str(e)}")
+
         return {"task": "ingest_vessel_data", "status": "completed"}
     
     except Exception as e:
@@ -357,11 +363,11 @@ def ingest_air_quality():
     
     try:
         import asyncio
-        from backend.connectors.openmeteo_air_quality_connector import (
+        from connectors.openmeteo_air_quality_connector import (
             OpenMeteoAirQualityConnector,
             GALICIAN_LOCATIONS
         )
-        from backend.services.transformers import AirQualityTransformer
+        from services.transformers import AirQualityTransformer
         
         connector = OpenMeteoAirQualityConnector(cache_ttl=3600)
         orion = OrionService()
@@ -450,7 +456,7 @@ def ingest_marine_weather_openmeteo():
     logger.info("Starting Open-Meteo marine weather ingestion...")
     
     try:
-        from backend.connectors.openmeteo_connector import OpenMeteoConnector, GALICIAN_LOCATIONS
+        from connectors.openmeteo_connector import OpenMeteoConnector, GALICIAN_LOCATIONS
         
         connector = OpenMeteoConnector(cache_ttl=3600)
         orion = OrionService()
@@ -471,7 +477,7 @@ def ingest_marine_weather_openmeteo():
                 
                 if marine_data.get("status") == "success":
                     # Normalize the data
-                    normalized = await connector.normalize_data(marine_data)
+                    normalized = loop.run_until_complete(connector.normalize_data(marine_data))
                     
                     # Transform to NGSI-LD SeaConditionObserved
                     ngsi_entity = OceanTransformer.from_generic(

@@ -263,6 +263,7 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
+      - ./data:/app/data
     networks:
       - smartports_net
     healthcheck:
@@ -305,6 +306,7 @@ services:
     command: celery -A tasks.celery worker --loglevel=info --concurrency=4
     volumes:
       - ./backend:/app
+      - ./data:/app/data
     networks:
       - smartports_net
     healthcheck:

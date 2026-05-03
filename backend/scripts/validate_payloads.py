@@ -8,11 +8,14 @@ Usage:
 
 import json
 import sys
+from pathlib import Path
 from typing import Dict, Any, List
 
-sys.path.insert(0, '/home/enrique/XDEI/SmartPorts')
+_APP_ROOT = Path(__file__).resolve().parent.parent
+if str(_APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_APP_ROOT))
 
-from backend.services.ngsi_builders import (
+from services.ngsi_builders import (
     PortBuilder, PortAuthorityBuilder, SeaportFacilitiesBuilder,
     BerthBuilder, VesselBuilder, MasterVesselBuilder, BoatAuthorizedBuilder,
     BoatPlacesAvailableBuilder, BoatPlacesPricingBuilder, DeviceBuilder,
