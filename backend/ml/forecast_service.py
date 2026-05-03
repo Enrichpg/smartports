@@ -50,21 +50,26 @@ class ForecastService:
         self._models: Dict[str, Any] = {}
 
     def _get_or_train(self, port_id: str) -> Optional[Any]:
-        """Return a cached trained Prophet model, training it on first call."""
+        """Return a cached trained Prophet model, training it on first call.
+        Falls back to None (→ synthetic forecast) on any runtime error."""
         if not PROPHET_AVAILABLE:
             return None
         if port_id not in self._models:
-            df = _generate_training_data(port_id)
-            m = Prophet(
-                yearly_seasonality=True,
-                weekly_seasonality=True,
-                daily_seasonality=True,
-                changepoint_prior_scale=0.05,
-                interval_width=0.80,
-            )
-            m.fit(df)
-            self._models[port_id] = m
-            logger.info("Trained Prophet model for port %s", port_id)
+            try:
+                df = _generate_training_data(port_id)
+                m = Prophet(
+                    yearly_seasonality=True,
+                    weekly_seasonality=True,
+                    daily_seasonality=True,
+                    changepoint_prior_scale=0.05,
+                    interval_width=0.80,
+                )
+                m.fit(df)
+                self._models[port_id] = m
+                logger.info("Trained Prophet model for port %s", port_id)
+            except Exception as e:
+                logger.warning("Prophet unavailable (%s) — using deterministic fallback", e)
+                self._models[port_id] = None
         return self._models[port_id]
 
     def forecast_occupancy(
