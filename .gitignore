@@ -225,3 +225,5 @@ Desktop.ini
 .dmypy.json
 dmypy.json
 .pyre/
+.venv/
+scripts/
