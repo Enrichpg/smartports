@@ -47,11 +47,17 @@ class Settings(BaseSettings):
     # MQTT
     mqtt_broker_url: str = Field(default="mqtt://mosquitto:1883", alias="MQTT_BROKER_URL")
 
+    # Ollama LLM
+    ollama_base_url: str = Field(default="http://ollama:11434", alias="OLLAMA_BASE_URL")
+    ollama_model: str = Field(default="llama2", alias="OLLAMA_MODEL")
+    ollama_timeout: int = Field(default=120, alias="OLLAMA_TIMEOUT")
+
     # Optional features
     enable_prometheus: bool = Field(default=True, alias="ENABLE_PROMETHEUS")
     enable_grafana: bool = Field(default=True, alias="ENABLE_GRAFANA")
     enable_ml_forecasting: bool = Field(default=True, alias="ENABLE_ML_FORECASTING")
     enable_ml_recommendations: bool = Field(default=True, alias="ENABLE_ML_RECOMMENDATIONS")
+    enable_llm_assistant: bool = Field(default=True, alias="ENABLE_LLM_ASSISTANT")
 
     # Real APIs Configuration
     aemet_api_key: str = Field(default="", alias="AEMET_API_KEY")

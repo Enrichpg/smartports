@@ -368,6 +368,24 @@ services:
       retries: 5
       start_period: 30s
 
+  # Ollama: Local LLM inference (Llama 2) for the conversational assistant
+  ollama:
+    image: ollama/ollama:latest
+    container_name: smartports_ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - smartports_net
+    healthcheck:
+      test: curl -f http://localhost:11434/api/tags || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Prometheus: Metrics collection and alerting (optional but recommended)
   prometheus:
     image: prom/prometheus:latest
@@ -431,4 +449,8 @@ volumes:
   
   # Nginx
   nginx_cache:
+    driver: local
+
+  # Ollama
+  ollama_models:
     driver: local

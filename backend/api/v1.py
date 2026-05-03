@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from api.routes import ports, berths, availability, vessels, portcalls, alerts
+from api.routes import forecasts, recommendations, assistant
 from config import settings
 
 router = APIRouter()
@@ -16,6 +17,9 @@ router.include_router(availability.router)
 router.include_router(vessels.router)
 router.include_router(portcalls.router)
 router.include_router(alerts.router)
+router.include_router(forecasts.router)
+router.include_router(recommendations.router)
+router.include_router(assistant.router)
 
 
 @router.get("/", name="API v1 Root")
@@ -38,6 +42,9 @@ async def api_v1_root():
             "alerts": "/api/v1/alerts",
             "realtime_ws": "/api/v1/realtime/ws",
             "admin": "/api/v1/admin",
+            "forecasts": "/api/v1/forecasts/occupancy",
+            "recommendations": "/api/v1/recommendations/berth",
+            "assistant": "/api/v1/assistant/chat",
         },
     }
 
