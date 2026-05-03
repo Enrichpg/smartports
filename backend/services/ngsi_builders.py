@@ -159,13 +159,14 @@ class BerthBuilder(NGSIBuilder):
         status: str = "free",
         occupied_by: Optional[str] = None,
         facility_id: Optional[str] = None,
+        port_id: Optional[str] = None,
         dimensions: Optional[Dict[str, float]] = None,
         updated_at: Optional[str] = None
     ) -> Dict[str, Any]:
         """Build Berth entity"""
         if updated_at is None:
             updated_at = datetime.utcnow().isoformat() + "Z"
-        
+
         entity = {
             "@context": NGSI_CONTEXT,
             "id": berth_id,
@@ -173,14 +174,16 @@ class BerthBuilder(NGSIBuilder):
             "name": NGSIBuilder.property(name),
             "status": NGSIBuilder.property(status, updated_at),
         }
-        
+
         if occupied_by:
             entity["occupiedBy"] = NGSIBuilder.relationship(occupied_by)
         if facility_id:
             entity["belongsTo"] = NGSIBuilder.relationship(facility_id)
+        if port_id:
+            entity["refPort"] = NGSIBuilder.relationship(port_id)
         if dimensions:
             entity["dimensions"] = NGSIBuilder.property(dimensions)
-        
+
         return entity
 
 

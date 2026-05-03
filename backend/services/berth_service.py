@@ -31,21 +31,42 @@ class BerthService:
         BerthStatus.OUT_OF_SERVICE: [BerthStatus.FREE],
     }
 
+    @staticmethod
+    def _normalize_port_id(port_id: str) -> str:
+        """Ensure port_id is a full NGSI-LD URN."""
+        if port_id.startswith("urn:ngsi-ld:"):
+            return port_id
+        return f"urn:ngsi-ld:Port:{port_id}"
+
     async def get_berths_by_port(
         self, port_id: str, limit: int = 100, offset: int = 0
     ) -> tuple[List[BerthResponse], int]:
-        """Get all berths in a port via Port → SeaportFacilities → Berth chain"""
+        """
+        Get all berths in a port.
+        Primary path: filter by refPort relationship (direct, 1-hop).
+        Fallback: Port → hasFacilities → SeaportFacilities → Berth chain.
+        """
+        port_urn = self._normalize_port_id(port_id)
         try:
-            # Get port entity to find its SeaportFacilities
-            port_entity = await orion_client.get_entity(port_id)
-            facility_id = port_entity.get("hasFacilities", {}).get("object")
+            # URNs contain colons — must be quoted in NGSI-LD query language
+            berth_entities = await orion_client.query_entities(
+                entity_type="Berth",
+                filters=f'refPort=="{port_urn}"',
+                limit=1000,
+            )
+            if not berth_entities:
+                # Fallback: resolve via Port → Facility chain
+                port_entity = await orion_client.get_entity(port_urn)
+                facility_id = port_entity.get("hasFacilities", {}).get("object")
+                if not facility_id:
+                    return [], 0
+                return await self.get_berths_by_facility(facility_id, limit=limit, offset=offset)
 
-            if not facility_id:
-                return [], 0
-
-            return await self.get_berths_by_facility(facility_id, limit=limit, offset=offset)
+            total = len(berth_entities)
+            page = berth_entities[offset: offset + limit]
+            return [self._entity_to_berth_response(b) for b in page], total
         except Exception as e:
-            logger.error(f"Error fetching berths for port {port_id}: {e}")
+            logger.error(f"Error fetching berths for port {port_urn}: {e}")
             raise
 
     async def get_berth_by_id(self, berth_id: str) -> BerthResponse:
@@ -161,18 +182,25 @@ class BerthService:
         except ValueError:
             status = BerthStatus.FREE
 
-        _nk = "name" if "name" in entity else "https://uri.etsi.org/ngsi-ld/name"
         facility_id = (entity.get("belongsTo", {}).get("object")
                        or entity.get("partOf", {}).get("object"))
+        port_id = (entity.get("refPort", {}).get("object")
+                   or entity.get("relatedTo", {}).get("object", ""))
+
+        # Seed stores dimensions as a nested dict; older entries use flat attributes
+        dims = entity.get("dimensions", {}).get("value") or {}
+        length = dims.get("length") or entity.get("length", {}).get("value")
+        depth = dims.get("depth") or entity.get("depth", {}).get("value")
+
         return BerthResponse(
             id=entity.get("id", ""),
-            name=entity.get(_nk, {}).get("value", ""),
-            port_id=entity.get("relatedTo", {}).get("object", ""),
+            name=entity.get("name", {}).get("value", ""),
+            port_id=port_id,
             facility_id=facility_id,
             berth_type=entity.get("berthType", {}).get("value", "unknown"),
             status=status,
-            depth=entity.get("depth", {}).get("value"),
-            length=entity.get("length", {}).get("value"),
+            depth=depth,
+            length=length,
             draft_limit=entity.get("draftLimit", {}).get("value"),
             category=entity.get("category", {}).get("value"),
             active_portcall_id=entity.get("activePortCall", {}).get("object"),

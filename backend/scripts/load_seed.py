@@ -133,21 +133,23 @@ class SeedGenerator:
         berth_statuses = ["free", "occupied", "maintenance", "reserved"]
         
         for port_key, port_data in GALICIAN_PORTS.items():
+            port_id = f"urn:ngsi-ld:Port:galicia-{port_key}"
             facility_id = f"urn:ngsi-ld:SeaportFacilities:galicia-{port_key}-main"
-            
+
             # Generate berths for each port
             for berth_num in range(1, port_data["num_berths"] + 1):
                 berth_id = f"urn:ngsi-ld:Berth:galicia-{port_key}-{berth_num:03d}"
                 berth_name = f"{port_data['name']} - Berth {berth_num}"
-                
+
                 # Assign status: most free, some occupied or reserved
                 status = berth_statuses[berth_num % len(berth_statuses)]
-                
+
                 berth_entity = BerthBuilder.build(
                     berth_id=berth_id,
                     name=berth_name,
                     status=status,
                     facility_id=facility_id,
+                    port_id=port_id,
                     dimensions={
                         "length": 150.0 + (berth_num * 5),
                         "width": 25.0,

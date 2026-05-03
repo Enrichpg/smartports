@@ -47,17 +47,21 @@ async def recommend_berth(
         "draft": draft_m,
     }
 
-    # Convert BerthResponse objects to plain dicts for the ML layer
+    # Convert BerthResponse objects to plain dicts for the ML layer.
+    # Seed stores length/depth in the dimensions dict; use sensible defaults
+    # for beam/draft since those aren't in the current seed schema.
     berths_dicts = []
     for b in berths_list:
+        berth_length = b.length or 150.0
+        berth_depth = b.depth or 10.0
         berths_dicts.append({
             "id": b.id,
-            "name": getattr(b, "name", b.id),
-            "category": getattr(b, "category", "general"),
-            "status": getattr(b, "status", "free"),
-            "max_length": getattr(b, "max_length", 50),
-            "max_beam": getattr(b, "max_beam", 15),
-            "max_draft": getattr(b, "max_draft", 8),
+            "name": b.name or b.id,
+            "category": b.category or "general",
+            "status": b.status.value if hasattr(b.status, "value") else str(b.status),
+            "max_length": berth_length,
+            "max_beam": berth_length * 0.18,   # typical beam ≈ 18 % of length
+            "max_draft": berth_depth,
         })
 
     try:

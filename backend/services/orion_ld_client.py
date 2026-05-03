@@ -9,6 +9,24 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
+# NGSI-LD types stored in Orion-LD with the FIWARE namespace prefix.
+# When querying by type, the short name must be expanded to the full URI
+# because the context is applied at ingest time but not at query time
+# unless a Link header is provided.
+_FIWARE_NS = "https://uri.fiware.org/ns/data-models#"
+_FIWARE_TYPES = {
+    "Port", "Berth", "PortAuthority", "SeaportFacilities", "Vessel",
+    "MasterVessel", "BoatAuthorized", "BoatPlacesAvailable", "BoatPlacesPricing",
+    "Device", "WeatherObserved", "AirQualityObserved", "Alert", "PortCall",
+}
+
+
+def _expand_type(entity_type: str) -> str:
+    """Expand short FIWARE type name to full URI if needed."""
+    if entity_type in _FIWARE_TYPES:
+        return f"{_FIWARE_NS}{entity_type}"
+    return entity_type
+
 
 class OrionLDClient:
     """
@@ -73,7 +91,7 @@ class OrionLDClient:
         params = {"limit": limit, "offset": offset}
 
         if entity_type:
-            params["type"] = entity_type
+            params["type"] = _expand_type(entity_type)
         if entity_id:
             params["id"] = entity_id
         if filters:

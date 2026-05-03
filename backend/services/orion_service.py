@@ -110,17 +110,19 @@ class OrionService:
                     return {"success": True, "id": entity_id, "status": create_resp.status_code}
 
                 if create_resp.status_code == 409:
-                    # Entity exists — patch its attributes
-                    attrs = {k: v for k, v in entity.items() if k not in ("id", "type", "@context")}
-                    patch_resp = await client.patch(
+                    # Entity exists.
+                    # POST /attrs appends new attributes AND updates existing ones.
+                    # PATCH /attrs only updates existing — cannot add new attrs.
+                    attrs = {k: v for k, v in entity.items() if k not in ("id", "type")}
+                    post_resp = await client.post(
                         f"{self.base_url}/ngsi-ld/v1/entities/{entity_id}/attrs",
                         json=attrs,
                         headers=self.headers,
                     )
-                    if patch_resp.status_code in (204, 207):
-                        return {"success": True, "id": entity_id, "status": patch_resp.status_code}
-                    logger.error("PATCH attrs %s: %s %s", entity_id, patch_resp.status_code, patch_resp.text)
-                    return {"success": False, "status": patch_resp.status_code, "error": patch_resp.text}
+                    if post_resp.status_code in (204, 207):
+                        return {"success": True, "id": entity_id, "status": post_resp.status_code}
+                    logger.error("POST attrs %s: %s %s", entity_id, post_resp.status_code, post_resp.text)
+                    return {"success": False, "status": post_resp.status_code, "error": post_resp.text}
 
                 logger.error("POST entity %s: %s %s", entity_id, create_resp.status_code, create_resp.text)
                 return {"success": False, "status": create_resp.status_code, "error": create_resp.text}

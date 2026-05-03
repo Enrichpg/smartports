@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     # FIWARE
     orion_base_url: str = Field(default="http://orion-ld:1026", alias="ORION_BASE_URL")
     quantumleap_base_url: str = Field(default="http://quantumleap:8668", alias="QUANTUMLEAP_BASE_URL")
-    fiware_service: str = Field(default="smartports", alias="FIWARE_SERVICE")
-    fiware_service_path: str = Field(default="/Galicia", alias="FIWARE_SERVICE_PATH")
+    fiware_service: str = Field(default="smartport", alias="FIWARE_SERVICE")
+    fiware_service_path: str = Field(default="/galicia", alias="FIWARE_SERVICE_PATH")
 
     # Redis
     redis_url: str = Field(default="redis://redis:6379/0", alias="REDIS_URL")
