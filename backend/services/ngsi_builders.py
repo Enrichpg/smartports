@@ -7,14 +7,28 @@ from datetime import datetime
 import json
 
 # Global NGSI-LD @context
+# Use only the ETSI core context (always cached in Orion-LD) plus an inline
+# vocabulary dict. Avoid external URLs that Orion-LD must download at runtime.
 NGSI_CONTEXT = [
-    "https://www.w3.org/2019/wot/json-schema",
-    "https://smartdatamodels.org/context.jsonld",
-    "https://schema.org/",
+    "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
     {
+        "schema": "https://schema.org/",
         "smartdatamodels": "https://smartdatamodels.org/ontology/",
-        "ngsi": "https://uri.etsi.org/ngsi-ld/",
-        "fiware": "https://fiware.github.io/data-models/context.jsonld"
+        "fiware": "https://uri.fiware.org/ns/data-models#",
+        "Port": "fiware:Port",
+        "Berth": "fiware:Berth",
+        "Vessel": "fiware:Vessel",
+        "PortCall": "fiware:PortCall",
+        "PortAuthority": "fiware:PortAuthority",
+        "SeaportFacilities": "fiware:SeaportFacilities",
+        "MasterVessel": "fiware:MasterVessel",
+        "BoatAuthorized": "fiware:BoatAuthorized",
+        "BoatPlacesAvailable": "fiware:BoatPlacesAvailable",
+        "BoatPlacesPricing": "fiware:BoatPlacesPricing",
+        "Device": "https://uri.fiware.org/ns/data-models#Device",
+        "WeatherObserved": "fiware:WeatherObserved",
+        "AirQualityObserved": "fiware:AirQualityObserved",
+        "Alert": "fiware:Alert",
     }
 ]
 

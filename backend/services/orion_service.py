@@ -95,31 +95,38 @@ class OrionService:
     async def upsert_entity(
         self,
         entity: Dict[str, Any],
-        options: str = "keyValues,upsert"
     ) -> Dict[str, Any]:
-        """Upsert NGSI-LD entity (create if not exists, update if exists)"""
+        """Upsert NGSI-LD entity: POST to create, PATCH attrs if 409 (already exists)."""
+        entity_id = entity.get("id")
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                url = f"{self.base_url}/ngsi-ld/v1/entities"
-                
-                logger.info(f"Upserting entity {entity.get('id')}")
-                
-                response = await client.post(
-                    url,
+                # Try to create first
+                create_resp = await client.post(
+                    f"{self.base_url}/ngsi-ld/v1/entities",
                     json=entity,
                     headers=self.headers,
-                    params={"options": options}
                 )
-                
-                if response.status_code in [201, 204, 200]:
-                    logger.info(f"Entity {entity.get('id')} upserted successfully")
-                    return {"success": True, "id": entity.get('id'), "status": response.status_code}
-                else:
-                    logger.error(f"Error upserting entity: {response.status_code} - {response.text}")
-                    return {"success": False, "status": response.status_code, "error": response.text}
-                    
+                if create_resp.status_code in (201, 204):
+                    return {"success": True, "id": entity_id, "status": create_resp.status_code}
+
+                if create_resp.status_code == 409:
+                    # Entity exists — patch its attributes
+                    attrs = {k: v for k, v in entity.items() if k not in ("id", "type", "@context")}
+                    patch_resp = await client.patch(
+                        f"{self.base_url}/ngsi-ld/v1/entities/{entity_id}/attrs",
+                        json=attrs,
+                        headers=self.headers,
+                    )
+                    if patch_resp.status_code in (204, 207):
+                        return {"success": True, "id": entity_id, "status": patch_resp.status_code}
+                    logger.error("PATCH attrs %s: %s %s", entity_id, patch_resp.status_code, patch_resp.text)
+                    return {"success": False, "status": patch_resp.status_code, "error": patch_resp.text}
+
+                logger.error("POST entity %s: %s %s", entity_id, create_resp.status_code, create_resp.text)
+                return {"success": False, "status": create_resp.status_code, "error": create_resp.text}
+
         except Exception as e:
-            logger.error(f"Exception upserting entity: {e}")
+            logger.error("Exception upserting entity %s: %s", entity_id, e)
             return {"success": False, "error": str(e)}
     
     async def get_entity(self, entity_id: str) -> Dict[str, Any]:
@@ -240,31 +247,46 @@ class OrionService:
     async def batch_upsert_entities(
         self,
         entities: List[Dict[str, Any]],
-        dry_run: bool = False
+        dry_run: bool = False,
+        chunk_size: int = 50,
     ) -> Dict[str, Any]:
-        """Batch upsert multiple entities with dry-run capability"""
-        results = {
-            "total": len(entities),
-            "successful": 0,
-            "failed": 0,
-            "dry_run": dry_run,
-            "details": []
-        }
-        
-        for entity in entities:
-            if dry_run:
-                logger.info(f"[DRY-RUN] Would upsert {entity.get('id')}")
-                results["details"].append({
-                    "id": entity.get('id'),
-                    "status": "dry-run"
-                })
-            else:
-                result = await self.upsert_entity(entity)
-                if result.get("success"):
-                    results["successful"] += 1
+        """
+        Batch upsert using POST /ngsi-ld/v1/entityOperations/upsert (native NGSI-LD batch).
+        Falls back to individual upsert_entity per entity on chunk failure.
+        """
+        results = {"total": len(entities), "successful": 0, "failed": 0, "dry_run": dry_run}
+
+        if dry_run:
+            for entity in entities:
+                logger.info("[DRY-RUN] Would upsert %s", entity.get("id"))
+            results["successful"] = len(entities)
+            return results
+
+        batch_url = f"{self.base_url}/ngsi-ld/v1/entityOperations/upsert"
+        headers = {**self.headers, "Content-Type": "application/json"}
+
+        for i in range(0, len(entities), chunk_size):
+            chunk = entities[i:i + chunk_size]
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(batch_url, json=chunk, headers=headers)
+                if resp.status_code in (204, 201):
+                    results["successful"] += len(chunk)
+                    logger.info("Batch chunk %d–%d: OK", i, i + len(chunk))
                 else:
-                    results["failed"] += 1
-                results["details"].append(result)
-        
-        logger.info(f"Batch upsert completed: {results['successful']} successful, {results['failed']} failed")
+                    logger.warning(
+                        "Batch chunk %d–%d failed (%s), falling back to individual upserts: %s",
+                        i, i + len(chunk), resp.status_code, resp.text[:200],
+                    )
+                    for entity in chunk:
+                        r = await self.upsert_entity(entity)
+                        if r.get("success"):
+                            results["successful"] += 1
+                        else:
+                            results["failed"] += 1
+            except Exception as e:
+                logger.error("Batch chunk %d–%d exception: %s", i, i + len(chunk), e)
+                results["failed"] += len(chunk)
+
+        logger.info("Batch upsert completed: %d successful, %d failed", results["successful"], results["failed"])
         return results

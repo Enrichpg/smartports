@@ -11,6 +11,7 @@ Usage:
 import asyncio
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -445,8 +446,8 @@ async def main():
     )
     parser.add_argument(
         "--orion-url",
-        default="http://localhost:1026",
-        help="Orion-LD base URL"
+        default=os.environ.get("ORION_BASE_URL", "http://orion-ld:1026"),
+        help="Orion-LD base URL (default: $ORION_BASE_URL or http://orion-ld:1026)"
     )
     parser.add_argument(
         "--service",
