@@ -3,9 +3,9 @@
  * Bridges WebSocket events to UI state and visualizations
  */
 
-import { wsManager } from './services/websocket.js';
-import { apiClient } from './services/api.js';
-import { store } from './store/store.js';
+import { wsManager } from './websocket.js';
+import { apiClient } from './api.js';
+import { store } from '../store/store.js';
 
 class WebSocketIntegrator {
   constructor(map2d = null, map3d = null) {
