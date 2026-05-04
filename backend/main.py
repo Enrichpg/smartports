@@ -56,6 +56,14 @@ async def lifespan(app: FastAPI):
         )
         set_celery(celery)
         logger.info("Celery worker initialized")
+
+        # Register simulation tasks
+        try:
+            from tasks.simulation_tasks import register_simulation_tasks
+            register_simulation_tasks()
+            logger.info("Simulation tasks registered with Celery Beat")
+        except Exception as e:
+            logger.warning(f"Simulation tasks registration failed: {e}")
     except Exception as e:
         logger.warning(f"Celery initialization failed: {e}")
     
