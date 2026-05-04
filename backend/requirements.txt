@@ -25,6 +25,7 @@ requests==2.31.0
 
 # External APIs
 openmeteo-requests==1.0.1
+openmeteo-sdk==1.26.0
 requests-cache==1.1.1
 retry-requests==2.0.0
 
