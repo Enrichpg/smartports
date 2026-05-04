@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — PRD.md
 
-**Version:** 1.0  
-**Date:** 2026-04-27  
-**Status:** Approved  
+**Version:** 1.1  
+**Date:** 2026-05-04  
+**Status:** Approved with Synthetic Data Ecosystem  
 **Product Owner:** SmartPort Project Lead
 
 ---
@@ -770,6 +770,7 @@ The following are NOT included in Phase 1 but may be future enhancements:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-27 | Product Lead | Initial comprehensive PRD |
+| 1.1 | 2026-05-04 | Claude + Team | Added Synthetic Maritime Ecosystem (4500 vessels, 90-day historical data for ML training) |
 
 ---
 

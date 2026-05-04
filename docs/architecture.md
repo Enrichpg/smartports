@@ -1,8 +1,8 @@
 # SmartPort Galicia — System Architecture
 
-**Version:** 1.3 (Iteración 9 - WebSocket & Real-Time)
+**Version:** 1.4 (Iteración 10 - Synthetic Maritime Ecosystem)
 **Date:** 2026-05-04
-**Status:** Active with Real-Time Layer
+**Status:** Active with Real-Time Layer + Synthetic Data Generation
 **Scope:** Multipurpose Galician port network (11+ ports, expandable to 128+)
 
 ---
@@ -55,17 +55,20 @@ The architecture is designed for **real-time first**, **multipurpose scalability
 │  - FastAPI server (REST API, WebSocket, business logic)        │
 │  - Domain services (berth management, port calls, etc.)        │
 │  - Integrations (Orion queries, QL queries, alerts)            │
-│  - Redis (caching, session store)                              │
+│  - Synthetic Maritime Ecosystem generator (4500 vessels)        │
+│  - Simulation engine (state machines, observations)            │
+│  - Redis (caching, session store, Celery queue)                │
 │  - PostgreSQL (operational DB, transactional integrity)        │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ Layer 4: Intelligence & ML                                     │
-│  - Celery workers (async ML tasks)                             │
+│ Layer 4: Intelligence, Simulation & ML                         │
+│  - Celery workers (async ML + simulation tasks)                │
+│  - Simulation tick task (5-min intervals: vessel state + obs)  │
 │  - Prophet (occupancy forecasting, Prophet models)             │
 │  - scikit-learn (berth recommendation engine)                   │
 │  - Ollama (local LLM for chat interface)                        │
-│  - Redis (task queue)                                          │
+│  - Redis (task queue, simulation scheduling)                   │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -127,8 +130,8 @@ Optional:
 | **mongodb** | Document Store | Flexible document storage (metadata, configs, logs) | 27017 |
 | **postgres** | Operational DB | Transactional data (operations, users, sessions), referential integrity | 5432 |
 | **redis** | Cache & Queue | Session cache, task queue for Celery, temporary data | 6379 |
-| **backend** | Core API & Logic | REST API, domain services, WebSocket, Orion/QL integration, alert engine | 8000 (HTTP), 8001 (WS) |
-| **celery-worker** | Async Processing | ML forecasting, recommendations, background jobs, scheduled tasks | N/A (broker-based) |
+| **backend** | Core API & Logic | REST API, domain services, WebSocket, Orion/QL integration, alert engine, synthetic data generation | 8000 (HTTP), 8001 (WS) |
+| **celery-worker** | Async Processing | ML forecasting, recommendations, background jobs, simulation tick (5-min interval: vessel state + observations) | N/A (broker-based) |
 | **nginx** | Reverse Proxy | SSL/TLS termination, rate limiting, request routing, WebSocket upgrade | 80 (HTTP), 443 (HTTPS) |
 | **grafana** | Analytics & Dashboards | QL/TS queries, historical analytics, embedded in frontend | 3000 (HTTP) |
 | **prometheus** (optional) | Metrics | Scrape metrics from services, alerting infrastructure | 9090 (HTTP) |
@@ -412,9 +415,13 @@ Files Created:
   - backend/connectors/ (AEMET, MeteoGalicia, PuertosDelEstado)
   - backend/services/transformers/ (Weather, Ocean, Availability)
   - backend/simulators/ (Berth, Availability, Vessel, AirQuality)
+  - backend/generators/ (NEW: Synthetic maritime ecosystem, 8 modules)
+  - backend/services/simulation_engine.py (NEW: State machine simulation)
+  - backend/tasks/simulation_tasks.py (NEW: Celery periodic tick task)
   - backend/tasks/ingest_tasks.py (Celery task definitions)
   - backend/scripts/setup_quantumleap_subscriptions.py (Historical setup)
   - docs/REAL_APIS_INGESTION.md (Comprehensive guide)
+  - docs/SYNTHETIC_DATA_ECOSYSTEM.md (NEW: Synthetic data specification)
 
 Configuration (.env):
   - AEMET_API_KEY: API key for AEMET OpenData

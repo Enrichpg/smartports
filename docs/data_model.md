@@ -1,19 +1,20 @@
 # SmartPort Galicia — Data Model (NGSI-LD)
 
-**Version:** 1.0  
-**Date:** 2026-04-27  
-**Standard:** NGSI-LD v1.6  
-**Status:** Active
+**Version:** 1.1  
+**Date:** 2026-05-04  
+**Standard:** NGSI-LD v1.6 + Synthetic Data Extensions  
+**Status:** Active with Synthetic Maritime Ecosystem
 
 ---
 
 ## Executive Summary
 
-The SmartPort Galicia data model defines **15 NGSI-LD entities** organized into three groups:
+The SmartPort Galicia data model defines **15+ NGSI-LD entities** organized into four groups:
 
 1. **Infrastructure (Static):** Port, PortAuthority, SeaportFacilities, MasterVessel, BoatAuthorized, BoatPlacesPricing
 2. **Operations (Dynamic):** Berth, Vessel, PortCall, Operation, BoatPlacesAvailable
 3. **Observations & Alerts (Dynamic):** Device, AirQualityObserved, WeatherObserved, Alert
+4. **Synthetic Data (Generated Ecosystem):** 4500 realistic Vessel instances, 320 heterogeneous Berths, 180 Sensor Devices with periodic observations, 90-day historical movement records
 
 All entities follow:
 - **Official Smart Data Models** from https://smartdatamodels.org
