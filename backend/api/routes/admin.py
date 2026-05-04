@@ -7,6 +7,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from datetime import datetime, timedelta
+from pydantic import BaseModel
 
 from cache.redis_service import get_cache, CacheKeys
 from audit.service import get_audit_service
@@ -401,3 +402,73 @@ async def get_realtime_health():
         },
         "overall_status": "healthy",  # Can be enhanced with more sophisticated logic
     }
+
+
+# =============================================================================
+# Synthetic Data Endpoints
+# =============================================================================
+
+class RegenerateSyntheticDataRequest(BaseModel):
+    """Request model for synthetic data regeneration."""
+    volume: str = "xlarge"
+    historical_days: int = 90
+    seed: Optional[int] = None
+    purge_first: bool = False
+
+
+@router.post("/synthetic/regenerate", name="Regenerate Synthetic Data")
+async def regenerate_synthetic_data(request: RegenerateSyntheticDataRequest):
+    """
+    Regenerate the complete synthetic maritime ecosystem.
+
+    Request body:
+    - volume: small|medium|large|xlarge (default: xlarge for 4500 vessels, 320 berths)
+    - historical_days: Number of days of historical data (default: 90)
+    - seed: Random seed for reproducibility (default: 42)
+    - purge_first: Delete existing entities before regenerating (default: false)
+    """
+    try:
+        from generators.synthetic_data_generator import SyntheticDataGenerator
+        from generators.scenario_config import ScenarioConfig
+        from services.orion_service import OrionService
+
+        logger.info(f"Regenerating synthetic data: volume={request.volume}, historical_days={request.historical_days}")
+
+        # Generate entities
+        config = ScenarioConfig(
+            volume=request.volume,
+            historical_days=request.historical_days,
+            seed=request.seed or 42
+        )
+        generator = SyntheticDataGenerator(config)
+        entities = generator.generate_all()
+
+        # Load to Orion-LD
+        orion = OrionService()
+        loaded_count = 0
+
+        for entity in entities:
+            try:
+                orion.upsert_entity(entity)
+                loaded_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to load entity {entity.get('id')}: {e}")
+
+        logger.info(f"Successfully loaded {loaded_count}/{len(entities)} entities")
+
+        return {
+            "status": "completed",
+            "message": f"Successfully regenerated {loaded_count} entities",
+            "entities_total": len(entities),
+            "entities_loaded": loaded_count,
+            "volume": request.volume,
+            "historical_days": request.historical_days,
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        }
+
+    except ValueError as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid configuration: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error regenerating synthetic data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

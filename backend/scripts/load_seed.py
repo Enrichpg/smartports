@@ -461,7 +461,24 @@ async def main():
         default="/galicia",
         help="FIWARE ServicePath"
     )
-    
+    parser.add_argument(
+        "--synthetic-volume",
+        choices=["small", "medium", "large", "xlarge"],
+        default=None,
+        help="Generate synthetic maritime data (volume: small/medium/large/xlarge)"
+    )
+    parser.add_argument(
+        "--synthetic-xlarge",
+        action="store_true",
+        help="Shortcut for --synthetic-volume xlarge (4500 vessels, 320 berths)"
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducibility (default: 42)"
+    )
+
     args = parser.parse_args()
     
     # Initialize Orion service
@@ -470,15 +487,46 @@ async def main():
         fiware_service=args.service,
         fiware_service_path=args.service_path
     )
-    
-    # Generate and load seed
-    generator = SeedGenerator(orion)
-    generator.generate_all()
-    
-    await generator.load_to_orion(
-        dry_run=args.dry_run,
-        upsert=args.upsert
-    )
+
+    # Handle synthetic data generation if requested
+    synthetic_volume = args.synthetic_xlarge and "xlarge" or args.synthetic_volume
+
+    if synthetic_volume:
+        logger.info(f"Generating synthetic maritime data (volume={synthetic_volume})...")
+        try:
+            from generators.synthetic_data_generator import SyntheticDataGenerator
+            from generators.scenario_config import ScenarioConfig
+
+            config = ScenarioConfig(volume=synthetic_volume, historical_days=90, seed=args.seed)
+            syn_generator = SyntheticDataGenerator(config)
+            entities = syn_generator.generate_all()
+
+            logger.info(f"Generated {len(entities)} synthetic entities")
+
+            # Load to Orion
+            if not args.dry_run:
+                loaded = 0
+                for entity in entities:
+                    try:
+                        orion.upsert_entity(entity)
+                        loaded += 1
+                    except Exception as e:
+                        logger.warning(f"Failed to load {entity.get('id')}: {e}")
+                logger.info(f"Loaded {loaded}/{len(entities)} synthetic entities to Orion-LD")
+            else:
+                logger.info(f"[DRY RUN] Would load {len(entities)} entities")
+        except Exception as e:
+            logger.error(f"Error generating synthetic data: {e}")
+            sys.exit(1)
+    else:
+        # Generate and load standard seed
+        generator = SeedGenerator(orion)
+        generator.generate_all()
+
+        await generator.load_to_orion(
+            dry_run=args.dry_run,
+            upsert=args.upsert
+        )
 
 
 if __name__ == "__main__":
