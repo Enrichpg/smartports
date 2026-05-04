@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(
     tags=["realtime"],
-    prefix="/realtime",
 )
 
 

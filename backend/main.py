@@ -126,7 +126,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health_router)
 app.include_router(api_v1_router, prefix=settings.api_v1_prefix)
-app.include_router(realtime.router, prefix=settings.api_v1_prefix)
+app.include_router(realtime.router, prefix=f"{settings.api_v1_prefix}/realtime")
 app.include_router(admin.router, prefix=settings.api_v1_prefix)
 
 
