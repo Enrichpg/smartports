@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.env|env$\")",
+      "Bash(grep -E \"\\\\.\\(md|yml|py\\)$\")",
+      "Bash(git mv *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Read(//home/enrique/**)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(docker compose *)",
+      "Bash(docker network *)",
+      "Bash(docker volume *)",
+      "Bash(curl -s http://localhost:8668/version)",
+      "Bash(curl -s http://localhost/health)",
+      "Bash(curl -s http://localhost/api/v1/)",
+      "Bash(curl -s http://localhost/api/v1/ports)",
+      "Bash(curl -s http://localhost:8000/health/detailed)",
+      "Bash(python backend/scripts/load_seed.py --dry-run)",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('data/seed/galicia_entities.json'\\)\\); print\\(f'Entities: {len\\(d\\)}'\\); print\\('First entity type:', d[0].get\\('type', 'N/A'\\)\\); print\\('Keys:', list\\(d[0].keys\\(\\)\\)[:6]\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('data/seed/galicia_entities.json'\\)\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s http://localhost:1026/version)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:1026/ngsi-ld/v1/entities?limit=1\" -H \"NGSILD-Tenant: smartports\")",
+      "Bash(curl -sv \"http://localhost:1026/ngsi-ld/v1/entities?limit=1\" -H \"NGSILD-Tenant: smartports\")",
+      "Bash(curl -s \"http://localhost:1026/ngsi-ld/v1/entities?limit=5&type=Port\" -H \"NGSILD-Tenant: smartports\")",
+      "Bash(curl -s \"http://localhost/api/v1/ports/galicia-a-coruna/summary\")",
+      "Bash(curl -s \"http://localhost/api/v1/berths?limit=3\")",
+      "Bash(curl -s \"http://localhost/api/v1/ports/urn:ngsi-ld:Port:galicia-a-coruna/summary\")",
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/alerts?port_id=100&limit=100\")",
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/availability\")",
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/alerts\")"
+    ]
+  }
+}

@@ -74,6 +74,13 @@ celery_app.conf.beat_schedule = {
         "schedule": settings.air_quality_update_frequency,  # 1 hour default
         "options": {"queue": "real_data"}
     },
+    
+    # Real-time event broadcasting (demo/simulator)
+    "emit-demo-events-every-10sec": {
+        "task": "smartport.emit_demo_events",
+        "schedule": 10.0,  # Every 10 seconds
+        "options": {"queue": "realtime"}
+    },
 }
 
 

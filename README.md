@@ -8,9 +8,9 @@
 
 **SmartPort Galicia** is a FIWARE-based, NGSI-LD-compliant platform for managing multiple Galician ports as a unified system. It combines real-time operational control, historical analytics, machine learning forecasting, and intelligent decision support.
 
-**Status:** Active — Iteration 2 complete (real-time infrastructure, real API integrations)
-**Version:** 1.2
-**Last Updated:** 2026-04-28
+**Status:** Active — Iteration 9 complete (WebSocket live events, 3D visualization, robust frontend integration)
+**Version:** 1.3
+**Last Updated:** 2026-05-04
 
 ---
 

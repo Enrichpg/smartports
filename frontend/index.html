@@ -23,7 +23,7 @@
     <script>
         window.ENV = {
             BACKEND_URL: window.location.protocol + '//' + window.location.host + '/api/v1',
-            WS_URL: (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws',
+            WS_URL: (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/api/v1/realtime/ws',
             DEBUG: false
         };
     </script>
@@ -40,6 +40,9 @@
     
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Three.js for 3D Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <!-- Main Application Module -->
     <script type="module" src="/src/app.js"></script>

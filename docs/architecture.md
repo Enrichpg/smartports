@@ -1,8 +1,8 @@
 # SmartPort Galicia — System Architecture
 
-**Version:** 1.2
-**Date:** 2026-04-28
-**Status:** Active
+**Version:** 1.3 (Iteración 9 - WebSocket & Real-Time)
+**Date:** 2026-05-04
+**Status:** Active with Real-Time Layer
 **Scope:** Multipurpose Galician port network (11+ ports, expandable to 128+)
 
 ---

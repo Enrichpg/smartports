@@ -1,10 +1,17 @@
 /**
  * Main Application Controller
- * Handles routing, page switching, and app lifecycle
+ * 
+ * Handles:
+ * - Routing between pages
+ * - WebSocket integration
+ * - Real-time event handling
+ * - 2D and 3D visualization setup
  */
 
 import { store } from './store/store.js';
 import { wsManager } from './services/websocket.js';
+import WebSocketIntegrator from './services/websocket-integrator.js';
+import Map3D from './components/map3d.js';
 import { DashboardPage } from './pages/dashboard.js';
 import { PortDetailPage } from './pages/port-detail.js';
 import { AlertsPage } from './pages/alerts.js';
@@ -14,33 +21,59 @@ export class SmartPortApp {
   constructor(containerId = 'app') {
     this.containerId = containerId;
     this.currentPage = null;
+    this.map3d = null;
+    this.wsIntegrator = null;
+    
     this.pages = {
       dashboard: DashboardPage,
       'port-detail': PortDetailPage,
       alerts: AlertsPage,
       operations: OperationsPage,
     };
+    
+    this.debug = window.ENV?.DEBUG || false;
   }
 
   async init() {
-    // Initialize WebSocket connection
-    wsManager.connect();
+    try {
+      console.log('[SmartPortApp] Initializing...');
 
-    // Set up route handling
-    this.setupRouting();
+      // Initialize 3D visualization if container exists
+      const map3dContainer = document.getElementById('map-3d-container');
+      if (map3dContainer) {
+        this.map3d = new Map3D('map-3d-container');
+        console.log('[SmartPortApp] 3D map initialized');
+      }
 
-    // Mount initial page
-    this.route();
+      // Initialize WebSocket integrator
+      this.wsIntegrator = new WebSocketIntegrator(null, this.map3d);
+      await this.wsIntegrator.init();
 
-    // Handle back/forward navigation
-    window.addEventListener('popstate', () => this.route());
+      // Set up route handling
+      this.setupRouting();
 
-    // Handle sidebar navigation
-    this.setupNavigation();
+      // Mount initial page
+      this.route();
+
+      // Handle back/forward navigation
+      window.addEventListener('popstate', () => this.route());
+
+      // Handle sidebar navigation
+      this.setupNavigation();
+
+      // Handle 3D object selection events
+      window.addEventListener('3d:objectSelected', (e) => {
+        this._handle3DObjectSelected(e.detail);
+      });
+
+      console.log('[SmartPortApp] Initialization complete');
+    } catch (error) {
+      console.error('[SmartPortApp] Initialization error:', error);
+    }
   }
 
   setupRouting() {
-    // This will be called whenever route changes
+    // Route change handler
   }
 
   route() {
@@ -60,37 +93,45 @@ export class SmartPortApp {
   }
 
   async loadPage(pageName, params = {}) {
-    // Save current page for cleanup
-    const oldPage = this.currentPage;
+    try {
+      // Save current page for cleanup
+      const oldPage = this.currentPage;
 
-    // Cleanup old page
-    if (oldPage) {
-      oldPage.destroy();
+      // Cleanup old page
+      if (oldPage) {
+        oldPage.destroy();
+      }
+
+      // Create new page instance
+      let pageInstance;
+
+      switch (pageName) {
+        case 'port-detail':
+          pageInstance = new PortDetailPage(params.portId);
+          break;
+        case 'alerts':
+          pageInstance = new AlertsPage();
+          break;
+        case 'operations':
+          pageInstance = new OperationsPage();
+          break;
+        default:
+          pageInstance = new DashboardPage();
+      }
+
+      // Mount page
+      await pageInstance.mount(this.containerId);
+      this.currentPage = pageInstance;
+
+      // Update page state
+      store.setUIState({ currentPage: pageName });
+
+      if (this.debug) {
+        console.log('[SmartPortApp] Page loaded:', pageName);
+      }
+    } catch (error) {
+      console.error('[SmartPortApp] Error loading page:', error);
     }
-
-    // Create new page instance
-    let pageInstance;
-
-    switch (pageName) {
-      case 'port-detail':
-        pageInstance = new PortDetailPage(params.portId);
-        break;
-      case 'alerts':
-        pageInstance = new AlertsPage();
-        break;
-      case 'operations':
-        pageInstance = new OperationsPage();
-        break;
-      default:
-        pageInstance = new DashboardPage();
-    }
-
-    // Mount page
-    await pageInstance.mount(this.containerId);
-    this.currentPage = pageInstance;
-
-    // Update page state
-    store.setUIState({ currentPage: pageName });
   }
 
   setupNavigation() {
@@ -130,11 +171,32 @@ export class SmartPortApp {
     this.route();
   }
 
+  /**
+   * Handle 3D object selection
+   */
+  _handle3DObjectSelected(userData) {
+    if (this.debug) {
+      console.log('[SmartPortApp] 3D object selected:', userData);
+    }
+
+    // Dispatch custom event for pages to listen to
+    window.dispatchEvent(new CustomEvent('entity:selected', {
+      detail: userData
+    }));
+  }
+
   destroy() {
     if (this.currentPage) {
       this.currentPage.destroy();
     }
-    wsManager.disconnect();
+    
+    if (this.wsIntegrator) {
+      this.wsIntegrator.disconnect();
+    }
+    
+    if (this.map3d) {
+      this.map3d.destroy();
+    }
   }
 }
 
