@@ -13,6 +13,7 @@ import {
   ErrorBanner,
   LoadingSkeleton,
   EmptyState,
+  updateWsBadge,
 } from '../components/base.js';
 import {
   PortCard,
@@ -227,44 +228,52 @@ export class DashboardPage {
   }
 
   initializeWebSocket() {
-    wsManager.connect();
+    // wsManager.connect() is called once in app.js — no duplicate call here
 
-    // Subscribe to real-time events
-    wsManager.subscribe('berth.updated', (data) => {
-      store.updateBerth(data.id, data);
-      if (this.mapController && data.port_id) {
-        const port = store.getPort(data.port_id);
-        if (port) {
-          this.mapController.updatePort(port);
-        }
+    wsManager.subscribe('berth.updated', ({ payload, scope }) => {
+      const berthId = scope?.berth_id || payload?.id;
+      if (berthId) store.updateBerth(berthId, payload);
+      if (this.mapController && scope?.port_id) {
+        const port = store.getPort(scope.port_id);
+        if (port) this.mapController.updatePort(port);
+      }
+      this.updateChart();
+    });
+
+    wsManager.subscribe('alert.created', ({ payload }) => {
+      if (payload) store.addAlert(payload);
+    });
+
+    wsManager.subscribe('portcall.created', ({ payload }) => {
+      if (payload) store.addPortCall(payload);
+    });
+
+    wsManager.subscribe('availability.updated', ({ payload }) => {
+      if (payload) {
+        store.setAvailability(payload);
+        this.renderAvailability();
       }
     });
 
-    wsManager.subscribe('alert.created', (data) => {
-      store.addAlert(data);
-    });
-
-    wsManager.subscribe('portcall.created', (data) => {
-      store.addPortCall(data);
-    });
-
-    wsManager.subscribe('availability.updated', (data) => {
-      store.setAvailability(data);
-      this.renderAvailability();
+    wsManager.subscribe('port.summary.updated', ({ payload }) => {
+      if (payload) this.updateLastUpdate();
     });
 
     wsManager.subscribe('connected', () => {
       store.setConnectionStatus('connected');
+      updateWsBadge('connected');
       this.updateConnectionStatus();
     });
 
     wsManager.subscribe('disconnected', () => {
       store.setConnectionStatus('disconnected');
+      updateWsBadge('disconnected');
       this.updateConnectionStatus();
     });
 
     wsManager.subscribe('reconnecting', () => {
       store.setConnectionStatus('connecting');
+      updateWsBadge('reconnecting');
       this.updateConnectionStatus();
     });
   }

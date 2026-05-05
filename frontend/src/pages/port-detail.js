@@ -186,32 +186,30 @@ export class PortDetailPage {
   }
 
   initializeWebSocket() {
-    wsManager.subscribe('berth.updated', (data) => {
-      if (data.port_id === this.portId) {
-        store.updateBerth(data.id, data);
-        this.renderBerths();
-      }
+    wsManager.subscribe('berth.updated', ({ payload, scope }) => {
+      if (scope?.port_id !== this.portId) return;
+      const berthId = scope?.berth_id || payload?.id;
+      if (berthId) store.updateBerth(berthId, payload);
+      this.renderBerths();
     });
 
-    wsManager.subscribe('portcall.updated', (data) => {
-      if (data.port_id === this.portId) {
-        store.updatePortCall(data.id, data);
-        this.renderPortCalls();
-      }
+    wsManager.subscribe('portcall.updated', ({ payload, scope }) => {
+      if (scope?.port_id !== this.portId) return;
+      const callId = scope?.portcall_id || payload?.id;
+      if (callId) store.updatePortCall(callId, payload);
+      this.renderPortCalls();
     });
 
-    wsManager.subscribe('alert.created', (data) => {
-      if (data.port_id === this.portId) {
-        store.addAlert(data);
-        this.renderAlerts();
-      }
+    wsManager.subscribe('alert.created', ({ payload, scope }) => {
+      if (scope?.port_id !== this.portId) return;
+      if (payload) store.addAlert(payload);
+      this.renderAlerts();
     });
 
-    wsManager.subscribe('availability.updated', (data) => {
-      if (data.port_id === this.portId) {
-        store.setAvailability(data);
-        this.renderAvailability();
-      }
+    wsManager.subscribe('availability.updated', ({ payload, scope }) => {
+      if (scope?.port_id !== this.portId) return;
+      if (payload) store.setAvailability(payload);
+      this.renderAvailability();
     });
   }
 

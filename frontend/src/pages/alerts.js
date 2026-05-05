@@ -223,8 +223,8 @@ export class AlertsPage {
   }
 
   initializeWebSocket() {
-    wsManager.subscribe('alert.created', (data) => {
-      store.addAlert(data);
+    wsManager.subscribe('alert.created', ({ payload }) => {
+      if (payload) store.addAlert(payload);
       this.render();
     });
   }

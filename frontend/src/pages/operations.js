@@ -232,12 +232,14 @@ export class OperationsPage {
   }
 
   initializeWebSocket() {
-    wsManager.subscribe('berth.updated', () => {
+    wsManager.subscribe('berth.updated', ({ payload, scope }) => {
+      if (payload && scope?.berth_id) store.updateBerth(scope.berth_id, payload);
       this.renderBerths();
       this.renderKPIs();
     });
 
-    wsManager.subscribe('portcall.updated', () => {
+    wsManager.subscribe('portcall.updated', ({ payload, scope }) => {
+      if (payload && scope?.portcall_id) store.updatePortCall(scope.portcall_id, payload);
       this.renderPortCalls();
       this.renderKPIs();
     });

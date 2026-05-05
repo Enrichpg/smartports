@@ -99,8 +99,8 @@ class ConnectionManager:
             type="event",
             data=event.dict()
         )
-        
-        message_json = json.dumps(message.dict())
+
+        message_json = message.model_dump_json()
         disconnected = []
         
         async with self._lock:
@@ -146,7 +146,7 @@ class ConnectionManager:
             return False
         
         try:
-            message_json = json.dumps(message.dict())
+            message_json = message.model_dump_json()
             await conn_data["websocket"].send_text(message_json)
             return True
         except Exception as e:

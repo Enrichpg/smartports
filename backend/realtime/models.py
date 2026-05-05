@@ -47,9 +47,9 @@ class RealtimeEvent(BaseModel):
     severity: str = "info"  # info, warning, error
     
     def dict(self, **kwargs):
-        """Override to ensure timestamp is ISO format"""
-        d = super().dict(**kwargs)
-        if isinstance(d['timestamp'], datetime):
+        """Return event as JSON-safe dict (timestamp as ISO string, event_id as str)."""
+        d = super().model_dump(**kwargs)
+        if isinstance(d.get('timestamp'), datetime):
             d['timestamp'] = d['timestamp'].isoformat() + 'Z'
         if d.get('event_id'):
             d['event_id'] = str(d['event_id'])

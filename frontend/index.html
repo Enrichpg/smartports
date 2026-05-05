@@ -23,7 +23,7 @@
     <script>
         window.ENV = {
             BACKEND_URL: window.location.protocol + '//' + window.location.host + '/api/v1',
-            WS_URL: (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws',
+            WS_URL: (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/api/v1/realtime/ws',
             DEBUG: false
         };
     </script>

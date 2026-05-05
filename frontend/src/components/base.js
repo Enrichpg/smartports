@@ -3,20 +3,15 @@
  * Main navigation header with branding, status, and quick actions
  */
 
-export function Header({ currentPage, onNavigate, connectionStatus }) {
-  const statusBadgeClass =
-    connectionStatus === 'connected'
-      ? 'badge-success'
-      : connectionStatus === 'connecting'
-        ? 'badge-warning'
-        : 'badge-danger';
+const WS_BADGE_CONFIG = {
+  connected:    { cls: 'bg-success', icon: 'fa-circle',       text: 'Live' },
+  connecting:   { cls: 'bg-warning text-dark', icon: 'fa-spinner fa-spin', text: 'Conectando...' },
+  reconnecting: { cls: 'bg-warning text-dark', icon: 'fa-rotate-right fa-spin', text: 'Reconectando...' },
+  disconnected: { cls: 'bg-danger',  icon: 'fa-circle-xmark', text: 'Offline' },
+};
 
-  const statusText =
-    connectionStatus === 'connected'
-      ? 'Conectado'
-      : connectionStatus === 'connecting'
-        ? 'Conectando...'
-        : 'Desconectado';
+export function Header({ currentPage, onNavigate, connectionStatus = 'disconnected' }) {
+  const cfg = WS_BADGE_CONFIG[connectionStatus] || WS_BADGE_CONFIG.disconnected;
 
   return `
     <nav class="navbar navbar-dark bg-primary sticky-top shadow-sm">
@@ -28,13 +23,25 @@ export function Header({ currentPage, onNavigate, connectionStatus }) {
           <div class="text-white">
             <small>Página actual: <strong>${currentPage}</strong></small>
           </div>
-          <span class="badge ${statusBadgeClass}" id="connection-status-badge">
-            <i class="fas fa-circle-fill"></i> ${statusText}
+          <span class="badge ${cfg.cls}" id="ws-live-badge" title="WebSocket">
+            <i class="fas ${cfg.icon} fa-xs"></i> ${cfg.text}
           </span>
         </div>
       </div>
     </nav>
   `;
+}
+
+/**
+ * Update the WS live badge in the navbar without re-rendering the whole header.
+ * Call this from any page whenever connection status changes.
+ */
+export function updateWsBadge(status) {
+  const badge = document.getElementById('ws-live-badge');
+  if (!badge) return;
+  const cfg = WS_BADGE_CONFIG[status] || WS_BADGE_CONFIG.disconnected;
+  badge.className = `badge ${cfg.cls}`;
+  badge.innerHTML = `<i class="fas ${cfg.icon} fa-xs"></i> ${cfg.text}`;
 }
 
 /**
