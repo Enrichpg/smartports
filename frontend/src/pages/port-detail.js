@@ -61,9 +61,14 @@ export class PortDetailPage {
         <!-- Back Button and Title -->
         <div class="row mb-3 mt-2">
           <div class="col-12">
-            <a href="/" class="btn btn-outline-primary btn-sm mb-3">
-              <i class="fas fa-arrow-left"></i> Volver al Dashboard
-            </a>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <a href="/" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Dashboard
+              </a>
+              <a href="/ports/${this.portId}/3d" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-cube"></i> Vista 3D
+              </a>
+            </div>
             <h3 id="port-name">Cargando...</h3>
             <p id="port-location" class="text-muted">Ubicación desconocida</p>
           </div>

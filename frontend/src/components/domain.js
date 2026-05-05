@@ -40,10 +40,20 @@ export function PortCard({
   `
     : '';
 
+  const portRawId = port.id?.split(':').pop() || port.id;
+
   return `
     <div class="card cursor-pointer port-card h-100 ${onClick ? 'shadow-hover' : ''}" ${clickHandler} style="transition: all 0.3s;">
       <div class="card-body">
-        <h5 class="card-title">${port.name || port.id}</h5>
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <h5 class="card-title mb-0">${port.name || port.id}</h5>
+          <a href="/ports/${portRawId}/3d"
+             class="btn btn-outline-primary btn-sm ms-2"
+             title="Vista 3D"
+             onclick="event.stopPropagation()">
+            <i class="fas fa-cube"></i>
+          </a>
+        </div>
         <p class="card-text small text-muted">${port.location || 'Ubicación no disponible'}</p>
         ${StatusBadge({ status: port.status || 'active' })}
         ${details}

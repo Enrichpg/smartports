@@ -7,6 +7,7 @@ import { store } from './store/store.js';
 import { wsManager } from './services/websocket.js';
 import { DashboardPage } from './pages/dashboard.js';
 import { PortDetailPage } from './pages/port-detail.js';
+import { Port3DPage } from './pages/port-3d.js';
 import { AlertsPage } from './pages/alerts.js';
 import { OperationsPage } from './pages/operations.js';
 
@@ -47,7 +48,10 @@ export class SmartPortApp {
     const path = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
 
-    if (path.startsWith('/ports/')) {
+    if (path.startsWith('/ports/') && path.endsWith('/3d')) {
+      const portId = path.replace('/ports/', '').replace(/\/3d$/, '');
+      this.loadPage('port-3d', { portId });
+    } else if (path.startsWith('/ports/')) {
       const portId = path.replace('/ports/', '').replace(/\/$/, '');
       this.loadPage('port-detail', { portId });
     } else if (path === '/alerts' || path === '/alerts/') {
@@ -74,6 +78,9 @@ export class SmartPortApp {
     switch (pageName) {
       case 'port-detail':
         pageInstance = new PortDetailPage(params.portId);
+        break;
+      case 'port-3d':
+        pageInstance = new Port3DPage(params.portId);
         break;
       case 'alerts':
         pageInstance = new AlertsPage();
@@ -118,7 +125,9 @@ export class SmartPortApp {
   navigate(page, params = {}) {
     let path = '/';
 
-    if (page === 'port-detail' && params.portId) {
+    if (page === 'port-3d' && params.portId) {
+      path = `/ports/${params.portId}/3d`;
+    } else if (page === 'port-detail' && params.portId) {
       path = `/ports/${params.portId}`;
     } else if (page === 'alerts') {
       path = '/alerts';
