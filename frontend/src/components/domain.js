@@ -232,17 +232,15 @@ export function AlertPanel({
   const alertItems = displayAlerts
     .map(
       (alert) => `
-    <div class="alert alert-${getSeverityClass(alert.severity)} mb-2 py-2" 
-         ${onAlertClick ? `onclick="(${onAlertClick})('${alert.id}')"` : ''} 
-         role="alert">
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <strong>${alert.title || alert.type}</strong>
-          <p class="mb-0 small">${alert.message || 'Sin descripción'}</p>
-          <small class="text-muted">${new Date(alert.timestamp).toLocaleString()}</small>
-        </div>
-        <span class="badge bg-${getSeverityColor(alert.severity)}">${alert.severity || 'info'}</span>
+    <div class="alert alert-${getSeverityBsClass(alert.severity)} alert-item mb-2" data-severity="${alert.severity || ''}"
+         ${onAlertClick ? `onclick="(${onAlertClick})('${alert.id}')"` : ''}>
+      <div class="alert-item-header">
+        <i class="fas ${getSeverityIcon(alert.severity)} me-2"></i>
+        <strong>${alert.title || alert.alert_type || 'Alerta'}</strong>
+        <span class="badge bg-${getSeverityBsClass(alert.severity)} ms-2">${alert.severity || ''}</span>
+        <small class="text-muted ms-auto">${alert.created_at ? new Date(alert.created_at).toLocaleTimeString('es-ES') : ''}</small>
       </div>
+      <div class="alert-item-body">${alert.description || ''}</div>
     </div>
   `
     )
@@ -347,24 +345,32 @@ export function AvailabilityPanel({
 
 // ============= HELPER FUNCTIONS =============
 
-function getSeverityClass(severity) {
-  const severityMap = {
-    high: 'danger',
-    medium: 'warning',
-    low: 'info',
-    info: 'info',
+function getSeverityBsClass(severity) {
+  const map = {
+    critical: 'danger',
+    error:    'danger',
+    high:     'warning',
+    warning:  'warning',
+    medium:   'info',
+    info:     'info',
+    low:      'secondary',
   };
-  return severityMap[severity] || 'info';
+  return map[(severity || '').toLowerCase()] || 'secondary';
 }
+const getSeverityClass = getSeverityBsClass;
+const getSeverityColor = getSeverityBsClass;
 
-function getSeverityColor(severity) {
-  const severityMap = {
-    high: 'danger',
-    medium: 'warning',
-    low: 'info',
-    info: 'info',
+function getSeverityIcon(severity) {
+  const icons = {
+    critical: 'fa-skull-crossbones',
+    error:    'fa-times-circle',
+    high:     'fa-exclamation-triangle',
+    warning:  'fa-exclamation-triangle',
+    medium:   'fa-info-circle',
+    info:     'fa-info-circle',
+    low:      'fa-circle',
   };
-  return severityMap[severity] || 'info';
+  return icons[(severity || '').toLowerCase()] || 'fa-bell';
 }
 
 function getFacilityAvailability(byFacility) {

@@ -291,40 +291,33 @@ export function FilterBar({ filters, onFilterChange, clearAllHandler = null }) {
  */
 
 export function StatusBadge({ status, customColors = {} }) {
-  const statusColors = {
-    free: 'badge-success',
-    reserved: 'badge-warning',
-    occupied: 'badge-danger',
-    unavailable: 'badge-secondary',
-    active: 'badge-success',
-    inactive: 'badge-secondary',
-    authorized: 'badge-info',
-    pending: 'badge-warning',
-    rejected: 'badge-danger',
-    high: 'badge-danger',
-    medium: 'badge-warning',
-    low: 'badge-info',
-    ...customColors,
+  const map = {
+    free:           { cls: 'success',   label: 'Libre' },
+    available:      { cls: 'success',   label: 'Libre' },
+    occupied:       { cls: 'danger',    label: 'Ocupado' },
+    reserved:       { cls: 'warning',   label: 'Reservado' },
+    outofservice:   { cls: 'secondary', label: 'Fuera de servicio' },
+    out_of_service: { cls: 'secondary', label: 'Fuera de servicio' },
+    maintenance:    { cls: 'secondary', label: 'Mantenimiento' },
+    unavailable:    { cls: 'secondary', label: 'No disponible' },
+    active:         { cls: 'success',   label: 'Activo' },
+    inactive:       { cls: 'secondary', label: 'Inactivo' },
+    authorized:     { cls: 'info',      label: 'Autorizado' },
+    pending:        { cls: 'warning',   label: 'Pendiente' },
+    rejected:       { cls: 'danger',    label: 'Rechazado' },
+    connected:      { cls: 'success',   label: 'Conectado' },
+    disconnected:   { cls: 'danger',    label: 'Desconectado' },
+    connecting:     { cls: 'warning',   label: 'Conectando' },
+    error:          { cls: 'danger',    label: 'Error' },
+    critical:       { cls: 'danger',    label: 'Crítico' },
+    high:           { cls: 'danger',    label: 'Alta' },
+    medium:         { cls: 'warning',   label: 'Media' },
+    low:            { cls: 'info',      label: 'Baja' },
   };
 
-  const badgeClass = statusColors[status] || 'badge-secondary';
-  const statusLabel =
-    {
-      free: 'Libre',
-      reserved: 'Reservado',
-      occupied: 'Ocupado',
-      unavailable: 'No disponible',
-      active: 'Activo',
-      inactive: 'Inactivo',
-      authorized: 'Autorizado',
-      pending: 'Pendiente',
-      rejected: 'Rechazado',
-      high: 'Alta',
-      medium: 'Media',
-      low: 'Baja',
-    }[status] || status;
-
-  return `<span class="badge ${badgeClass}">${statusLabel}</span>`;
+  const key = (status || '').toLowerCase();
+  const entry = map[key] || { cls: customColors[key] || 'secondary', label: status || 'Desconocido' };
+  return `<span class="badge bg-${entry.cls}">${entry.label}</span>`;
 }
 
 /**
