@@ -89,6 +89,8 @@ async def check_alerts(request: CheckAlertsRequest):
             check_authorizations=request.check_authorizations,
             check_occupancy=request.check_occupancy,
             check_conflicts=request.check_conflicts,
+            check_weather=getattr(request, "check_weather", True),
+            check_eta=getattr(request, "check_eta", True),
         )
         return alerts
     except Exception as e:

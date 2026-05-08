@@ -25,6 +25,11 @@ class AlertType(str, Enum):
     VESSEL_NOT_FOUND = "vessel_not_found"
     INSURANCE_EXPIRED = "insurance_expired"
     INVALID_VESSEL_SIZE = "invalid_vessel_size"
+    WEATHER_WIND = "weather_wind"
+    WEATHER_WAVE = "weather_wave"
+    WEATHER_VISIBILITY = "weather_visibility"
+    ETA_DEVIATION = "eta_deviation"
+    VESSEL_DELAYED = "vessel_delayed"
     OPERATIONAL = "operational"
 
 
@@ -81,6 +86,8 @@ class CheckAlertsRequest(BaseModel):
     check_authorizations: bool = Field(default=True, description="Check vessel authorizations")
     check_occupancy: bool = Field(default=True, description="Check occupancy levels")
     check_conflicts: bool = Field(default=True, description="Check berth conflicts")
+    check_weather: bool = Field(default=True, description="Check weather conditions")
+    check_eta: bool = Field(default=True, description="Check ETA deviations")
     severity_threshold: AlertSeverity = Field(
         default=AlertSeverity.WARNING, description="Minimum severity to report"
     )

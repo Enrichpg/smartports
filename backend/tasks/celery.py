@@ -81,6 +81,26 @@ celery_app.conf.beat_schedule = {
         "schedule": 10.0,  # Every 10 seconds
         "options": {"queue": "realtime"}
     },
+
+    # Alert rules engine — sweep all ports every 15 minutes
+    "alert-sweep-every-15min": {
+        "task": "tasks.check_all_ports_alerts",
+        "schedule": 900,  # 15 minutes
+        "options": {"queue": "operational"}
+    },
+    # Weather alerts — more frequent (every 10 min)
+    "weather-alerts-every-10min": {
+        "task": "tasks.check_weather_alerts",
+        "args": ["urn:ngsi-ld:Port:galicia-a-coruna"],
+        "schedule": 600,
+        "options": {"queue": "operational"}
+    },
+    # Cleanup expired alerts — daily
+    "cleanup-alerts-daily": {
+        "task": "tasks.cleanup_expired_alerts",
+        "schedule": crontab(hour=3, minute=0),  # 3 AM UTC daily
+        "options": {"queue": "operational"}
+    },
 }
 
 

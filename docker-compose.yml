@@ -165,6 +165,8 @@ services:
       IOTA_MONGO_DB: ${MONGO_IOT_DB:-iot-agent}
       IOTA_MONGO_USER: ${MONGO_ROOT_USER:-admin}
       IOTA_MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      IOTA_MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@mongodb:27017/${MONGO_IOT_DB:-iot-agent}?authSource=admin
+      IOTA_AMQP_DISABLED: true
       IOTA_LOG_LEVEL: ${IOT_AGENT_LOG_LEVEL:-INFO}
       IOTA_NORTH_PORT: 4041
       IOTA_HTTP_PORT: 7896
@@ -174,7 +176,7 @@ services:
     networks:
       - smartports_net
     healthcheck:
-      test: curl -f http://localhost:4041/iot/about || exit 1
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4041/iot/about', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -375,8 +377,8 @@ services:
     image: ollama/ollama:latest
     container_name: smartports_ollama
     restart: unless-stopped
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
+#    ports:
+#      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_models:/root/.ollama
     networks:

@@ -3,11 +3,20 @@
 
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from .orion_ld_client import orion_client
 from .authorization_service import authorization_service
 from schemas.alert import AlertResponse, AlertType, AlertSeverity
+
+# Rule thresholds
+WIND_SPEED_WARNING_KT = 25.0   # knots — operational caution
+WIND_SPEED_CRITICAL_KT = 40.0  # knots — port operations suspend
+WAVE_HEIGHT_WARNING_M = 2.5    # metres
+WAVE_HEIGHT_CRITICAL_M = 4.0
+VISIBILITY_WARNING_KM = 1.0    # km — restricted visibility
+ETA_DEVIATION_WARNING_H = 2.0  # hours — vessel late
+ETA_DEVIATION_CRITICAL_H = 6.0 # hours — significant delay
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +30,8 @@ class AlertService:
         check_authorizations: bool = True,
         check_occupancy: bool = True,
         check_conflicts: bool = True,
+        check_weather: bool = True,
+        check_eta: bool = True,
     ) -> List[AlertResponse]:
         """
         Check and generate alerts for a port.
@@ -28,21 +39,22 @@ class AlertService:
         - Vessel authorization status
         - Occupancy levels
         - Berth conflicts
+        - Weather conditions (wind, waves, visibility)
+        - ETA deviations for active port calls
         """
         alerts = []
 
         try:
             if check_authorizations:
-                auth_alerts = await self._check_authorization_alerts(port_id)
-                alerts.extend(auth_alerts)
-
+                alerts.extend(await self._check_authorization_alerts(port_id))
             if check_occupancy:
-                occupancy_alerts = await self._check_occupancy_alerts(port_id)
-                alerts.extend(occupancy_alerts)
-
+                alerts.extend(await self._check_occupancy_alerts(port_id))
             if check_conflicts:
-                conflict_alerts = await self._check_berth_conflicts(port_id)
-                alerts.extend(conflict_alerts)
+                alerts.extend(await self._check_berth_conflicts(port_id))
+            if check_weather:
+                alerts.extend(await self._check_weather_alerts(port_id))
+            if check_eta:
+                alerts.extend(await self._check_eta_deviations(port_id))
 
             return alerts
         except Exception as e:
@@ -105,25 +117,41 @@ class AlertService:
             logger.error(f"Error checking authorization alerts: {e}")
             return []
 
+    def _get_berth_port(self, berth: Dict[str, Any]) -> str:
+        """Extract port ID from a berth entity (handles NGSI-LD namespace variants)."""
+        for key in ("refPort", "https://uri.etsi.org/ngsi-ld/default-context/refPort"):
+            ref = berth.get(key, {})
+            val = ref.get("object") or ref.get("value", "")
+            if val:
+                return val
+        return ""
+
+    def _get_berth_status(self, berth: Dict[str, Any]) -> str:
+        """Extract status value from a berth entity."""
+        for key in ("status", "https://uri.etsi.org/ngsi-ld/status",
+                    "https://uri.etsi.org/ngsi-ld/default-context/status"):
+            s = berth.get(key, {})
+            if s:
+                return s.get("value", "").lower()
+        return ""
+
     async def _check_occupancy_alerts(self, port_id: str) -> List[AlertResponse]:
         """Check for occupancy-related alerts"""
         alerts = []
 
         try:
-            # Get all berths in port
             berth_entities = await orion_client.query_entities(
                 entity_type="Berth", limit=1000
             )
             port_berths = [
                 b for b in berth_entities
-                if b.get("relatedTo", {}).get("object") == port_id
+                if self._get_berth_port(b) == port_id
             ]
 
             total_berths = len(port_berths)
             occupied_berths = sum(
-                1
-                for b in port_berths
-                if b.get("status", {}).get("value", "").lower() == "occupied"
+                1 for b in port_berths
+                if self._get_berth_status(b) == "occupied"
             )
 
             occupancy_rate = (occupied_berths / total_berths * 100) if total_berths > 0 else 0
@@ -162,13 +190,12 @@ class AlertService:
         alerts = []
 
         try:
-            # Get all berths in port with active PortCalls
             berth_entities = await orion_client.query_entities(
                 entity_type="Berth", limit=1000
             )
             port_berths = [
                 b for b in berth_entities
-                if b.get("relatedTo", {}).get("object") == port_id
+                if self._get_berth_port(b) == port_id
             ]
 
             # Check for multiple PortCalls on same berth
@@ -203,6 +230,117 @@ class AlertService:
         except Exception as e:
             logger.error(f"Error checking berth conflicts: {e}")
             return []
+
+    async def _check_weather_alerts(self, port_id: str) -> List[AlertResponse]:
+        """Check weather conditions and emit alerts if thresholds exceeded."""
+        alerts = []
+        try:
+            weather_entities = await orion_client.query_entities(
+                entity_type="WeatherObserved", limit=50
+            )
+            port_weather = [
+                w for w in weather_entities
+                if w.get("refPort", {}).get("object") == port_id
+                or w.get("location", {}).get("value", {}).get("port_id") == port_id
+            ]
+            if not port_weather:
+                port_weather = weather_entities[:1]  # fallback: use any available reading
+
+            for w in port_weather[:1]:
+                wind_kn = float(w.get("windSpeed", {}).get("value", 0) or 0)
+                wave_m = float(w.get("waveHeight", {}).get("value", 0) or 0)
+                vis_km = float(w.get("visibility", {}).get("value", 999) or 999)
+                entity_id = w.get("id", port_id)
+
+                if wind_kn >= WIND_SPEED_CRITICAL_KT:
+                    alerts.append(await self._create_alert(
+                        port_id=port_id, entity_id=entity_id, entity_type="WeatherObserved",
+                        alert_type=AlertType.WEATHER_WIND, severity=AlertSeverity.CRITICAL,
+                        title=f"Viento crítico: {wind_kn:.0f} kt",
+                        description=f"Velocidad de viento {wind_kn:.0f} kt supera el límite operativo ({WIND_SPEED_CRITICAL_KT} kt). Operaciones portuarias suspendidas.",
+                    ))
+                elif wind_kn >= WIND_SPEED_WARNING_KT:
+                    alerts.append(await self._create_alert(
+                        port_id=port_id, entity_id=entity_id, entity_type="WeatherObserved",
+                        alert_type=AlertType.WEATHER_WIND, severity=AlertSeverity.WARNING,
+                        title=f"Viento fuerte: {wind_kn:.0f} kt",
+                        description=f"Velocidad de viento {wind_kn:.0f} kt. Precaución en maniobras de atraque.",
+                    ))
+
+                if wave_m >= WAVE_HEIGHT_CRITICAL_M:
+                    alerts.append(await self._create_alert(
+                        port_id=port_id, entity_id=entity_id, entity_type="WeatherObserved",
+                        alert_type=AlertType.WEATHER_WAVE, severity=AlertSeverity.CRITICAL,
+                        title=f"Oleaje peligroso: {wave_m:.1f} m",
+                        description=f"Altura de ola {wave_m:.1f} m supera límite crítico ({WAVE_HEIGHT_CRITICAL_M} m).",
+                    ))
+                elif wave_m >= WAVE_HEIGHT_WARNING_M:
+                    alerts.append(await self._create_alert(
+                        port_id=port_id, entity_id=entity_id, entity_type="WeatherObserved",
+                        alert_type=AlertType.WEATHER_WAVE, severity=AlertSeverity.WARNING,
+                        title=f"Oleaje moderado: {wave_m:.1f} m",
+                        description=f"Altura de ola {wave_m:.1f} m. Precaución para embarcaciones menores.",
+                    ))
+
+                if vis_km <= VISIBILITY_WARNING_KM:
+                    alerts.append(await self._create_alert(
+                        port_id=port_id, entity_id=entity_id, entity_type="WeatherObserved",
+                        alert_type=AlertType.WEATHER_VISIBILITY, severity=AlertSeverity.WARNING,
+                        title=f"Visibilidad reducida: {vis_km:.1f} km",
+                        description=f"Visibilidad {vis_km:.1f} km. Protocolo de niebla activado.",
+                    ))
+
+        except Exception as e:
+            logger.error(f"Error checking weather alerts for {port_id}: {e}")
+        return alerts
+
+    async def _check_eta_deviations(self, port_id: str) -> List[AlertResponse]:
+        """Check for vessels with significant ETA deviation."""
+        alerts = []
+        try:
+            portcalls = await orion_client.query_entities(
+                entity_type="PortCall",
+                filters=f"portId=={port_id}",
+                limit=200,
+            )
+            now = datetime.now(timezone.utc)
+
+            for pc in portcalls:
+                status = pc.get("status", {}).get("value", "")
+                if status not in ("scheduled", "active", "expected"):
+                    continue
+
+                eta_val = pc.get("eta", {}).get("value")
+                if not eta_val:
+                    continue
+
+                try:
+                    if isinstance(eta_val, str):
+                        eta_dt = datetime.fromisoformat(eta_val.replace("Z", "+00:00"))
+                    else:
+                        continue
+                except (ValueError, TypeError):
+                    continue
+
+                deviation_h = (now - eta_dt).total_seconds() / 3600
+                if deviation_h < ETA_DEVIATION_WARNING_H:
+                    continue
+
+                vessel_id = pc.get("vesselId", {}).get("object", pc.get("id", ""))
+                pc_id = pc.get("id", "")
+                severity = AlertSeverity.CRITICAL if deviation_h >= ETA_DEVIATION_CRITICAL_H else AlertSeverity.WARNING
+                alert_type = AlertType.VESSEL_DELAYED if deviation_h >= ETA_DEVIATION_CRITICAL_H else AlertType.ETA_DEVIATION
+
+                alerts.append(await self._create_alert(
+                    port_id=port_id, entity_id=pc_id, entity_type="PortCall",
+                    alert_type=alert_type, severity=severity,
+                    title=f"Retraso de escala: {deviation_h:.1f} h",
+                    description=f"Escala {pc_id} presenta {deviation_h:.1f} h de retraso sobre ETA ({eta_val}). Vessel: {vessel_id}",
+                ))
+
+        except Exception as e:
+            logger.error(f"Error checking ETA deviations for {port_id}: {e}")
+        return alerts
 
     async def get_port_alerts(
         self, port_id: str, active_only: bool = True, limit: int = 100, offset: int = 0
