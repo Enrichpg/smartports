@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — Contexto para Claude Code
 
 > Leido automaticamente por Claude Code al arrancar.
-> Historial completo extraido de los tickets 1-10.
-> Ultima actualizacion: 2026-05-05 (post iteracion 10 - Enrique)
+> Historial completo extraido de los tickets 1-11.
+> Ultima actualizacion: 2026-05-08 (post iteracion 11 - Sergio)
 
 ---
 
@@ -13,7 +13,7 @@ Practica universitaria XDEI/UDC - Sergio + Enrique.
 
 - Stack: FastAPI + Orion-LD (NGSI-LD) + PostgreSQL + Redis + Celery + Docker Compose
 - Frontend: HTML/CSS/JS + Leaflet + Chart.js + WebSocket live + Three.js 3D
-- ML: Prophet fallback determinista (forecast) + scikit-learn RandomForest (berths)
+- ML: Prophet real con CmdStan (forecast) + scikit-learn RandomForest (berths)
 - LLM: Ollama llama2 (asistente portuario en espanol)
 - Generadores: ecosistema maritimo sintetico (8 modulos, motor de simulacion)
 - Repo: https://github.com/Enrichpg/smartports.git (rama main)
@@ -36,7 +36,7 @@ WebSocket backend, Redis cache, Celery tasks, auditoria PostgreSQL.
 - Bugs resueltos: imports hardcodeados ruta Enrique, IDs Orion-LD URN, refPort berths
 - ID puerto correcto: galicia-a-coruna
 
-### Ticket 10 — Iteracion 9: WebSocket live + 3D + Ecosistema sintetico (Enrique)
+### Ticket 10 — Iteracion 10: WebSocket live + 3D + Ecosistema sintetico (Enrique)
 Commits: b7f3b4c, 5c6204a, b98ef09, d7dfc6c, 75ddcdc, 93637cc
 
 WebSocket live (Fase A):
@@ -62,15 +62,30 @@ Ecosistema maritimo sintetico (Iteracion 10):
 - Tests en tests/generators/ (6 ficheros)
 - Documentacion: ITERATION_9_SUMMARY.md, docs/ITERATION_9.md, docs/REALTIME_PROTOCOL.md
 
+### Ticket 11 — Iteracion 11: Prophet real, iot-agent fix, Grafana, alerts engine (Sergio)
+Commit: 1af0617 (feat: Iteration 11)
+
+- Prophet real activado: cmdstanpy==1.2.4 + prophet==1.1.5 en requirements.txt
+- iot-agent corregido: IOTA_MONGO_URI completo, IOTA_AMQP_DISABLED=true, healthcheck node
+- Pipeline Orion-LD → QuantumLeap → TimescaleDB → Grafana operativo
+  - Subscription NGSI-LD creada (BerthStatus → QuantumLeap notify)
+  - Datasource Grafana: uid=aflgkwci7gy68b (TimescaleDB, db=quantumleap)
+  - Dashboard "SmartPort Galicia - Amarres": uid=394ded83-028c-4265-a828-65ae58a58318
+  - 6 paneles: 4 KPI stats + 1 timeseries evolución + 1 tabla
+- Alerts engine mejorado:
+  - Nuevos tipos: WEATHER_WIND, WEATHER_WAVE, WEATHER_VISIBILITY, ETA_DEVIATION, VESSEL_DELAYED
+  - Celery beat: sweep 15min, weather 10min, cleanup 3 AM
+  - alert_tasks.py reescrito con implementaciones reales
+
 ---
 
 ## Estado actual — Que falta
 
-- Activar Prophet real: fijar cmdstanpy==1.2.4 en requirements.txt y rebuild backend
-- iot-agent en Restarting (bug pendiente)
-- Grafana dashboards con datos reales de TimescaleDB
-- Alertas avanzadas: rules engine mejorado
 - Kubernetes/Helm para produccion (fase futura)
+- Grafana dashboards para otras entidades (vessels, weather, port calls)
+- Ollama: cargar modelo llama2 explicitamente (puede estar vacio tras restart)
+- Tests de integracion end-to-end
+- Documentacion de API OpenAPI/Swagger exportada
 
 ---
 
@@ -103,7 +118,7 @@ python3 ~/XDEI/smartports/scripts/export_ticket.py --description "descripcion"
 ## Servicios Docker activos
 
 - mosquitto (1883, 9001): MQTT broker
-- iot-agent: RESTARTING — bug pendiente
+- iot-agent (4041, 7896): MQTT→NGSI-LD bridge (CORREGIDO en it.11)
 - orion-ld (1026): Context broker NGSI-LD
 - quantumleap (8668): Time-series a TimescaleDB
 - postgresql (5432): Datos operativos + auditoria

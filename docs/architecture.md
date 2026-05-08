@@ -1752,13 +1752,60 @@ Alert Rules:
 
 ---
 
-## 15. Version History
+## 15. Iteration 11 — Improvements (2026-05-08)
+
+### 15.1 Real Prophet/CmdStan Forecasting
+
+`cmdstanpy==1.2.4` pinned before `prophet==1.1.5` in `requirements.txt`. Backend container rebuilt with working Stan toolchain. Forecast endpoint `GET /api/v1/forecasts/occupancy` now executes the real Prophet model instead of the deterministic fallback.
+
+### 15.2 IoT Agent JSON — MongoDB Connection Fix
+
+Three bugs resolved to bring iot-agent out of the Restarting loop:
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| `MONGODB-003 No URI found` | iotagent-json:latest requires full `IOTA_MONGO_URI` | Added full URI env var with `authSource=admin` |
+| `AMQP ECONNREFUSED :5672` | Default config tries to connect to RabbitMQ | Added `IOTA_AMQP_DISABLED: true` |
+| Healthcheck unhealthy | `curl` not installed in Node.js image | Switched to `node -e require('http').get(...)` |
+
+### 15.3 QuantumLeap → TimescaleDB → Grafana Pipeline
+
+End-to-end time-series analytics pipeline activated:
+
+1. **NGSI-LD subscription** created on Orion-LD using `/ngsi-ld/v1/subscriptions` (core context, full URI entity types). Notifies QuantumLeap at `http://quantumleap:8668/v2/notify` on all `BerthStatus` entity changes.
+2. **QuantumLeap** persists every notification into TimescaleDB table `etsmartdatamodels_berthstatus` (column names derived from attribute URIs, lowercased, `_` substituted for `:`).
+3. **Grafana datasource** "TimescaleDB" (`uid: aflgkwci7gy68b`) connects directly to `timescaledb:5432`, database `quantumleap`.
+4. **Dashboard** "SmartPort Galicia - Amarres" (`uid: 394ded83-028c-4265-a828-65ae58a58318`) with 6 panels:
+   - 4 KPI stats: Ocupados / Libres / Reservados / Total (last-value SQL)
+   - 1 timeseries: cumulative berth-state evolution (correlated subquery with DISTINCT ON)
+   - 1 table: per-entity latest status
+
+### 15.4 Enhanced Alerts Rules Engine
+
+New alert types added to `AlertType` enum: `WEATHER_WIND`, `WEATHER_WAVE`, `WEATHER_VISIBILITY`, `ETA_DEVIATION`, `VESSEL_DELAYED`.
+
+New threshold constants in `alert_service.py`:
+
+| Metric | WARNING | CRITICAL |
+|--------|---------|----------|
+| Wind speed | 25 kt | 40 kt |
+| Wave height | 2.5 m | 4.0 m |
+| Visibility | 1.0 km | — |
+| ETA deviation | 2 h | 6 h |
+
+`backend/tasks/alert_tasks.py` rewritten from TODO stubs to real Celery tasks using `_run_async()` helper. Celery beat schedule: 15-min full sweep, 10-min weather-only check, 3 AM cleanup.
+
+---
+
+## 16. Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-27 | Initial architecture document |
 | 1.1 | 2026-04-28 | Added section 5.7: Realtime Infrastructure (WebSocket, audit, cache, Celery) |
 | 1.2 | 2026-04-28 | Fixed duplicate section number (5.4→5.7), corrected nginx config notes, updated status |
+| 1.3 | 2026-05-04 | Iteration 10: Synthetic maritime ecosystem, WebSocket live, Three.js 3D view |
+| 1.4 | 2026-05-08 | Iteration 11: Prophet real, iot-agent fix, Grafana/TimescaleDB pipeline, alerts engine |
 
 ---
 

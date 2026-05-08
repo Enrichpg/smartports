@@ -765,12 +765,35 @@ The following are NOT included in Phase 1 but may be future enhancements:
 
 ---
 
-## 12. Revision History
+## 12. Iteration 11 — Delivered Features (2026-05-08)
+
+### 12.1 Real ML Forecasting (Prophet + CmdStan)
+- `cmdstanpy==1.2.4` pinned in requirements; Stan toolchain functional inside container.
+- `GET /api/v1/forecasts/occupancy` executes real Prophet model, 30-day training window, 24-hour horizon.
+
+### 12.2 IoT Agent JSON — Operational
+- Fixed three independent bugs (MongoDB URI, AMQP, healthcheck); service no longer in Restarting loop.
+- Enables real MQTT → NGSI-LD ingestion pipeline for physical sensors.
+
+### 12.3 Grafana Analytics Dashboard
+- Full pipeline: Orion-LD → QuantumLeap → TimescaleDB → Grafana.
+- Dashboard "SmartPort Galicia - Amarres" with KPI stats and cumulative berth-state timeseries.
+- Demonstrates end-to-end observability from context entity to analytics chart.
+
+### 12.4 Advanced Alerts Engine
+- 5 new alert types: wind speed, wave height, visibility, ETA deviation, vessel delayed.
+- Celery beat tasks: 15-min port sweep, 10-min weather check, daily cleanup.
+- Severity thresholds aligned with maritime safety standards.
+
+---
+
+## 13. Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-27 | Product Lead | Initial comprehensive PRD |
 | 1.1 | 2026-05-04 | Claude + Team | Added Synthetic Maritime Ecosystem (4500 vessels, 90-day historical data for ML training) |
+| 1.2 | 2026-05-08 | Claude + Team | Iteration 11: Prophet real, iot-agent fix, Grafana pipeline, advanced alerts |
 
 ---
 
