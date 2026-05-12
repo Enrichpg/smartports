@@ -416,21 +416,30 @@ class Map3D {
   loadSnapshot(snapshotData) {
     try {
       if (snapshotData.berths) {
-        Object.entries(snapshotData.berths).forEach(([berthId, berthData]) => {
-          this.updateBerth(berthId, berthData);
-        });
+        const berths = snapshotData.berths;
+        if (Array.isArray(berths)) {
+          berths.forEach(b => this.updateBerth(b.id, b));
+        } else {
+          Object.entries(berths).forEach(([id, data]) => this.updateBerth(id, data));
+        }
       }
 
       if (snapshotData.vessels) {
-        Object.entries(snapshotData.vessels).forEach(([vesselId, vesselData]) => {
-          this.updateVessel(vesselId, vesselData);
-        });
+        const vessels = snapshotData.vessels;
+        if (Array.isArray(vessels)) {
+          vessels.forEach(v => this.updateVessel(v.id, v));
+        } else {
+          Object.entries(vessels).forEach(([id, data]) => this.updateVessel(id, data));
+        }
       }
 
       if (snapshotData.sensors) {
-        Object.entries(snapshotData.sensors).forEach(([sensorId, sensorData]) => {
-          this.updateSensor(sensorId, sensorData);
-        });
+        const sensors = snapshotData.sensors;
+        if (Array.isArray(sensors)) {
+          sensors.forEach(s => this.updateSensor(s.id, s));
+        } else {
+          Object.entries(sensors).forEach(([id, data]) => this.updateSensor(id, data));
+        }
       }
 
       if (this.debug) {

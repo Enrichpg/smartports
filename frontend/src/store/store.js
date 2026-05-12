@@ -1,330 +1,88 @@
 /**
  * Global Application State Store
- * 
- * Manages:
- * - Ports, berths, vessels, port calls, alerts
- * - Real-time updates from WebSocket
- * - UI state and filters
- * - KPIs and aggregations
- * 
- * Pattern: Observer pattern with state mutation methods
+ * Manages dashboard state, caching, and synchronization
  */
 
 class Store {
   constructor() {
-    // Core data
     this.state = {
-      // Ports and berths
-      ports: {},           // { port_id: { id, name, lat, lon, berths: [...], kpis: {...} } }
-      berths: {},          // { berth_id: { id, port_id, name, status, vessel_id, ... } }
-      vessels: {},         // { vessel_id: { id, name, imo, type, length_m, ... } }
-      portCalls: {},       // { portcall_id: { id, vessel_id, port_id, status, ... } }
-      alerts: [],          // [ { id, type, severity, description, entity_id, ... } ]
-      
-      // Current sensor readings
-      sensors: {},         // { sensor_id: { type, value, unit, timestamp } }
-      
-      // Occupancy tracking
-      occupancy: {},       // { port_id: { total, occupied, reserved, free, percentage, trending } }
-      
-      // Filters and view state
+      // Ports data
+      ports: [],
+      portDetail: null,
+      portsLoading: false,
+      portsError: null,
+
+      // Berths data
+      berths: [],
+      berthsLoading: false,
+      berthsError: null,
+
+      // Port Calls data
+      portCalls: [],
+      portCallsLoading: false,
+      portCallsError: null,
+
+      // Alerts
+      alerts: [],
+      alertsLoading: false,
+      alertsError: null,
+
+      // Availability
+      availability: null,
+      availabilityLoading: false,
+      availabilityError: null,
+
+      // Vessels, sensors, occupancy (for WebSocket real-time updates)
+      vessels: {},
+      occupancy: {},
+      sensors: {},
+
+      // Filters
       filters: {
         selectedPort: null,
-        selectedBerth: null,
-        eventTypes: [],    // ['berth.updated', 'alert.triggered', ...]
+        selectedFacility: null,
+        berthState: null,
+        alertSeverity: null,
+        portCallState: null,
       },
-      
-      // UI state
+
+      // UI State
       ui: {
         currentPage: 'dashboard',
         sidebarOpen: true,
-        websocketStatus: 'disconnected',  // 'disconnected' | 'connecting' | 'connected' | 'error'
-        websocketError: null,
+        connectionStatus: 'connecting',
         lastUpdate: null,
-        debugMode: window.ENV?.DEBUG || false,
+        loading: false,
       },
-      
-      // Aggregated metrics
+
+      // Aggregated KPIs
       kpis: {
         totalPorts: 0,
+        activePorts: 0,
         totalBerths: 0,
+        freeBerths: 0,
         occupiedBerths: 0,
         reservedBerths: 0,
-        freeBerths: 0,
-        occupancyPercentage: 0,
         activeAlerts: 0,
         activePortCalls: 0,
+        estimatedOccupancy: 0,
       },
     };
-    
-    // Change listeners
+
     this.listeners = new Map();
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] Initialized');
-    }
   }
 
-  // =========== STATE QUERIES ===========
+  // ============= GETTERS =============
   getState() {
-    return JSON.parse(JSON.stringify(this.state));
+    return { ...this.state };
+  }
+
+  getPorts() {
+    return this.state.ports;
   }
 
   getPort(portId) {
-    return this.state.ports[portId];
-  }
-
-  getBerth(berthId) {
-    return this.state.berths[berthId];
-  }
-
-  getVessel(vesselId) {
-    return this.state.vessels[vesselId];
-  }
-
-  getOccupancy(portId) {
-    return this.state.occupancy[portId] || {};
-  }
-
-  getKPIs() {
-    return { ...this.state.kpis };
-  }
-
-  getUIState() {
-    return { ...this.state.ui };
-  }
-
-  getAlerts() {
-    return [...this.state.alerts];
-  }
-
-  // =========== STATE UPDATES ===========
-  
-  /**
-   * Update berth state from real-time event
-   */
-  updateBerth(berthId, updates) {
-    if (!this.state.berths[berthId]) {
-      this.state.berths[berthId] = { id: berthId, ...updates };
-    } else {
-      Object.assign(this.state.berths[berthId], updates);
-    }
-    
-    this._recalculateKPIs();
-    this._notifyListeners('berth:updated', { berthId, updates });
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] Berth updated:', berthId, updates);
-    }
-  }
-
-  /**
-   * Update port occupancy
-   */
-  updateOccupancy(portId, occupancyData) {
-    this.state.occupancy[portId] = {
-      ...this.state.occupancy[portId],
-      ...occupancyData,
-      timestamp: new Date().toISOString(),
-    };
-    
-    this._recalculateKPIs();
-    this._notifyListeners('occupancy:updated', { portId, occupancyData });
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] Occupancy updated:', portId, occupancyData);
-    }
-  }
-
-  /**
-   * Update or add vessel
-   */
-  updateVessel(vesselId, vesselData) {
-    if (!this.state.vessels[vesselId]) {
-      this.state.vessels[vesselId] = { id: vesselId, ...vesselData };
-    } else {
-      Object.assign(this.state.vessels[vesselId], vesselData);
-    }
-    
-    this._notifyListeners('vessel:updated', { vesselId, vesselData });
-  }
-
-  /**
-   * Add or update alert
-   */
-  addAlert(alertData) {
-    const alertId = alertData.alert_id || alertData.id;
-    
-    // Check if already exists
-    const existingIdx = this.state.alerts.findIndex(a => a.id === alertId);
-    if (existingIdx >= 0) {
-      this.state.alerts[existingIdx] = { ...this.state.alerts[existingIdx], ...alertData };
-    } else {
-      this.state.alerts.push({
-        id: alertId,
-        timestamp: new Date().toISOString(),
-        ...alertData,
-      });
-    }
-    
-    this._recalculateKPIs();
-    this._notifyListeners('alert:added', alertData);
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] Alert added:', alertId, alertData);
-    }
-  }
-
-  /**
-   * Remove alert
-   */
-  removeAlert(alertId) {
-    const idx = this.state.alerts.findIndex(a => a.id === alertId);
-    if (idx >= 0) {
-      this.state.alerts.splice(idx, 1);
-      this._recalculateKPIs();
-      this._notifyListeners('alert:removed', { alertId });
-    }
-  }
-
-  /**
-   * Update sensor reading
-   */
-  updateSensor(sensorId, sensorData) {
-    this.state.sensors[sensorId] = {
-      ...this.state.sensors[sensorId],
-      ...sensorData,
-      timestamp: new Date().toISOString(),
-    };
-    
-    this._notifyListeners('sensor:updated', { sensorId, sensorData });
-  }
-
-  /**
-   * Update UI state
-   */
-  setUIState(uiUpdates) {
-    Object.assign(this.state.ui, uiUpdates);
-    this._notifyListeners('ui:updated', uiUpdates);
-  }
-
-  /**
-   * Set websocket connection status
-   */
-  setWebsocketStatus(status, error = null) {
-    this.state.ui.websocketStatus = status;
-    if (error) {
-      this.state.ui.websocketError = error;
-    }
-    this._notifyListeners('websocket:status', { status, error });
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] WebSocket status:', status, error);
-    }
-  }
-
-  /**
-   * Update multiple berths (bulk operation for snapshot)
-   */
-  setBerths(berthMap) {
-    this.state.berths = { ...this.state.berths, ...berthMap };
-    this._recalculateKPIs();
-    this._notifyListeners('berths:bulk', {});
-  }
-
-  /**
-   * Update multiple ports (bulk operation for snapshot)
-   */
-  setPorts(portMap) {
-    this.state.ports = { ...this.state.ports, ...portMap };
-    this._notifyListeners('ports:bulk', {});
-  }
-
-  // =========== INTERNAL HELPERS ===========
-  
-  /**
-   * Recalculate KPIs based on current state
-   */
-  _recalculateKPIs() {
-    const berths = Object.values(this.state.berths);
-    const occupied = berths.filter(b => b.status === 'occupied').length;
-    const reserved = berths.filter(b => b.status === 'reserved').length;
-    const free = berths.filter(b => b.status === 'free').length;
-    const total = berths.length;
-    
-    const occupancy = total > 0 ? ((occupied + reserved) / total) * 100 : 0;
-    
-    this.state.kpis = {
-      totalBerths: total,
-      occupiedBerths: occupied,
-      reservedBerths: reserved,
-      freeBerths: free,
-      occupancyPercentage: Math.round(occupancy * 10) / 10,
-      activeAlerts: this.state.alerts.length,
-      totalPorts: Object.keys(this.state.ports).length,
-      activePortCalls: Object.values(this.state.portCalls).filter(pc => pc.status === 'active').length,
-    };
-    
-    if (this.state.ui.debugMode) {
-      console.log('[Store] KPIs recalculated:', this.state.kpis);
-    }
-  }
-
-  /**
-   * Notify all listeners of a change
-   */
-  _notifyListeners(changeType, data) {
-    if (!this.listeners.has(changeType)) {
-      return;
-    }
-    
-    const callbacks = this.listeners.get(changeType);
-    callbacks.forEach(callback => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error(`[Store] Error in listener for ${changeType}:`, error);
-      }
-    });
-  }
-
-  // =========== OBSERVER PATTERN ===========
-
-  /**
-   * Subscribe to state changes
-   * Returns unsubscribe function
-   */
-  subscribe(changeType, callback) {
-    if (!this.listeners.has(changeType)) {
-      this.listeners.set(changeType, []);
-    }
-    const callbacks = this.listeners.get(changeType);
-    callbacks.push(callback);
-    
-    // Return unsubscribe function
-    return () => {
-      const idx = callbacks.indexOf(callback);
-      if (idx >= 0) {
-        callbacks.splice(idx, 1);
-      }
-    };
-  }
-
-  /**
-   * Clear all listeners (useful for cleanup)
-   */
-  clearListeners(changeType = null) {
-    if (changeType) {
-      this.listeners.delete(changeType);
-    } else {
-      this.listeners.clear();
-    }
-  }
-}
-
-// Export singleton
-export const store = new Store();
-export default Store;
+    return this.state.ports.find((p) => p.id === portId || p.id.includes(portId));
   }
 
   getPortDetail() {
@@ -333,6 +91,30 @@ export default Store;
 
   getBerths() {
     return this.state.berths;
+  }
+
+  getVessels() {
+    return this.state.vessels;
+  }
+
+  getVessel(vesselId) {
+    return this.state.vessels[vesselId];
+  }
+
+  getOccupancy() {
+    return this.state.occupancy;
+  }
+
+  getOccupancyForPort(portId) {
+    return this.state.occupancy[portId];
+  }
+
+  getSensors() {
+    return this.state.sensors;
+  }
+
+  getSensor(sensorId) {
+    return this.state.sensors[sensorId];
   }
 
   getAlerts() {
@@ -398,6 +180,30 @@ export default Store;
       this.updateKPIs();
       this.emit('berthUpdated', { berthId, data: this.state.berths[index] });
     }
+  }
+
+  updateVessel(vesselId, vesselData) {
+    if (!this.state.vessels) {
+      this.state.vessels = {};
+    }
+    this.state.vessels[vesselId] = { ...this.state.vessels[vesselId], ...vesselData };
+    this.emit('vesselUpdated', { vesselId, data: this.state.vessels[vesselId] });
+  }
+
+  updateOccupancy(portId, occupancyData) {
+    if (!this.state.occupancy) {
+      this.state.occupancy = {};
+    }
+    this.state.occupancy[portId] = { ...this.state.occupancy[portId], ...occupancyData };
+    this.emit('occupancyUpdated', { portId, data: this.state.occupancy[portId] });
+  }
+
+  updateSensor(sensorId, sensorData) {
+    if (!this.state.sensors) {
+      this.state.sensors = {};
+    }
+    this.state.sensors[sensorId] = { ...this.state.sensors[sensorId], ...sensorData };
+    this.emit('sensorUpdated', { sensorId, data: this.state.sensors[sensorId] });
   }
 
   setPortCalls(portCalls, loading = false, error = null) {
@@ -560,6 +366,9 @@ export default Store;
       portCalls: [],
       alerts: [],
       availability: null,
+      vessels: {},
+      occupancy: {},
+      sensors: {},
       filters: {
         selectedPort: null,
         selectedFacility: null,

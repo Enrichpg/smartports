@@ -264,6 +264,14 @@ class WebSocketManager {
     }
   }
 
+  clearListeners(eventType = null) {
+    if (eventType) {
+      this.listeners.delete(eventType);
+    } else {
+      this.listeners.clear();
+    }
+  }
+
   getStatus() {
     return {
       connected: this.isConnected,

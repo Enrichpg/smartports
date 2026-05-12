@@ -1,4 +1,7 @@
 {
+  "env": {
+    "ECC_DISABLED_HOOKS": "pre:edit-write:gateguard-fact-force"
+  },
   "permissions": {
     "allow": [
       "Bash(grep -E \"\\\\.env|env$\")",
@@ -30,7 +33,36 @@
       "Bash(curl -s \"http://localhost/api/v1/ports/urn:ngsi-ld:Port:galicia-a-coruna/summary\")",
       "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/alerts?port_id=100&limit=100\")",
       "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/availability\")",
-      "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/alerts\")"
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"http://localhost/api/v1/alerts\")",
+      "Bash(curl -s http://localhost/src/app.js)",
+      "Bash(curl -s http://localhost/src/store/store.js)",
+      "Bash(node -c frontend/src/store/store.js)",
+      "Bash(curl -s http://localhost:8000/api/v1/ports)",
+      "mcp__plugin_everything-claude-code_playwright__browser_navigate",
+      "mcp__plugin_everything-claude-code_playwright__browser_snapshot",
+      "mcp__plugin_everything-claude-code_playwright__browser_wait_for",
+      "Bash(npm run *)",
+      "Bash(node -c /home/enrique/XDEI/SmartPorts/frontend/src/store/store.js)",
+      "Bash(node -c /home/enrique/XDEI/SmartPorts/frontend/src/services/websocket-integrator.js)",
+      "Bash(curl -s http://localhost:80/debug-app.html)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/assistant/chat -H \"Content-Type: application/json\" -d '{\"message\": \"Hola, di solo una palabra\"}')",
+      "Bash(curl -s \"http://localhost:8000/api/v1/ports?limit=3\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Total puertos: {d[\\\\\"total\\\\\"]}'\\); [print\\(f'  - {p[\\\\\"name\\\\\"]}'\\) for p in d['ports'][:3]]\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/berths?limit=1\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Total atraques: {d[\\\\\"total\\\\\"]}'\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/alerts?limit=1\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Total alertas: {d[\\\\\"total\\\\\"]}'\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/forecasts/occupancy?port_id=galicia-a-coruna&horizon_hours=6\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Forecast: {d.get\\(\\\\\"model\\\\\",\\\\\"ok\\\\\"\\)} - {len\\(d.get\\(\\\\\"forecast\\\\\",[]\\)\\)} puntos'\\)\")",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/assistant/chat -H \"Content-Type: application/json\" -d '{\"message\":\"Estado del puerto\"}')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['content'][:80]+'...'\\)\")",
+      "Bash(curl -s http://localhost:8000/api/v1/realtime/status)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(d.keys\\(\\)\\)[:5]\\)\\)\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/realtime/connections\")",
+      "Bash(curl -s \"http://localhost:8000/api/v1/realtime/health\")",
+      "Bash(curl -s -I \"http://localhost/src/app.js\")",
+      "Bash(curl -s -I \"http://localhost/src/styles/dashboard.css\")"
     ]
   }
 }

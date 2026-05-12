@@ -139,7 +139,7 @@ class ApiClient {
   }
 
   async getAvailabilityByPort(portId) {
-    return this.get(`/availability/port/${portId}`);
+    return this.get(`/availability/ports/${portId}`);
   }
 
   // ============= PORT CALLS =============

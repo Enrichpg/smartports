@@ -40,7 +40,8 @@ class WebSocketIntegrator {
       
     } catch (error) {
       console.error('[WSIntegrator] Initialization error:', error);
-      store.setWebsocketStatus('error', error.message);
+      store.setConnectionStatus('error');
+      store.setUIState({ websocketError: error.message });
     }
   }
 
@@ -49,33 +50,31 @@ class WebSocketIntegrator {
    */
   async _loadInitialSnapshot() {
     try {
-      store.setWebsocketStatus('connecting');
+      store.setConnectionStatus('connecting');
       
       // Load ports
       const portsData = await apiClient.getPorts(100, 0);
       if (portsData && portsData.ports) {
-        const portMap = {};
-        portsData.ports.forEach(port => {
-          portMap[port.id] = port;
-        });
-        store.setPorts(portMap);
+        store.setPorts(portsData.ports);
       }
-      
-      // Load berths
-      const berthsData = await apiClient.getBerths(100, 0);
-      if (berthsData && berthsData.berths) {
-        const berthMap = {};
-        berthsData.berths.forEach((berth, idx) => {
-          berthMap[berth.id] = { 
-            ...berth, 
-            position_index: idx % 15 
-          };
-        });
-        store.setBerths(berthMap);
-        
-        // Render initial berths on 3D map
+
+      // Load berths per port (endpoint requires port_id or facility_id)
+      const ports = store.getPorts();
+      if (ports.length > 0) {
+        const berthResults = await Promise.allSettled(
+          ports.map((p) => apiClient.getBerths(p.id, null, 100, 0))
+        );
+        const allBerths = berthResults
+          .filter((r) => r.status === 'fulfilled')
+          .flatMap((r) => r.value?.berths || []);
+        const berthsWithIndex = allBerths.map((berth, idx) => ({
+          ...berth,
+          position_index: idx % 15,
+        }));
+        store.setBerths(berthsWithIndex);
+
         if (this.map3d) {
-          this.map3d.loadSnapshot({ berths: berthMap });
+          this.map3d.loadSnapshot({ berths: berthsWithIndex });
         }
       }
       
@@ -91,7 +90,7 @@ class WebSocketIntegrator {
       }
       
       // Load alerts
-      const alertsData = await apiClient.getAlerts(50, 0);
+      const alertsData = await apiClient.getAlerts(null, 50, 0);
       if (alertsData && alertsData.alerts) {
         alertsData.alerts.forEach(alert => {
           store.addAlert(alert);
@@ -116,7 +115,7 @@ class WebSocketIntegrator {
     // Connection state listeners
     wsManager.subscribe('connected', () => {
       console.log('[WSIntegrator] WebSocket connected');
-      store.setWebsocketStatus('connected');
+      store.setConnectionStatus('connected');
       
       // Subscribe to all events
       wsManager.send({
@@ -136,17 +135,18 @@ class WebSocketIntegrator {
 
     wsManager.subscribe('disconnected', () => {
       console.log('[WSIntegrator] WebSocket disconnected');
-      store.setWebsocketStatus('disconnected');
+      store.setConnectionStatus('disconnected');
     });
 
     wsManager.subscribe('reconnecting', (data) => {
       console.log('[WSIntegrator] Reconnecting...', data);
-      store.setWebsocketStatus('connecting');
+      store.setConnectionStatus('connecting');
     });
 
     wsManager.subscribe('error', (error) => {
       console.error('[WSIntegrator] WebSocket error:', error);
-      store.setWebsocketStatus('error', error.error || error);
+      store.setConnectionStatus('error');
+      store.setUIState({ websocketError: error.error || error });
     });
 
     // Event type listeners

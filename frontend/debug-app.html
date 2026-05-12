@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartPort Debug</title>
+</head>
+<body>
+    <h1>SmartPort Debug Console</h1>
+    <pre id="console"></pre>
+
+    <script>
+        const consoleLogs = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        console.log = function(...args) {
+            originalLog(...args);
+            consoleLogs.push('[LOG] ' + args.join(' '));
+            updateConsole();
+        };
+
+        console.error = function(...args) {
+            originalError(...args);
+            consoleLogs.push('[ERROR] ' + args.join(' '));
+            updateConsole();
+        };
+
+        window.addEventListener('error', (e) => {
+            consoleLogs.push('[WINDOW ERROR] ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+            updateConsole();
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            consoleLogs.push('[UNHANDLED REJECTION] ' + e.reason);
+            updateConsole();
+        });
+
+        function updateConsole() {
+            document.getElementById('console').textContent = consoleLogs.join('\n');
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        console.log('Starting SmartPort app...');
+
+        // Test imports
+        import('./src/app.js')
+            .then((module) => {
+                console.log('✓ app.js loaded successfully');
+                const app = new module.SmartPortApp('app');
+                console.log('✓ SmartPortApp instantiated');
+                app.init();
+                console.log('✓ SmartPortApp initialized');
+            })
+            .catch((error) => {
+                console.error('✗ Error loading app.js:', error.message);
+                console.error(error.stack);
+            });
+    </script>
+</body>
+</html>

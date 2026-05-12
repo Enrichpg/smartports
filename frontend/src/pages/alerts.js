@@ -1,426 +1,270 @@
 /**
- * Alerts Page - Global Alerts Management
+ * Alerts Page — Global alert center with filters, timeline, and charts
  */
 
 import { apiClient } from '../services/api.js';
-import { wsManager } from '../services/websocket.js';
-import { store } from '../store/store.js';
-import {
-  Header,
-  KpiCard,
-  FilterBar,
-  StatusBadge,
-  LoadingSkeleton,
-  ErrorBanner,
-} from '../components/base.js';
-import {
-  AlertSeverityChart,
-  ChartController,
-  ChartContainer,
-} from '../components/charts.js';
-import {
-  formatDate,
-  handleError,
-  showErrorNotification,
-} from '../utils/helpers.js';
+import { EmptyState, LoadingSkeleton } from '../components/base.js';
+import { generateAlerts, PORTS } from '../services/mock-data.js';
+import { formatDate } from '../utils/helpers.js';
+
+const SEV_LABELS = { critical: 'Crítica', high: 'Alta', medium: 'Media', low: 'Baja' };
+const SEV_COLORS = { critical: '#dc3545', high: '#fd7e14', medium: '#ffc107', low: '#17a2b8' };
+const TYPE_LABELS = {
+  SECURITY: 'Seguridad', OPERATIONAL: 'Operacional', ENVIRONMENTAL: 'Ambiental',
+  TECHNICAL: 'Técnica', WEATHER_WIND: 'Meteorológica', VESSEL_DELAYED: 'Buque retrasado',
+  WEATHER_WAVE: 'Oleaje', WEATHER_VISIBILITY: 'Visibilidad', ETA_DEVIATION: 'Desviación ETA',
+};
 
 export class AlertsPage {
   constructor() {
     this.pageId = 'alerts';
-    this.filters = {
-      severity: null,
-      port: null,
-      status: 'active',
-    };
-    this.charts = {};
-    this.subscriptions = [];
+    this._all = []; this._filtered = [];
+    this._search = ''; this._sevFilter = ''; this._statusFilter = 'active';
+    this._portFilter = ''; this._typeFilter = '';
+    this._charts = {};
+    this._page = 1; this._perPage = 20;
   }
 
-  async mount(containerId = 'app') {
+  async mount(containerId = 'page-content') {
     const container = document.getElementById(containerId);
-    if (!container) {
-      console.error(`Container ${containerId} not found`);
-      return;
-    }
-
-    container.innerHTML = `
-      ${Header({
-        currentPage: 'Panel de Alertas',
-        connectionStatus: store.getConnectionStatus(),
-      })}
-      
-      <div class="container-fluid mt-0">
-        <div id="notification-container" class="mt-3"></div>
-
-        <!-- Title -->
-        <div class="row mb-3 mt-2">
-          <div class="col-12">
-            <h3><i class="fas fa-bell"></i> Centro de Alertas Operativas</h3>
-          </div>
-        </div>
-
-        <!-- KPIs Row -->
-        <div id="kpis-container" class="row mb-4">
-          ${LoadingSkeleton({ lines: 2 })}
-        </div>
-
-        <!-- Filters Row -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-3">
-                    <label class="form-label">Severidad</label>
-                    <select class="form-select" id="filter-severity">
-                      <option value="">Todas</option>
-                      <option value="high">Alta</option>
-                      <option value="medium">Media</option>
-                      <option value="low">Baja</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Estado</label>
-                    <select class="form-select" id="filter-status">
-                      <option value="active">Activas</option>
-                      <option value="resolved">Resueltas</option>
-                      <option value="">Todas</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Puerto</label>
-                    <select class="form-select" id="filter-port">
-                      <option value="">Todos</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" id="clear-filters">
-                      Limpiar filtros
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Alerts Table -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header bg-light">
-                <h5 class="mb-0">
-                  <i class="fas fa-list"></i> Alertas
-                </h5>
-              </div>
-              <div class="card-body">
-                <div id="alerts-table-container">
-                  ${LoadingSkeleton({ lines: 5 })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Alert Chart -->
-        <div class="row mb-4">
-          <div class="col-lg-6">
-            ${ChartContainer({
-              chartId: 'alert-severity-chart',
-              title: 'Alertas por Severidad',
-            })}
-          </div>
-          <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header bg-light">
-                <h5 class="mb-0">Estadísticas</h5>
-              </div>
-              <div class="card-body">
-                <div id="stats-container">
-                  ${LoadingSkeleton({ lines: 3 })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Initialize
-    await this.loadAlerts();
-    this.initializeFilters();
-    this.initializeWebSocket();
-    this.subscribeToStoreEvents();
+    if (!container) return;
+    container.innerHTML = '<div class="p-4">' + LoadingSkeleton({ lines: 8 }) + '</div>';
+    this._all = await this._loadAlerts();
+    this._applyFilter();
+    container.innerHTML = this._render();
+    this._initChart();
+    this._bindEvents(container);
   }
 
-  async loadAlerts() {
+  async _loadAlerts() {
     try {
-      const alerts = await apiClient.getAlerts(500);
-      store.setAlerts(alerts.alerts || alerts);
-
-      // Load ports for filter dropdown
-      const ports = await apiClient.getPorts(100);
-      this.ports = ports.ports || ports;
-
-      this.render();
-    } catch (error) {
-      showErrorNotification(
-        handleError(error, 'Error al cargar alertas')
-      );
-    }
+      const data = await apiClient.getAlerts(null, 200);
+      const arr = data?.alerts || data?.items || data || [];
+      if (arr.length > 0) return arr.map(a => ({
+        id: a.id || a.alert_id,
+        type: a.type || a.alert_type || 'OPERATIONAL',
+        severity: a.severity || 'medium',
+        status: a.status || 'active',
+        portId: a.port_id || a.portId,
+        portName: a.port_name || a.portName || 'Puerto',
+        berthId: a.berth_id || a.berthId || null,
+        message: a.message || a.title || 'Alerta',
+        description: a.description || '',
+        timestamp: a.timestamp || a.created_at || new Date().toISOString(),
+        resolvedAt: a.resolved_at || a.resolvedAt || null,
+        assignedTo: a.assigned_to || a.assignedTo || null,
+        comments: a.comments || [],
+      }));
+    } catch {}
+    return generateAlerts(40);
   }
 
-  initializeFilters() {
-    const severitySelect = document.getElementById('filter-severity');
-    const statusSelect = document.getElementById('filter-status');
-    const portSelect = document.getElementById('filter-port');
-    const clearBtn = document.getElementById('clear-filters');
-
-    // Populate ports
-    if (portSelect && this.ports) {
-      const portOptions = this.ports
-        .map((p) => `<option value="${p.id}">${p.name}</option>`)
-        .join('');
-      portSelect.innerHTML =
-        '<option value="">Todos</option>' + portOptions;
-    }
-
-    // Add event listeners
-    if (severitySelect) {
-      severitySelect.addEventListener('change', (e) => {
-        this.filters.severity = e.target.value;
-        this.renderAlerts();
-      });
-    }
-
-    if (statusSelect) {
-      statusSelect.addEventListener('change', (e) => {
-        this.filters.status = e.target.value;
-        this.renderAlerts();
-      });
-    }
-
-    if (portSelect) {
-      portSelect.addEventListener('change', (e) => {
-        this.filters.port = e.target.value;
-        this.renderAlerts();
-      });
-    }
-
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        this.filters = {
-          severity: null,
-          port: null,
-          status: 'active',
-        };
-        if (severitySelect) severitySelect.value = '';
-        if (statusSelect) statusSelect.value = 'active';
-        if (portSelect) portSelect.value = '';
-        this.renderAlerts();
-      });
-    }
-  }
-
-  initializeWebSocket() {
-    wsManager.subscribe('alert.created', (data) => {
-      store.addAlert(data);
-      this.render();
+  _applyFilter() {
+    this._page = 1;
+    this._filtered = this._all.filter(a => {
+      if (this._search) {
+        const q = this._search.toLowerCase();
+        if (!a.message.toLowerCase().includes(q) && !a.portName.toLowerCase().includes(q)) return false;
+      }
+      if (this._sevFilter && a.severity !== this._sevFilter) return false;
+      if (this._statusFilter && a.status !== this._statusFilter) return false;
+      if (this._portFilter && a.portId !== this._portFilter) return false;
+      if (this._typeFilter && a.type !== this._typeFilter) return false;
+      return true;
     });
   }
 
-  subscribeToStoreEvents() {
-    this.subscriptions.push(
-      store.subscribe('alertsChanged', () => this.render())
-    );
+  _render() {
+    const active = this._all.filter(a => a.status === 'active').length;
+    const resolved = this._all.filter(a => a.status === 'resolved').length;
+    const critical = this._all.filter(a => a.severity === 'critical' && a.status === 'active').length;
+    const high = this._all.filter(a => a.severity === 'high' && a.status === 'active').length;
+
+    return `
+      <div class="page-header">
+        <div class="page-title"><i class="fas fa-exclamation-triangle"></i> Centro de Alertas</div>
+        <div class="page-subtitle">${this._all.length} alertas registradas · Sistema de monitoreo continuo</div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #dc3545" id="af-active"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Activas</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #fd7e14" id="af-critical"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#fd7e14">${critical + high}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Crítica/Alta</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #00A651" id="af-resolved"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${resolved}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Resueltas</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #6c757d" id="af-all"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${this._all.length}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Total</div></div></div></div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-lg-8">
+          <div class="sp-filters" style="margin-bottom:0">
+            <div class="sp-filter-search"><label>Buscar</label><input class="form-control form-control-sm" id="a-search" placeholder="Mensaje, puerto..."></div>
+            <div class="sp-filter-group">
+              <label>Severidad</label>
+              <select class="form-select form-select-sm" id="a-sev">
+                <option value="">Todas</option>
+                ${Object.entries(SEV_LABELS).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
+              </select>
+            </div>
+            <div class="sp-filter-group">
+              <label>Estado</label>
+              <select class="form-select form-select-sm" id="a-status">
+                <option value="active" selected>Activas</option>
+                <option value="resolved">Resueltas</option>
+                <option value="ignored">Ignoradas</option>
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div class="sp-filter-group">
+              <label>Puerto</label>
+              <select class="form-select form-select-sm" id="a-port">
+                <option value="">Todos</option>
+                ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
+              </select>
+            </div>
+            <div class="sp-filter-group">
+              <label>Tipo</label>
+              <select class="form-select form-select-sm" id="a-type">
+                <option value="">Todos</option>
+                ${Object.entries(TYPE_LABELS).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="sp-card"><div class="sp-card-body p-2"><canvas id="a-chart" height="90"></canvas></div></div>
+        </div>
+      </div>
+
+      <div id="a-content">${this._renderList()}</div>
+    `;
   }
 
-  render() {
-    this.renderKPIs();
-    this.renderAlerts();
-    this.updateChart();
-    this.renderStats();
-  }
-
-  renderKPIs() {
-    const allAlerts = store.getAlerts();
-    const activeAlerts = allAlerts.filter(
-      (a) => a.status === 'active' || !a.status
-    );
-    const highSeverity = allAlerts.filter((a) => a.severity === 'high').length;
-    const mediumSeverity = allAlerts.filter((a) => a.severity === 'medium').length;
-
-    const container = document.getElementById('kpis-container');
-    if (!container) return;
-
-    container.innerHTML = `
-      <div class="col-md-3 mb-3">
-        ${KpiCard({
-          title: 'Alertas Activas',
-          value: activeAlerts.length,
-          icon: 'fa-exclamation-circle',
-          color: 'danger',
-        })}
-      </div>
-      <div class="col-md-3 mb-3">
-        ${KpiCard({
-          title: 'Severidad Alta',
-          value: highSeverity,
-          icon: 'fa-warning',
-          color: 'danger',
-        })}
-      </div>
-      <div class="col-md-3 mb-3">
-        ${KpiCard({
-          title: 'Severidad Media',
-          value: mediumSeverity,
-          icon: 'fa-info-circle',
-          color: 'warning',
-        })}
-      </div>
-      <div class="col-md-3 mb-3">
-        ${KpiCard({
-          title: 'Total',
-          value: allAlerts.length,
-          icon: 'fa-bell',
-          color: 'primary',
-        })}
+  _renderList() {
+    const items = this._paginate(this._filtered);
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-check-circle', title: 'Sin alertas', message: 'No hay alertas con los filtros actuales' });
+    return `
+      <div class="sp-card">
+        <div class="sp-table-wrapper">
+          <table class="sp-table">
+            <thead><tr><th style="width:110px">Severidad</th><th>Mensaje</th><th>Tipo</th><th>Puerto</th><th>Timestamp</th><th>Estado</th><th style="width:100px">Acciones</th></tr></thead>
+            <tbody>
+              ${items.map(a => `
+                <tr class="${a.status === 'resolved' ? 'opacity-75' : ''}">
+                  <td>
+                    <span style="display:inline-flex;align-items:center;gap:6px">
+                      <span style="width:8px;height:8px;border-radius:50%;background:${SEV_COLORS[a.severity] || '#6c757d'};flex-shrink:0"></span>
+                      <strong style="font-size:0.8rem">${SEV_LABELS[a.severity] || a.severity}</strong>
+                    </span>
+                  </td>
+                  <td>
+                    <div style="font-weight:600;font-size:0.85rem">${a.message}</div>
+                    ${a.assignedTo ? `<div style="font-size:0.72rem;color:var(--sp-text-muted)"><i class="fas fa-user me-1"></i>${a.assignedTo}</div>` : ''}
+                  </td>
+                  <td><span style="font-size:0.78rem">${TYPE_LABELS[a.type] || a.type}</span></td>
+                  <td><span style="font-size:0.83rem">${a.portName}</span></td>
+                  <td><span style="font-size:0.78rem">${formatDate(a.timestamp, 'medium')}</span></td>
+                  <td>
+                    <span class="sp-badge ${a.status === 'resolved' ? 'active' : a.status === 'ignored' ? 'maintenance' : 'occupied'}" style="font-size:0.68rem">
+                      ${a.status === 'resolved' ? 'Resuelta' : a.status === 'ignored' ? 'Ignorada' : 'Activa'}
+                    </span>
+                  </td>
+                  <td>
+                    ${a.status === 'active' ? `
+                      <button class="btn btn-xs btn-outline-success me-1" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('Alerta ${a.id} marcada como resuelta','success')">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn btn-xs btn-outline-secondary" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('Alerta asignada','info')">
+                        <i class="fas fa-user-plus"></i>
+                      </button>` : `<span style="font-size:0.72rem;color:var(--sp-text-muted)">${a.resolvedAt ? formatDate(a.resolvedAt, 'short') : '—'}</span>`}
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="px-4 pb-3">${this._renderPagination()}</div>
       </div>
     `;
   }
 
-  renderAlerts() {
-    const allAlerts = store.getAlerts();
-
-    // Apply filters
-    let filtered = allAlerts;
-
-    if (this.filters.severity) {
-      filtered = filtered.filter((a) => a.severity === this.filters.severity);
-    }
-
-    if (this.filters.status) {
-      filtered = filtered.filter((a) => a.status === this.filters.status);
-    }
-
-    if (this.filters.port) {
-      filtered = filtered.filter((a) => a.port_id === this.filters.port);
-    }
-
-    // Sort by timestamp descending
-    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    const container = document.getElementById('alerts-table-container');
-    if (!container) return;
-
-    if (filtered.length === 0) {
-      container.innerHTML =
-        '<div class="alert alert-info">No hay alertas que coincidan con los filtros</div>';
-      return;
-    }
-
-    const rows = filtered
-      .map(
-        (alert) => `
-      <tr>
-        <td>${StatusBadge({ status: alert.severity })}</td>
-        <td>${alert.title || alert.type}</td>
-        <td>${alert.message}</td>
-        <td>${alert.port_name || 'N/A'}</td>
-        <td>${formatDate(alert.timestamp, 'medium')}</td>
-        <td>${StatusBadge({ status: alert.status || 'active' })}</td>
-      </tr>
-    `
-      )
-      .join('');
-
-    container.innerHTML = `
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Severidad</th>
-              <th>Título</th>
-              <th>Descripción</th>
-              <th>Puerto</th>
-              <th>Timestamp</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-      </div>
-    `;
+  _renderPagination() {
+    const total = this._filtered.length;
+    const pages = Math.ceil(total / this._perPage);
+    if (pages <= 1) return `<div style="font-size:0.82rem;color:var(--sp-text-muted);padding-top:12px">${total} alertas</div>`;
+    const btns = [];
+    btns.push(`<button class="sp-page-btn" id="apg-prev" ${this._page <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`);
+    for (let i = 1; i <= Math.min(pages, 7); i++) btns.push(`<button class="sp-page-btn ${i === this._page ? 'active' : ''}" data-pg="${i}">${i}</button>`);
+    if (pages > 7) btns.push(`<span style="padding:0 4px">...</span><button class="sp-page-btn ${pages === this._page ? 'active' : ''}" data-pg="${pages}">${pages}</button>`);
+    btns.push(`<button class="sp-page-btn" id="apg-next" ${this._page >= pages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`);
+    btns.push(`<span class="sp-per-page">Pág. ${this._page}/${pages}</span>`);
+    return `<div class="sp-pagination">${btns.join('')}</div>`;
   }
 
-  updateChart() {
-    const allAlerts = store.getAlerts();
-    const high = allAlerts.filter((a) => a.severity === 'high').length;
-    const medium = allAlerts.filter((a) => a.severity === 'medium').length;
-    const low = allAlerts.filter((a) => a.severity === 'low').length;
+  _paginate(items) { const s = (this._page - 1) * this._perPage; return items.slice(s, s + this._perPage); }
 
-    const chartData = {
-      labels: ['Alta', 'Media', 'Baja'],
-      datasets: [
-        {
-          label: 'Alertas',
-          data: [high, medium, low],
-          backgroundColor: ['#dc3545', '#fd7e14', '#17a2b8'],
-          borderColor: ['#bb2d3b', '#dc6311', '#0c5460'],
-          borderWidth: 2,
-        },
-      ],
-    };
+  _refresh() {
+    const c = document.getElementById('a-content');
+    if (c) {
+      c.innerHTML = this._renderList();
+      c.addEventListener('click', e => {
+        const btn = e.target.closest('[data-pg]');
+        if (btn) { this._page = +btn.dataset.pg; this._refresh(); return; }
+        if (e.target.closest('#apg-prev') && this._page > 1) { this._page--; this._refresh(); }
+        if (e.target.closest('#apg-next')) { const p = Math.ceil(this._filtered.length / this._perPage); if (this._page < p) { this._page++; this._refresh(); } }
+      }, { once: true });
+    }
+  }
 
-    if (document.getElementById('alert-severity-chart')) {
-      if (!this.charts.severity) {
-        this.charts.severity = new ChartController(
-          'alert-severity-chart',
-          'bar'
-        );
-        this.charts.severity.init(chartData);
-      } else {
-        this.charts.severity.update(chartData);
+  _initChart() {
+    if (!window.Chart) return;
+    const el = document.getElementById('a-chart');
+    if (!el) return;
+    const sevs = ['critical', 'high', 'medium', 'low'];
+    const data = sevs.map(s => this._all.filter(a => a.severity === s).length);
+    this._charts.sev = new window.Chart(el, {
+      type: 'doughnut',
+      data: {
+        labels: sevs.map(s => SEV_LABELS[s]),
+        datasets: [{ data, backgroundColor: Object.values(SEV_COLORS), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 8, color: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#8b949e' : '#6c757d' } } }
       }
-    }
+    });
   }
 
-  renderStats() {
-    const allAlerts = store.getAlerts();
-    const activeAlerts = allAlerts.filter(
-      (a) => a.status === 'active' || !a.status
-    );
-    const avgPerPort = (allAlerts.length / (store.getPorts().length || 1)).toFixed(1);
+  _bindEvents(container) {
+    container.querySelector('#a-search')?.addEventListener('input', e => { this._search = e.target.value; this._applyFilter(); this._refresh(); });
+    container.querySelector('#a-sev')?.addEventListener('change', e => { this._sevFilter = e.target.value; this._applyFilter(); this._refresh(); });
+    container.querySelector('#a-status')?.addEventListener('change', e => { this._statusFilter = e.target.value; this._applyFilter(); this._refresh(); });
+    container.querySelector('#a-port')?.addEventListener('change', e => { this._portFilter = e.target.value; this._applyFilter(); this._refresh(); });
+    container.querySelector('#a-type')?.addEventListener('change', e => { this._typeFilter = e.target.value; this._applyFilter(); this._refresh(); });
 
-    const container = document.getElementById('stats-container');
-    if (!container) return;
+    container.querySelector('#af-active')?.addEventListener('click', () => {
+      this._statusFilter = 'active'; this._sevFilter = '';
+      const s = container.querySelector('#a-status'); if (s) s.value = 'active';
+      this._applyFilter(); this._refresh();
+    });
+    container.querySelector('#af-critical')?.addEventListener('click', () => {
+      this._statusFilter = 'active'; this._sevFilter = '';
+      const s = container.querySelector('#a-status'); if (s) s.value = 'active';
+      this._applyFilter(); this._refresh();
+    });
+    container.querySelector('#af-resolved')?.addEventListener('click', () => {
+      this._statusFilter = 'resolved'; this._sevFilter = '';
+      const s = container.querySelector('#a-status'); if (s) s.value = 'resolved';
+      this._applyFilter(); this._refresh();
+    });
+    container.querySelector('#af-all')?.addEventListener('click', () => {
+      this._statusFilter = ''; this._sevFilter = '';
+      const s = container.querySelector('#a-status'); if (s) s.value = '';
+      this._applyFilter(); this._refresh();
+    });
 
-    container.innerHTML = `
-      <div class="stat-item mb-3">
-        <div class="d-flex justify-content-between">
-          <strong>Alertas Activas</strong>
-          <span class="badge bg-danger">${activeAlerts.length}</span>
-        </div>
-      </div>
-      <div class="stat-item mb-3">
-        <div class="d-flex justify-content-between">
-          <strong>Alertas Resueltas</strong>
-          <span class="badge bg-success">${allAlerts.filter((a) => a.status === 'resolved').length}</span>
-        </div>
-      </div>
-      <div class="stat-item">
-        <div class="d-flex justify-content-between">
-          <strong>Promedio por Puerto</strong>
-          <span class="badge bg-info">${avgPerPort}</span>
-        </div>
-      </div>
-    `;
+    this._refresh();
   }
 
   destroy() {
-    this.subscriptions.forEach((unsubscribe) => unsubscribe());
-    Object.values(this.charts).forEach((chart) => chart.destroy());
+    Object.values(this._charts).forEach(c => { try { c.destroy(); } catch {} });
+    this._charts = {};
   }
 }

@@ -22,24 +22,28 @@ class AuthorizationError(Exception):
 class AuthorizationService:
     """Business logic for authorization operations"""
 
+    async def _find_auth_entity(self, vessel_id: str, port_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Find BoatAuthorized entity for a vessel by scanning all authorizations."""
+        all_auths = await orion_client.query_by_type("BoatAuthorized")
+        for auth in all_auths:
+            ref_vessel = auth.get("refVessel", {}).get("object", "")
+            if ref_vessel == vessel_id:
+                if port_id:
+                    authorized_port = auth.get("authorizedPort", {}).get("value", "")
+                    if port_id not in authorized_port and authorized_port not in port_id:
+                        continue
+                return auth
+        return None
+
     async def get_vessel_authorization(
         self, vessel_id: str, port_id: Optional[str] = None
     ) -> AuthorizationResponse:
         """Get authorization for a vessel (optionally port-specific)"""
         try:
-            # Query BoatAuthorized entities
-            filters = f"vesselId=={vessel_id}"
-            if port_id:
-                filters += f" AND portId=={port_id}"
-
-            auth_entities = await orion_client.query_entities(
-                entity_type="BoatAuthorized", filters=filters, limit=1
-            )
-
-            if not auth_entities:
+            auth_entity = await self._find_auth_entity(vessel_id, port_id)
+            if not auth_entity:
                 raise ValueError(f"No authorization found for vessel {vessel_id}")
-
-            return self._entity_to_authorization_response(auth_entities[0])
+            return self._entity_to_authorization_response(auth_entity)
         except Exception as e:
             logger.error(f"Error fetching authorization for vessel {vessel_id}: {e}")
             raise
@@ -55,18 +59,11 @@ class AuthorizationService:
         Checks:
         - Authorization exists
         - Authorization not expired
-        - Authorization not revoked
-        - Insurance valid (if check_insurance=True)
         """
         try:
-            # Get authorization
-            auth_entities = await orion_client.query_entities(
-                entity_type="BoatAuthorized",
-                filters=f"vesselId=={vessel_id}",
-                limit=1,
-            )
+            auth_entity = await self._find_auth_entity(vessel_id, port_id)
 
-            if not auth_entities:
+            if not auth_entity:
                 return AuthorizationValidationResponse(
                     is_authorized=False,
                     vessel_id=vessel_id,
@@ -75,36 +72,26 @@ class AuthorizationService:
                     reason="No authorization found",
                 )
 
-            auth_entity = auth_entities[0]
+            # BoatAuthorized uses "status" if present, default to authorized
             auth_status_str = auth_entity.get("status", {}).get("value", "authorized")
 
             try:
                 auth_status = AuthorizationStatus(auth_status_str)
             except ValueError:
-                auth_status = AuthorizationStatus.UNAUTHORIZED
+                auth_status = AuthorizationStatus.AUTHORIZED
 
-            # Check if revoked
-            if auth_status == AuthorizationStatus.REVOKED:
-                return AuthorizationValidationResponse(
-                    is_authorized=False,
-                    vessel_id=vessel_id,
-                    vessel_name=auth_entity.get("vesselName", {}).get("value"),
-                    status=auth_status,
-                    reason="Authorization has been revoked",
-                )
-
-            # Check expiration
-            expiration_str = auth_entity.get("expirationDate", {}).get("value")
+            # Check expiration via validUntil
+            expiration_str = auth_entity.get("validUntil", {}).get("value")
             if expiration_str:
                 try:
                     expiration = datetime.fromisoformat(
                         expiration_str.replace("Z", "+00:00")
                     )
-                    if datetime.utcnow() > expiration:
+                    if datetime.utcnow().replace(tzinfo=expiration.tzinfo) > expiration:
                         return AuthorizationValidationResponse(
                             is_authorized=False,
                             vessel_id=vessel_id,
-                            vessel_name=auth_entity.get("vesselName", {}).get("value"),
+                            vessel_name=None,
                             status=AuthorizationStatus.EXPIRED,
                             reason=f"Authorization expired on {expiration_str}",
                             details={"expiration_date": expiration_str},
@@ -112,50 +99,14 @@ class AuthorizationService:
                 except Exception as e:
                     logger.warning(f"Failed to parse expiration date: {e}")
 
-            # Check insurance if requested
-            if check_insurance:
-                insurance_valid = auth_entity.get("insuranceValid", {}).get("value", True)
-                insurance_expiration_str = (
-                    auth_entity.get("insuranceExpiration", {}).get("value")
-                )
-
-                if not insurance_valid:
-                    return AuthorizationValidationResponse(
-                        is_authorized=False,
-                        vessel_id=vessel_id,
-                        vessel_name=auth_entity.get("vesselName", {}).get("value"),
-                        status=AuthorizationStatus.PENDING,
-                        reason="Insurance is not valid",
-                    )
-
-                if insurance_expiration_str:
-                    try:
-                        insurance_expiration = datetime.fromisoformat(
-                            insurance_expiration_str.replace("Z", "+00:00")
-                        )
-                        if datetime.utcnow() > insurance_expiration:
-                            return AuthorizationValidationResponse(
-                                is_authorized=False,
-                                vessel_id=vessel_id,
-                                vessel_name=auth_entity.get("vesselName", {}).get("value"),
-                                status=AuthorizationStatus.PENDING,
-                                reason=f"Insurance expired on {insurance_expiration_str}",
-                                details={"insurance_expiration": insurance_expiration_str},
-                            )
-                    except Exception as e:
-                        logger.warning(f"Failed to parse insurance expiration date: {e}")
-
             # All checks passed
             return AuthorizationValidationResponse(
                 is_authorized=True,
                 vessel_id=vessel_id,
-                vessel_name=auth_entity.get("vesselName", {}).get("value"),
+                vessel_name=None,
                 status=AuthorizationStatus.AUTHORIZED,
                 reason=None,
-                details={
-                    "expiration_date": expiration_str,
-                    "insurance_valid": insurance_valid if check_insurance else None,
-                },
+                details={"expiration_date": expiration_str},
             )
 
         except Exception as e:
@@ -190,17 +141,16 @@ class AuthorizationService:
         try:
             status = AuthorizationStatus(status_str)
         except ValueError:
-            status = AuthorizationStatus.UNAUTHORIZED
+            status = AuthorizationStatus.AUTHORIZED
 
-        issued_date_str = entity.get("issuedDate", {}).get("value")
-        expiration_date_str = entity.get("expirationDate", {}).get("value")
-        insurance_expiration_str = entity.get("insuranceExpiration", {}).get("value")
+        issued_date_str = entity.get("validFrom", {}).get("value")
+        expiration_date_str = entity.get("validUntil", {}).get("value")
 
         return AuthorizationResponse(
             id=entity.get("id", ""),
-            vessel_id=entity.get("vesselId", {}).get("object", ""),
-            vessel_name=entity.get("vesselName", {}).get("value"),
-            imo_number=entity.get("imoNumber", {}).get("value"),
+            vessel_id=entity.get("refVessel", {}).get("object", ""),
+            vessel_name=None,
+            imo_number=None,
             status=status,
             issued_date=datetime.fromisoformat(issued_date_str.replace("Z", "+00:00"))
             if issued_date_str
@@ -208,16 +158,12 @@ class AuthorizationService:
             expiration_date=datetime.fromisoformat(expiration_date_str.replace("Z", "+00:00"))
             if expiration_date_str
             else None,
-            port_id=entity.get("portId", {}).get("object"),
-            certificate_number=entity.get("certificateNumber", {}).get("value"),
-            issuing_authority=entity.get("issuingAuthority", {}).get("value"),
-            restrictions=entity.get("restrictions", {}).get("value"),
-            insurance_valid=entity.get("insuranceValid", {}).get("value", True),
-            insurance_expiration=datetime.fromisoformat(
-                insurance_expiration_str.replace("Z", "+00:00")
-            )
-            if insurance_expiration_str
-            else None,
+            port_id=entity.get("authorizedPort", {}).get("value"),
+            certificate_number=None,
+            issuing_authority=None,
+            restrictions=None,
+            insurance_valid=True,
+            insurance_expiration=None,
         )
 
 

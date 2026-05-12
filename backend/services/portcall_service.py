@@ -64,10 +64,7 @@ class PortCallService:
             entity_data = {
                 "id": portcall_id,
                 "type": "PortCall",
-                "@context": [
-                    "https://www.w3.org/2019/wot/json-schema",
-                    "https://smartdatamodels.org/context.jsonld",
-                ],
+                "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
                 "vesselId": {"type": "Relationship", "object": vessel_id},
                 "portId": {"type": "Relationship", "object": port_id},
                 "status": {"type": "Property", "value": PortCallStatus.SCHEDULED.value},
@@ -150,11 +147,11 @@ class PortCallService:
     ) -> tuple[List[PortCallResponse], int]:
         """Get PortCalls for a specific port"""
         try:
-            entities = await orion_client.query_entities(
-                entity_type="PortCall",
-                filters=f"portId=={port_id}",
-                limit=1000,
-            )
+            all_entities = await orion_client.query_by_type("PortCall")
+            entities = [
+                e for e in all_entities
+                if e.get("portId", {}).get("object") == port_id
+            ]
             total = len(entities)
             portcalls_data = entities[offset : offset + limit]
             portcalls = [self._entity_to_portcall_response(p) for p in portcalls_data]
@@ -168,13 +165,12 @@ class PortCallService:
     ) -> List[PortCallResponse]:
         """Get active PortCalls (status=active)"""
         try:
-            filters = "status==active"
-            if port_id:
-                filters += f" AND portId=={port_id}"
-
-            entities = await orion_client.query_entities(
-                entity_type="PortCall", filters=filters, limit=1000
-            )
+            all_entities = await orion_client.query_by_type("PortCall")
+            entities = [
+                e for e in all_entities
+                if e.get("status", {}).get("value") == "active"
+                and (not port_id or e.get("portId", {}).get("object") == port_id)
+            ]
             return [self._entity_to_portcall_response(p) for p in entities]
         except Exception as e:
             logger.error(f"Error fetching active PortCalls: {e}")

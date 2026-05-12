@@ -47,12 +47,21 @@ export class PortMapController {
       return;
     }
 
-    if (!port.latitude || !port.longitude) {
+    // Support flat lat/lon and NGSI-LD GeoProperty format
+    let lat = port.latitude;
+    let lng = port.longitude;
+    if ((!lat || !lng) && port.location?.value?.coordinates) {
+      const coords = port.location.value.coordinates;
+      lng = coords[0];
+      lat = coords[1];
+    }
+
+    if (!lat || !lng) {
       console.warn(`Port ${port.id} missing coordinates`);
       return;
     }
 
-    const marker = L.circleMarker([port.latitude, port.longitude], {
+    const marker = L.circleMarker([lat, lng], {
       radius: this.getMarkerRadius(port),
       fillColor: this.getMarkerColor(port),
       color: '#000',
@@ -152,9 +161,5 @@ export class PortMapController {
 }
 
 export function MapContainer({ mapId = 'map', width = '100%', height = '500px' }) {
-  return `
-    <div id="${mapId}" style="width: ${width}; height: ${height};" class="rounded"></div>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  `;
+  return `<div id="${mapId}" style="width: ${width}; height: ${height};" class="rounded"></div>`;
 }

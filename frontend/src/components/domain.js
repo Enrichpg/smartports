@@ -21,20 +21,22 @@ export function PortCard({
   const clickHandler = onClick ? `onclick="(${onClick})('${port.id}'); return false;"` : '';
   const cardSize = compact ? 'col-md-4' : 'col-md-6';
 
+  const locationText = port.description || port.country || 'Galicia, España';
+
   const details = showDetails
     ? `
     <div class="row mt-2 small">
       <div class="col-6">
-        <strong>Atraques:</strong> ${port.total_berths || 0}
+        <strong>Atraques:</strong> ${port.total_berths != null ? port.total_berths : '—'}
       </div>
       <div class="col-6">
-        <strong>Ocupados:</strong> ${port.occupied_berths || 0}
+        <strong>Ocupados:</strong> ${port.occupied_berths != null ? port.occupied_berths : '—'}
       </div>
       <div class="col-6">
-        <strong>Libres:</strong> ${port.free_berths || 0}
+        <strong>Libres:</strong> ${port.free_berths != null ? port.free_berths : '—'}
       </div>
       <div class="col-6">
-        <strong>Alertas:</strong> ${port.active_alerts || 0}
+        <strong>Alertas:</strong> ${port.active_alerts != null ? port.active_alerts : '—'}
       </div>
     </div>
   `
@@ -44,7 +46,7 @@ export function PortCard({
     <div class="card cursor-pointer port-card h-100 ${onClick ? 'shadow-hover' : ''}" ${clickHandler} style="transition: all 0.3s;">
       <div class="card-body">
         <h5 class="card-title">${port.name || port.id}</h5>
-        <p class="card-text small text-muted">${port.location || 'Ubicación no disponible'}</p>
+        <p class="card-text small text-muted">${locationText}</p>
         ${StatusBadge({ status: port.status || 'active' })}
         ${details}
       </div>

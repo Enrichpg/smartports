@@ -17,7 +17,7 @@ _FIWARE_NS = "https://uri.fiware.org/ns/data-models#"
 _FIWARE_TYPES = {
     "Port", "Berth", "PortAuthority", "SeaportFacilities", "Vessel",
     "MasterVessel", "BoatAuthorized", "BoatPlacesAvailable", "BoatPlacesPricing",
-    "Device", "WeatherObserved", "AirQualityObserved", "Alert", "PortCall",
+    "Device", "WeatherObserved", "AirQualityObserved", "Alert",
 }
 
 
@@ -69,7 +69,7 @@ class OrionLDClient:
                     params=params,
                 )
                 response.raise_for_status()
-                if response.status_code == 204:
+                if response.status_code in (201, 204) or not response.content:
                     return {"status": "success"}
                 return response.json()
         except httpx.HTTPError as e:
@@ -107,6 +107,13 @@ class OrionLDClient:
 
     async def create_entity(self, entity: Dict[str, Any]) -> str:
         """Create a new entity in Orion-LD. Returns entity ID."""
+        entity = dict(entity)
+        if "@context" not in entity:
+            entity["@context"] = "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+        # Expand short FIWARE type to full URI so queries match seed entities
+        raw_type = entity.get("type", "")
+        if raw_type in _FIWARE_TYPES:
+            entity["type"] = _expand_type(raw_type)
         result = await self._request("POST", "ngsi-ld/v1/entities", json_data=entity)
         return result.get("id", entity.get("id", ""))
 
@@ -114,6 +121,8 @@ class OrionLDClient:
         self, entity_id: str, entity_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Update entity attributes (PATCH)"""
+        if "@context" not in entity_data:
+            entity_data = {**entity_data, "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"}
         result = await self._request(
             "PATCH", f"ngsi-ld/v1/entities/{entity_id}/attrs", json_data=entity_data
         )
