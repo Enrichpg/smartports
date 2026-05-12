@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — Contexto para Claude Code
 
 > Leido automaticamente por Claude Code al arrancar.
-> Historial completo extraido de los tickets 1-11.
-> Ultima actualizacion: 2026-05-08 (post iteracion 11 - Sergio)
+> Historial completo extraido de los tickets 1-12.
+> Ultima actualizacion: 2026-05-12 (post iteracion 12 - Enrique)
 
 ---
 

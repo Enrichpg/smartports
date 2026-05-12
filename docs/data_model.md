@@ -1,9 +1,9 @@
 # SmartPort Galicia — Data Model (NGSI-LD)
 
-**Version:** 1.1  
-**Date:** 2026-05-04  
+**Version:** 1.2  
+**Date:** 2026-05-12  
 **Standard:** NGSI-LD v1.6 + Synthetic Data Extensions  
-**Status:** Active with Synthetic Maritime Ecosystem
+**Status:** Active with Synthetic Maritime Ecosystem + Grafana Analytics
 
 ---
 

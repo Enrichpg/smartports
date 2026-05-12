@@ -1,8 +1,8 @@
 # SmartPort Galicia — System Architecture
 
-**Version:** 1.4 (Iteración 10 - Synthetic Maritime Ecosystem)
-**Date:** 2026-05-04
-**Status:** Active with Real-Time Layer + Synthetic Data Generation
+**Version:** 1.5 (Iteración 12 - Grafana Dashboards & Admin APIs)
+**Date:** 2026-05-12
+**Status:** Active with Real-Time Layer + Synthetic Data + Grafana Analytics
 **Scope:** Multipurpose Galician port network (11+ ports, expandable to 128+)
 
 ---
@@ -18,7 +18,13 @@
 - **Machine Learning** (Prophet, scikit-learn) for forecasting and recommendations
 - **Intelligent assistance** (Ollama LLM) for conversational queries
 
-The architecture is designed for **real-time first**, **multipurpose scalability**, and **FIWARE/NGSI-LD compliance** from day one.
+The architecture is designed for **real-time first**, **multipurpose scalability**, **FIWARE/NGSI-LD compliance**, and **automated analytics** from day one.
+
+### What's New in v1.5 (Iteración 12)
+- ✅ **Grafana Integration Activated**: Auto-provisioning of dashboards and datasources
+- ✅ **4 Pre-built Dashboards**: Berths, Weather, Alerts, System Health
+- ✅ **Admin API Endpoints**: `/api/v1/admin/grafana/*` for management
+- ✅ **Async Dashboard Initialization**: Non-blocking Grafana setup on startup
 
 ---
 

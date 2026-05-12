@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — PRD.md
 
-**Version:** 1.1  
-**Date:** 2026-05-04  
-**Status:** Approved with Synthetic Data Ecosystem  
+**Version:** 1.2  
+**Date:** 2026-05-12  
+**Status:** Approved with Grafana Analytics Integration  
 **Product Owner:** SmartPort Project Lead
 
 ---
@@ -301,10 +301,18 @@ SmartPort centralizes data, applies FIWARE standards, integrates real-time senso
 
 **FR-7.2** Embedded Grafana dashboards  
 **Acceptance Criteria:**
-- [ ] Grafana queries QuantumLeap/TimescaleDB directly
-- [ ] Pre-built dashboards for port manager, berth operator, environmental officer
+- [x] Grafana queries QuantumLeap/TimescaleDB directly
+- [x] Pre-built dashboards for port manager, berth operator, environmental officer
 - [ ] Custom dashboard builder available
 - [ ] Alerts integrated with Grafana notification channels
+
+**Implementation Status (Iteración 12):**
+- ✅ 4 dashboards created: Berths (smartports-berths), Weather (smartports-weather), Alerts (smartports-alerts), System (smartports-system)
+- ✅ Auto-provisioned on backend startup via GrafanaService
+- ✅ Admin endpoints for management: GET /api/v1/admin/grafana/*
+- ✅ Datasources configured: TimescaleDB, Prometheus
+- ⏳ Custom dashboard builder - future iteration
+- ⏳ Alert notification channels - future iteration
 
 #### **Module 8: Forecasting & Predictive Analytics**
 
