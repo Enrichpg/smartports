@@ -472,3 +472,122 @@ async def regenerate_synthetic_data(request: RegenerateSyntheticDataRequest):
     except Exception as e:
         logger.error(f"Error regenerating synthetic data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+# =============================================================================
+# Grafana Endpoints
+# =============================================================================
+
+@router.get("/grafana/dashboards", name="Get Grafana Dashboards")
+async def get_grafana_dashboards():
+    """
+    Get list of all Grafana dashboards.
+    
+    Returns information about provisioned SmartPort dashboards.
+    """
+    try:
+        from services.grafana_service import GrafanaService
+        
+        service = GrafanaService()
+        dashboards = await service.client.get_all_dashboards()
+        
+        return {
+            "status": "success",
+            "count": len(dashboards),
+            "dashboards": dashboards,
+            "grafana_url": "http://localhost/grafana/",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Error fetching Grafana dashboards: {e}")
+        raise HTTPException(status_code=503, detail=f"Grafana service unavailable: {str(e)}")
+
+
+@router.post("/grafana/initialize", name="Initialize Grafana")
+async def initialize_grafana():
+    """
+    Manually trigger Grafana initialization.
+    
+    Creates/updates:
+    - Datasources (TimescaleDB, Prometheus)
+    - Dashboards (Berths, Weather, Alerts, System)
+    
+    Useful after service restarts or config changes.
+    """
+    try:
+        from services.grafana_service import GrafanaService
+        
+        logger.info("🚀 Manual Grafana initialization triggered")
+        service = GrafanaService()
+        success = await service.initialize()
+        
+        return {
+            "status": "success" if success else "partial",
+            "message": "Grafana initialized" if success else "Grafana not fully initialized",
+            "dashboards_created": 4,
+            "datasources_configured": 2,
+            "grafana_url": "http://localhost/grafana/",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Error initializing Grafana: {e}")
+        raise HTTPException(status_code=503, detail=f"Grafana initialization failed: {str(e)}")
+
+
+@router.get("/grafana/dashboard/{uid}", name="Get Grafana Dashboard")
+async def get_grafana_dashboard(uid: str):
+    """
+    Get a specific dashboard by UID.
+    
+    UIDs for SmartPort dashboards:
+    - smartports-berths: Berth occupancy and status
+    - smartports-weather: Weather and environmental conditions
+    - smartports-alerts: System alerts and incidents
+    - smartports-system: Infrastructure health
+    """
+    try:
+        from services.grafana_service import GrafanaService
+        
+        service = GrafanaService()
+        dashboard = await service.client.get_dashboard(uid)
+        
+        if not dashboard:
+            raise HTTPException(status_code=404, detail=f"Dashboard '{uid}' not found")
+        
+        return {
+            "status": "success",
+            "dashboard": dashboard,
+            "grafana_url": f"http://localhost/grafana/d/{uid}/",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching Grafana dashboard {uid}: {e}")
+        raise HTTPException(status_code=503, detail=f"Grafana service unavailable: {str(e)}")
+
+
+@router.get("/grafana/health", name="Check Grafana Health")
+async def check_grafana_health():
+    """
+    Check Grafana service health and connectivity.
+    """
+    try:
+        from services.grafana_service import GrafanaService
+        
+        service = GrafanaService()
+        is_healthy = await service.client.health_check()
+        
+        return {
+            "status": "healthy" if is_healthy else "unavailable",
+            "grafana_url": "http://localhost:3000/",
+            "api_url": "http://localhost/grafana/api/",
+            "default_credentials": "admin / admin123",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat(),
+        }

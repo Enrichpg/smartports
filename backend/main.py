@@ -21,6 +21,7 @@ from realtime.event_bus import get_event_bus
 from cache.redis_service import get_cache, set_cache, RedisCache
 from audit.service import AuditService, set_audit_service
 from tasks.celery_app import make_celery, set_celery
+from services.grafana_service import GrafanaService
 
 # Configure logging
 logging.basicConfig(
@@ -74,6 +75,17 @@ async def lifespan(app: FastAPI):
     # Initialize event bus
     event_bus = get_event_bus()
     logger.info(f"Event bus initialized")
+    
+    # Initialize Grafana (dashboards & datasources)
+    try:
+        grafana_service = GrafanaService()
+        success = await grafana_service.initialize()
+        if success:
+            logger.info("✅ Grafana dashboards initialized")
+        else:
+            logger.warning("⚠️  Grafana initialization skipped (service not available)")
+    except Exception as e:
+        logger.warning(f"Grafana initialization failed: {e}")
     
     # TODO: Setup audit service with DB session once DB is initialized
     # This would be done in the database initialization code
