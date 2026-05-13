@@ -53,8 +53,13 @@ export class BerthsPage {
     const mnt = this._all.filter(b => b.status === 'maintenance').length;
     return `
       <div class="page-header">
-        <div class="page-title"><i class="fas fa-ship"></i> Atraques</div>
-        <div class="page-subtitle">${this._all.length} atraques en la red portuaria de Galicia</div>
+        <div>
+          <div class="page-title"><i class="fas fa-ship"></i> Atraques</div>
+          <div class="page-subtitle">${this._all.length} atraques en la red portuaria de Galicia</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" id="berths-export-csv">
+          <i class="fas fa-file-csv me-1"></i>Exportar CSV
+        </button>
       </div>
       <div class="row g-3 mb-3">
         <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-free"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${free}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Libres</div></div></div></div>
@@ -157,7 +162,23 @@ export class BerthsPage {
     this._bindPaginationEvents();
   }
 
+  _exportCSV() {
+    const headers = ['ID', 'Nombre', 'Puerto', 'Estado', 'Tipo', 'Eslora max (m)', 'Calado (m)', 'Buque actual', 'ETD'];
+    const rows = this._filtered.map(b => [
+      b.id, b.name, b.portName, b.status, b.type, b.length, b.depth,
+      b.vesselName || '', b.etd || '',
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `smartport-atraques-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   _bindEvents(container) {
+    container.querySelector('#berths-export-csv')?.addEventListener('click', () => this._exportCSV());
     container.querySelector('#berths-search')?.addEventListener('input', e => { this._search = e.target.value; this._applyFilters(); });
     container.querySelector('#berths-status')?.addEventListener('change', e => { this._statusFilter = e.target.value; this._applyFilters(); });
     container.querySelector('#berths-port')?.addEventListener('change', e => { this._portFilter = e.target.value; this._applyFilters(); });

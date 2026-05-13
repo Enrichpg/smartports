@@ -411,3 +411,45 @@ html, body { height: 100%; margin: 0; padding: 0; font-family: -apple-system, Bl
 .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 4px; }
 .skeleton-loader { padding: 12px; }
 .skeleton-line { background: linear-gradient(90deg, var(--sp-border) 25%, var(--sp-surface-2) 50%, var(--sp-border) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; height: 14px; border-radius: 4px; margin-bottom: 8px; }
+
+/* ── Language selector ─────────────────────────── */
+.lang-selector {
+  background: transparent;
+  border: 1px solid var(--sp-border);
+  color: var(--sp-text);
+  border-radius: var(--sp-radius);
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  height: 32px;
+  appearance: auto;
+}
+.lang-selector:focus { outline: none; border-color: var(--sp-primary); }
+[data-bs-theme="dark"] .lang-selector { background: var(--sp-surface-2); color: var(--sp-text); }
+
+/* ── Print / Export PDF styles ─────────────────── */
+@media print {
+  .sidebar, .app-header, .sp-filters, .header-actions,
+  .view-toggle, #dark-mode-btn, .notif-btn-wrap,
+  .sp-pagination, .page-subtitle, .lang-selector,
+  button:not(.print-show) { display: none !important; }
+
+  .main-wrapper { margin-left: 0 !important; }
+  .page-content { padding: 12px !important; overflow: visible !important; }
+  .app-shell { display: block !important; }
+  .sp-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .sp-table { font-size: 0.78rem; }
+  .sp-table th, .sp-table td { padding: 4px 8px !important; }
+  body { background: #fff !important; color: #000 !important; }
+
+  .print-header {
+    display: block !important;
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 2px solid #333;
+    margin-bottom: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+}
+.print-header { display: none; }

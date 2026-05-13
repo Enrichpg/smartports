@@ -1,5 +1,18 @@
 # Git Ignore for SmartPort Galicia Operations Center
 
+# ── Claude Code internal files (never commit) ──────
+CLAUDE.md
+.claude.json
+*.claude.json
+.claude/
+agents/
+ITERATION_*_SUMMARY.md
+validate_stack.py
+
+# ── Delivery ZIP (generated artifact) ─────────────
+smartport_entrega.zip
+*.entrega.zip
+
 # Environment variables (NEVER commit .env files)
 .env
 .env.local

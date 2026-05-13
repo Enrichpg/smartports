@@ -2,7 +2,7 @@
  * Base Components — Shell, Navigation, Toasts, and Shared UI
  */
 
-import { t, initI18n, applyI18n } from '../services/i18n.js';
+import { t, initI18n, applyI18n, setLang, getCurrentLang, getAvailableLangs } from '../services/i18n.js';
 
 /* ── App Shell ────────────────────────────────── */
 
@@ -90,6 +90,11 @@ export function renderAppShell() {
                 <div id="notif-list"><div class="notif-empty" data-i18n="ui.no_notif">Sin notificaciones</div></div>
               </div>
             </div>
+            <select class="lang-selector" id="lang-selector" title="Idioma / Language / Lingua" aria-label="Seleccionar idioma">
+              <option value="es">🌐 ES</option>
+              <option value="gl">🌐 GL</option>
+              <option value="en">🌐 EN</option>
+            </select>
             <button class="header-btn" id="dark-mode-btn">
               <i class="fas fa-moon" id="dark-mode-icon"></i>
             </button>
@@ -325,6 +330,21 @@ export function FilterBar({ filters = {}, clearAllHandler = null } = {}) {
   const active = Object.entries(filters).filter(([, v]) => v).map(([k, v]) => `<span class="badge bg-info me-2">${k}: ${v} <button class="btn-close btn-close-white ms-1" onclick="removeFilter('${k}')" style="font-size:.7rem"></button></span>`).join('');
   const btn = clearAllHandler ? `<button class="btn btn-sm btn-outline-secondary" onclick="(${clearAllHandler})()">Limpiar</button>` : '';
   return `<div class="card mb-3"><div class="card-body d-flex align-items-center gap-2 flex-wrap"><strong>Filtros activos:</strong>${active || '<span class="text-muted">Ninguno</span>'}${btn}</div></div>`;
+}
+
+/* ── Language selector ─────────────────────────── */
+
+export function initLangSelector() {
+  const sel = document.getElementById('lang-selector');
+  if (!sel) return;
+  sel.value = getCurrentLang();
+  sel.addEventListener('change', () => {
+    setLang(sel.value);
+    applyI18n(document);
+    // Re-render header title using current page key if possible
+    const badge = document.getElementById('conn-text');
+    if (badge) badge.textContent = t('conn.' + (badge.dataset.status || 'connecting'));
+  });
 }
 
 /* ── Legacy compat (existing pages import these) ── */

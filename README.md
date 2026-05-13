@@ -8,9 +8,9 @@
 
 **SmartPort Galicia** is a FIWARE-based, NGSI-LD-compliant platform for managing multiple Galician ports as a unified system. It combines real-time operational control, historical analytics, machine learning forecasting, and intelligent decision support.
 
-**Status:** Active — Iteration 9 complete (WebSocket live events, 3D visualization, robust frontend integration)
-**Version:** 1.3
-**Last Updated:** 2026-05-04
+**Status:** Active — Iteration 12 complete (Grafana auto-provisioning, full i18n ES/GL/EN, CSV/PDF export)
+**Version:** 1.5
+**Last Updated:** 2026-05-13
 
 ---
 
@@ -151,8 +151,8 @@ Set `AEMET_API_KEY` in `.env` to activate AEMET. Other sources work without keys
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-org/SmartPorts.git
-cd SmartPorts
+git clone https://github.com/Enrichpg/smartports.git
+cd smartports
 ```
 
 ### 2. Configure Environment
@@ -174,13 +174,16 @@ cp .env.example .env
 
 ```bash
 # Build and start all services (first run ~5-10 minutes)
-docker-compose up -d
+docker compose up -d
 
-# Verify all services are healthy
-docker-compose ps
+# Verify all services are healthy (all should show "healthy")
+docker compose ps
+
+# Load the 211 NGSI-LD seed entities (required after first start)
+docker exec smartports_backend python3 scripts/load_seed.py --upsert
 
 # Check health status
-curl http://localhost/health
+curl http://localhost:8000/health
 ```
 
 ### 4. Access Services
@@ -511,7 +514,7 @@ git merge feature/your-feature
 git push origin main
 ```
 
-**Important:** See [agents/AGENTS.md](agents/AGENTS.md) for mandatory documentation updates after each feature.
+**Important:** Update `docs/architecture.md`, `docs/PRD.md`, and `docs/data_model.md` after each feature iteration.
 
 ---
 
@@ -555,7 +558,7 @@ For now:
 | [docs/PRD.md](docs/PRD.md) | Product requirements & features |
 | [docs/data_model.md](docs/data_model.md) | NGSI-LD entity definitions & examples |
 | [docs/architecture.md](docs/architecture.md) | System design, services, data flows |
-| [agents/AGENTS.md](agents/AGENTS.md) | Development rules & governance |
+| [docs/APPLICATION.md](docs/APPLICATION.md) | Application summary (academic delivery) |
 | [README.md](README.md) | This file (quick start) |
 
 ### Generated Documentation
@@ -755,6 +758,7 @@ curl http://localhost:8000/api/forecasts/occupancy?portId=CorA&days=7
 
 ---
 
-**Last Updated:** 2026-04-27  
-**Maintained By:** SmartPort Team  
-**Status:** Production-Ready Foundation
+**Last Updated:** 2026-05-13  
+**Maintained By:** Sergio Varela & Enrique Pérez González — XDEI/UDC  
+**GitHub:** https://github.com/Enrichpg/smartports  
+**Status:** Iteration 12 — Production-Ready

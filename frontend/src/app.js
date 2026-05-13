@@ -14,8 +14,10 @@ import {
   initDarkMode,
   initSidebarToggle,
   initNotifDropdown,
+  initLangSelector,
   pushNotification,
 } from './components/base.js';
+import { initI18n, applyI18n } from './services/i18n.js';
 
 // Lazy page loader — avoids importing everything on startup
 let _pageCache = {};
@@ -69,29 +71,34 @@ export class SmartPortApp {
     const root = document.getElementById(this.containerId);
     if (!root) return;
 
-    // 1. Render the persistent app shell
+    // 1. Init i18n before rendering (loads saved language)
+    initI18n();
+
+    // 2. Render the persistent app shell
     root.innerHTML = renderAppShell();
 
-    // 2. Init UI chrome
+    // 3. Apply i18n to shell and init UI chrome
+    applyI18n(document);
     initDarkMode();
     initSidebarToggle();
     initNotifDropdown();
+    initLangSelector();
 
-    // 3. Sync connection badge with store
+    // 4. Sync connection badge with store
     store.subscribe('connectionStatusChanged', ({ status }) => updateConnectionBadge(status));
 
-    // 4. Global click delegation (sidebar nav + data-nav-page + legacy data-page)
+    // 5. Global click delegation (sidebar nav + data-nav-page + legacy data-page)
     document.addEventListener('click', e => this._handleClick(e));
 
-    // 5. Route immediately, then on history navigation
+    // 6. Route immediately, then on history navigation
     this._route();
     window.addEventListener('popstate', () => this._route());
 
-    // 6. Start WebSocket non-blocking
+    // 7. Start WebSocket non-blocking
     this.wsIntegrator = new WebSocketIntegrator(null, null);
     this.wsIntegrator.init().catch(() => {});
 
-    // 7. Seed demo notifications
+    // 8. Seed demo notifications
     setTimeout(() => {
       pushNotification({ message: 'Viento fuerte detectado en A Coruña (28 kn)', severity: 'high', timestamp: new Date() });
       pushNotification({ message: '2 escalas autorizadas en Vigo', severity: 'info', timestamp: new Date(Date.now() - 300000) });

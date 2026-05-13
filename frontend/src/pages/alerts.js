@@ -82,9 +82,15 @@ export class AlertsPage {
 
     return `
       <div class="page-header">
-        <div class="page-title"><i class="fas fa-exclamation-triangle"></i> Centro de Alertas</div>
-        <div class="page-subtitle">${this._all.length} alertas registradas · Sistema de monitoreo continuo</div>
+        <div>
+          <div class="page-title"><i class="fas fa-exclamation-triangle"></i> Centro de Alertas</div>
+          <div class="page-subtitle">${this._all.length} alertas registradas · Sistema de monitoreo continuo</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+          <i class="fas fa-print me-1"></i>Exportar PDF
+        </button>
       </div>
+      <div class="print-header">SmartPort Galicia — Informe de Alertas · ${new Date().toLocaleDateString('es-ES', { dateStyle: 'long' })}</div>
 
       <div class="row g-3 mb-3">
         <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #dc3545" id="af-active"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Activas</div></div></div></div>

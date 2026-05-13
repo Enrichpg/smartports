@@ -55,8 +55,13 @@ export class PortCallsPage {
     this._all.forEach(pc => { if (byState[pc.state] !== undefined) byState[pc.state]++; });
     return `
       <div class="page-header">
-        <div class="page-title"><i class="fas fa-calendar-alt"></i> Escalas Portuarias</div>
-        <div class="page-subtitle">${this._all.length} escalas registradas · Últimas 72 horas</div>
+        <div>
+          <div class="page-title"><i class="fas fa-calendar-alt"></i> Escalas Portuarias</div>
+          <div class="page-subtitle">${this._all.length} escalas registradas · Últimas 72 horas</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" id="pc-export-csv">
+          <i class="fas fa-file-csv me-1"></i>Exportar CSV
+        </button>
       </div>
       <div class="row g-3 mb-3">
         <div class="col-6 col-md-3"><div class="sp-card" id="pcf-active" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${byState.active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Activas</div></div></div></div>
@@ -207,7 +212,23 @@ export class PortCallsPage {
     });
   }
 
+  _exportCSV() {
+    const headers = ['ID', 'Buque', 'Tipo', 'Puerto', 'Atraque', 'Estado', 'ETA', 'ETD', 'Duracion (h)', 'Carga', 'GT'];
+    const rows = this._filtered.map(pc => [
+      pc.id, pc.vesselName, pc.vesselType, pc.portName, pc.berthName, pc.state,
+      pc.eta || '', pc.etd || '', pc.durationHours, pc.cargo || '', pc.grossTonnage || 0,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `smartport-escalas-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   _bindEvents(container) {
+    container.querySelector('#pc-export-csv')?.addEventListener('click', () => this._exportCSV());
     container.querySelector('#pc-search')?.addEventListener('input', e => { this._search=e.target.value; this._applyFilters(); });
     container.querySelector('#pc-state')?.addEventListener('change', e => { this._stateFilter=e.target.value; this._applyFilters(); });
     container.querySelector('#pc-port')?.addEventListener('change', e => { this._portFilter=e.target.value; this._applyFilters(); });
