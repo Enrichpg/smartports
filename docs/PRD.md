@@ -1,8 +1,8 @@
 # SmartPort Galicia Operations Center — PRD.md
 
-**Version:** 1.2  
-**Date:** 2026-05-12  
-**Status:** Approved with Grafana Analytics Integration  
+**Version:** 1.3  
+**Date:** 2026-05-13  
+**Status:** Approved — Pre-delivery complete  
 **Product Owner:** SmartPort Project Lead
 
 ---
@@ -795,13 +795,41 @@ The following are NOT included in Phase 1 but may be future enhancements:
 
 ---
 
-## 13. Revision History
+## 13. Iteration 12 — Delivered Features (2026-05-13)
+
+### 13.1 Internacionalización ES / GL / EN ✅
+- Selector de idioma en navbar con persistencia en localStorage.
+- 3 diccionarios completos (ES, GL, EN) en `frontend/src/services/i18n.js`.
+- Dashboard, navbar y shell estático 100% traducidos; re-mount automático al cambiar idioma.
+
+### 13.2 WebSocket Live — Badge Fix ✅
+- Listeners registrados antes del snapshot REST inicial.
+- Nuevo estado "Desconectado" tras agotar reintentos (evento `reconnect_failed`).
+- Badge reactivo: Live (verde) / Conectando (amarillo) / Desconectado (gris).
+
+### 13.3 Exportación de Datos ✅
+- **CSV**: atraques y escalas exportan con BOM UTF-8 (compatible Excel), nombre de archivo dinámico con fecha.
+- **PDF**: página de alertas con `window.print()` y CSS `@media print` que oculta navegación y filtros.
+
+### 13.4 Gestión Documental Operativa ✅
+- **Ver**: genera ficha HTML oficial al vuelo (metadatos, declaración, watermark) y abre en nueva pestaña.
+- **Descargar**: misma ficha con descarga forzada (`Content-Disposition: attachment` vía Blob).
+- Funciona 100% en frontend sin endpoint backend.
+
+### 13.5 Limpieza de Entrega ✅
+- `docs/ITERATION_*.md` y `docs/history/` excluidos del repo via `.gitignore` + `git rm --cached`.
+- `CLAUDE.md`, `.claude.json`, `agents/` ya excluidos desde iteraciones anteriores.
+
+---
+
+## 14. Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-27 | Product Lead | Initial comprehensive PRD |
 | 1.1 | 2026-05-04 | Claude + Team | Added Synthetic Maritime Ecosystem (4500 vessels, 90-day historical data for ML training) |
 | 1.2 | 2026-05-08 | Claude + Team | Iteration 11: Prophet real, iot-agent fix, Grafana pipeline, advanced alerts |
+| 1.3 | 2026-05-13 | Claude + Team | Iteration 12: i18n ES/GL/EN, WS fix, CSV/PDF export, documents view/download, delivery prep |
 
 ---
 

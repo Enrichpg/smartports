@@ -117,8 +117,8 @@ export class DocumentsPage {
                 <span style="font-size:0.72rem;color:var(--sp-text-muted)">${doc.size} · ${doc.version}</span>
               </div>
               <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="window.showToast('Abriendo ${doc.id}...','info')"><i class="fas fa-eye me-1"></i>Ver</button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="window.showToast('Descargando...','info')"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-outline-primary flex-fill" data-doc-action="view" data-doc-id="${doc.id}"><i class="fas fa-eye me-1"></i>Ver</button>
+                <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}"><i class="fas fa-download"></i></button>
               </div>
             </div>
           </div>
@@ -147,8 +147,8 @@ export class DocumentsPage {
                     <td class="${doc.status === 'expired' ? 'text-danger fw-semibold' : ''}">${doc.expiryDate}</td>
                     <td>${doc.size}</td>
                     <td>
-                      <button class="btn btn-sm btn-outline-primary me-1" onclick="window.showToast('Abriendo...','info')"><i class="fas fa-eye"></i></button>
-                      <button class="btn btn-sm btn-outline-secondary" onclick="window.showToast('Descargando...','info')"><i class="fas fa-download"></i></button>
+                      <button class="btn btn-sm btn-outline-primary me-1" data-doc-action="view" data-doc-id="${doc.id}"><i class="fas fa-eye"></i></button>
+                      <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}"><i class="fas fa-download"></i></button>
                     </td>
                   </tr>`;
               }).join('')}
@@ -156,6 +156,115 @@ export class DocumentsPage {
           </table>
         </div>
       </div>`;
+  }
+
+  _openDocument(doc) {
+    const blob = new Blob([this._buildDocHTML(doc)], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    if (!w) window.showToast('Permite ventanas emergentes para ver documentos', 'warning');
+  }
+
+  _downloadDocument(doc) {
+    const blob = new Blob([this._buildDocHTML(doc)], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `smartport-${doc.type}-${doc.vessel.replace(/\s+/g, '-').toLowerCase()}-${doc.id}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  _buildDocHTML(doc) {
+    const statusLabel = { valid: 'VÁLIDO', pending: 'PENDIENTE', expired: 'CADUCADO' }[doc.status] || doc.status.toUpperCase();
+    const statusColor = { valid: '#00A651', pending: '#ffa500', expired: '#dc3545' }[doc.status] || '#6c757d';
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>${doc.title}</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:820px;margin:40px auto;padding:24px;color:#333;background:#f9f9f9}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1a5490;padding-bottom:20px;margin-bottom:28px}
+    .logo-block{display:flex;align-items:center;gap:16px}
+    .logo-icon{width:56px;height:56px;background:#1a5490;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:26px;flex-shrink:0}
+    .org-name{font-size:1.05rem;font-weight:700;color:#1a5490}
+    .org-sub{font-size:0.76rem;color:#666;margin-top:2px}
+    .doc-ref{text-align:right}
+    .doc-ref h1{font-size:1.1rem;color:#1a5490;margin:0 0 4px}
+    .doc-id{font-size:0.8rem;color:#888;font-family:monospace}
+    .badge{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:20px;color:white;font-size:0.75rem;font-weight:700;background:${statusColor}}
+    .section{background:white;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:14px}
+    .section h2{font-size:0.78rem;text-transform:uppercase;color:#1a5490;margin:0 0 14px;letter-spacing:1px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field label{font-size:0.7rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:2px}
+    .field span{font-size:0.88rem;font-weight:600}
+    .body-text{font-size:0.85rem;line-height:1.75;color:#555;margin:0 0 10px}
+    .footer{text-align:center;font-size:0.7rem;color:#aaa;margin-top:28px;border-top:1px solid #e5e5e5;padding-top:14px}
+    .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:80px;color:rgba(0,0,0,0.03);font-weight:900;pointer-events:none;white-space:nowrap;z-index:-1}
+    @media print{.watermark{display:block}}
+  </style>
+</head>
+<body>
+  <div class="watermark">SMARTPORT GALICIA</div>
+  <div class="header">
+    <div class="logo-block">
+      <div class="logo-icon">⚓</div>
+      <div>
+        <div class="org-name">SmartPort Galicia</div>
+        <div class="org-sub">Autoridad Portuaria de Galicia</div>
+        <div class="org-sub">Sistema de Gestión Documental</div>
+      </div>
+    </div>
+    <div class="doc-ref">
+      <h1>${doc.typeLabel}</h1>
+      <div class="doc-id">${doc.id.toUpperCase()}</div>
+      <span class="badge">${statusLabel}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Información del Documento</h2>
+    <div class="grid">
+      <div class="field"><label>Título</label><span>${doc.title}</span></div>
+      <div class="field"><label>Tipo</label><span>${doc.typeLabel}</span></div>
+      <div class="field"><label>Fecha de Emisión</label><span>${doc.issueDate}</span></div>
+      <div class="field"><label>Fecha de Vencimiento</label><span style="color:${doc.status === 'expired' ? '#dc3545' : 'inherit'}">${doc.expiryDate}</span></div>
+      <div class="field"><label>Versión</label><span>${doc.version}</span></div>
+      <div class="field"><label>Tamaño estimado</label><span>${doc.size}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Buque y Puerto</h2>
+    <div class="grid">
+      <div class="field"><label>Nombre del Buque</label><span>${doc.vessel}</span></div>
+      <div class="field"><label>Puerto de Referencia</label><span>${doc.portName}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Declaración Oficial</h2>
+    <p class="body-text">
+      El presente documento ha sido emitido por la Autoridad Portuaria de Galicia y certifica que la
+      información contenida es conforme a la normativa vigente en materia de tráfico marítimo y gestión
+      portuaria (Ley 48/2003 de régimen económico y de prestación de servicios de los puertos de interés
+      general, y sus sucesivas modificaciones).
+    </p>
+    <p class="body-text">
+      Este documento es válido únicamente para el buque y período indicados. Cualquier alteración invalida
+      el presente certificado. Para renovación o consultas, contacte con la administración portuaria del
+      puerto de <strong>${doc.portName}</strong>.
+    </p>
+  </div>
+
+  <div class="footer">
+    <p>Generado por SmartPort Galicia Operations Center · ${new Date().toLocaleString('es-ES')} · Ref: ${doc.id.toUpperCase()}</p>
+    <p>Documento digital de referencia — la versión oficial firmada obra en poder de la autoridad portuaria.</p>
+  </div>
+</body>
+</html>`;
   }
 
   _applyFilters() {
@@ -172,6 +281,16 @@ export class DocumentsPage {
   }
 
   _bindEvents(container) {
+    // Ver / Descargar delegation — attached to container so survives grid/table re-renders
+    container.addEventListener('click', e => {
+      const btn = e.target.closest('[data-doc-action]');
+      if (!btn) return;
+      const doc = this._all.find(d => d.id === btn.dataset.docId);
+      if (!doc) return;
+      if (btn.dataset.docAction === 'view') this._openDocument(doc);
+      else if (btn.dataset.docAction === 'download') this._downloadDocument(doc);
+    });
+
     container.querySelector('#d-search')?.addEventListener('input', e => { this._search = e.target.value; this._applyFilters(); });
     container.querySelector('#d-type')?.addEventListener('change', e => { this._typeFilter = e.target.value; this._applyFilters(); });
     container.querySelector('#d-status')?.addEventListener('change', e => { this._statusFilter = e.target.value; this._applyFilters(); });

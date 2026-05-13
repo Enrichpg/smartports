@@ -8,6 +8,8 @@ CLAUDE.md
 agents/
 ITERATION_*_SUMMARY.md
 validate_stack.py
+docs/ITERATION_*.md
+docs/history/
 
 # ── Delivery ZIP (generated artifact) ─────────────
 smartport_entrega.zip

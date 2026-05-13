@@ -7,6 +7,7 @@ import { store } from '../store/store.js';
 import { animateCounter, KpiCard, EmptyState, LoadingSkeleton } from '../components/base.js';
 import { PORTS, generateAlerts, generatePortCalls, getKPISummary, generateOccupancyHistory } from '../services/mock-data.js';
 import { formatDate } from '../utils/helpers.js';
+import { t } from '../services/i18n.js';
 
 export class DashboardPage {
   constructor() {
@@ -71,29 +72,29 @@ export class DashboardPage {
     return `
       <div class="page-header">
         <div class="page-title"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
-        <div class="page-subtitle">Vista general en tiempo real · Red de puertos de Galicia</div>
+        <div class="page-subtitle">${t('dash.subtitle')}</div>
       </div>
 
       <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Puertos', value: kpis.totalPorts, icon: 'fa-anchor', color: 'primary', trend: 0, page: 'ports' })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Atraques', value: kpis.totalBerths, icon: 'fa-ship', color: 'info', trend: 2, page: 'berths' })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Escalas activas', value: kpis.activePortCalls, icon: 'fa-calendar-alt', color: 'success', trend: 15, page: 'port-calls' })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Alertas activas', value: kpis.activeAlerts, icon: 'fa-bell', color: 'danger', trend: -12, page: 'alerts' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.ports'), value: kpis.totalPorts, icon: 'fa-anchor', color: 'primary', trend: 0, page: 'ports' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.berths'), value: kpis.totalBerths, icon: 'fa-ship', color: 'info', trend: 2, page: 'berths' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.active_calls'), value: kpis.activePortCalls, icon: 'fa-calendar-alt', color: 'success', trend: 15, page: 'port-calls' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.active_alerts'), value: kpis.activeAlerts, icon: 'fa-bell', color: 'danger', trend: -12, page: 'alerts' })}</div>
       </div>
 
       <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Atraques libres', value: kpis.freeBerths, icon: 'fa-check-circle', color: 'success', page: 'berths' })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Atraques ocupados', value: kpis.occupiedBerths, icon: 'fa-times-circle', color: 'danger', page: 'berths' })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Eficiencia', value: kpis.efficiencyPct, icon: 'fa-chart-line', color: 'info', unit: '%', trend: 3 })}</div>
-        <div class="col-6 col-md-3">${KpiCard({ title: 'Escalas hoy', value: kpis.portCallsToday, icon: 'fa-route', color: 'warning', trend: 8, page: 'port-calls' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.free_berths'), value: kpis.freeBerths, icon: 'fa-check-circle', color: 'success', page: 'berths' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.occ_berths'), value: kpis.occupiedBerths, icon: 'fa-times-circle', color: 'danger', page: 'berths' })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.efficiency'), value: kpis.efficiencyPct, icon: 'fa-chart-line', color: 'info', unit: '%', trend: 3 })}</div>
+        <div class="col-6 col-md-3">${KpiCard({ title: t('dash.kpi.today_calls'), value: kpis.portCallsToday, icon: 'fa-route', color: 'warning', trend: 8, page: 'port-calls' })}</div>
       </div>
 
       <div class="row g-3 mb-4">
         <div class="col-lg-8">
           <div class="sp-card h-100">
             <div class="sp-card-header">
-              <span class="sp-card-title"><i class="fas fa-map-marked-alt"></i> Red de Puertos — Galicia</span>
-              <button class="btn btn-sm btn-outline-primary" data-nav-page="maps"><i class="fas fa-expand-arrows-alt"></i> Mapa completo</button>
+              <span class="sp-card-title"><i class="fas fa-map-marked-alt"></i> ${t('dash.section.network')}</span>
+              <button class="btn btn-sm btn-outline-primary" data-nav-page="maps"><i class="fas fa-expand-arrows-alt"></i> ${t('dash.btn.full_map')}</button>
             </div>
             <div class="sp-card-body p-0">
               <div id="dashboard-map" style="height:340px;border-radius:0 0 8px 8px;"></div>
@@ -102,7 +103,7 @@ export class DashboardPage {
         </div>
         <div class="col-lg-4">
           <div class="sp-card h-100">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-pie"></i> Ocupación por Puerto</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-pie"></i> ${t('dash.section.occ_by_port')}</span></div>
             <div class="sp-card-body"><canvas id="occupancy-donut" height="240"></canvas></div>
           </div>
         </div>
@@ -111,13 +112,13 @@ export class DashboardPage {
       <div class="row g-3 mb-4">
         <div class="col-lg-8">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-line"></i> Evolución de Ocupación — 30 días</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-line"></i> ${t('dash.section.occ_trend')}</span></div>
             <div class="sp-card-body"><canvas id="occupancy-trend" height="120"></canvas></div>
           </div>
         </div>
         <div class="col-lg-4">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-bars"></i> Atraques por Puerto</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-bars"></i> ${t('dash.section.berths_bar')}</span></div>
             <div class="sp-card-body"><canvas id="berths-bar" height="170"></canvas></div>
           </div>
         </div>
@@ -127,17 +128,17 @@ export class DashboardPage {
         <div class="col-lg-6">
           <div class="sp-card">
             <div class="sp-card-header">
-              <span class="sp-card-title"><i class="fas fa-anchor"></i> Estado de Puertos</span>
-              <button class="btn btn-sm btn-outline-primary" data-nav-page="ports">Ver todos</button>
+              <span class="sp-card-title"><i class="fas fa-anchor"></i> ${t('dash.section.port_status')}</span>
+              <button class="btn btn-sm btn-outline-primary" data-nav-page="ports">${t('dash.btn.see_all_ports')}</button>
             </div>
             <div class="sp-card-body p-0">
               <table class="sp-table">
-                <thead><tr><th>Puerto</th><th>Estado</th><th>Ocupación</th><th>Libres</th></tr></thead>
+                <thead><tr><th>${t('dash.col.port')}</th><th>${t('dash.col.status')}</th><th>${t('dash.col.occupancy')}</th><th>${t('dash.col.free')}</th></tr></thead>
                 <tbody>
                   ${PORTS.map(p => `
                     <tr data-nav-page="port-detail" data-port-id="${p.id}">
                       <td><strong>${p.shortName}</strong></td>
-                      <td><span class="sp-badge ${p.status}">${p.status === 'active' ? 'Activo' : 'Mantenimiento'}</span></td>
+                      <td><span class="sp-badge ${p.status}">${p.status === 'active' ? t('status.active') : t('status.maintenance')}</span></td>
                       <td>
                         <div style="display:flex;align-items:center;gap:8px">
                           <div class="sp-progress" style="flex:1"><div class="sp-progress-bar ${p.occupancyPct >= 80 ? 'high' : p.occupancyPct >= 50 ? 'medium' : 'low'}" style="width:${p.occupancyPct}%"></div></div>
@@ -155,11 +156,11 @@ export class DashboardPage {
         <div class="col-lg-6">
           <div class="sp-card">
             <div class="sp-card-header">
-              <span class="sp-card-title"><i class="fas fa-bell"></i> Alertas Recientes</span>
-              <button class="btn btn-sm btn-outline-danger" data-nav-page="alerts">Ver todas</button>
+              <span class="sp-card-title"><i class="fas fa-bell"></i> ${t('dash.section.alerts')}</span>
+              <button class="btn btn-sm btn-outline-danger" data-nav-page="alerts">${t('dash.btn.see_all_alerts')}</button>
             </div>
             <div class="sp-card-body p-0">
-              ${alerts.length === 0 ? EmptyState({ icon: 'fa-bell-slash', title: 'Sin alertas activas' }) : `
+              ${alerts.length === 0 ? EmptyState({ icon: 'fa-bell-slash', title: t('dash.empty.no_alerts') }) : `
               <div class="sp-timeline p-3">
                 ${alerts.map(a => `
                   <div class="timeline-item">
@@ -178,14 +179,14 @@ export class DashboardPage {
         <div class="col-12">
           <div class="sp-card">
             <div class="sp-card-header">
-              <span class="sp-card-title"><i class="fas fa-calendar-check"></i> Escalas en Curso</span>
-              <button class="btn btn-sm btn-outline-success" data-nav-page="port-calls">Ver todas</button>
+              <span class="sp-card-title"><i class="fas fa-calendar-check"></i> ${t('dash.section.calls')}</span>
+              <button class="btn btn-sm btn-outline-success" data-nav-page="port-calls">${t('dash.btn.see_all_calls')}</button>
             </div>
             <div class="sp-card-body p-0">
-              ${portCalls.length === 0 ? EmptyState({ icon: 'fa-ship', title: 'Sin escalas activas' }) : `
+              ${portCalls.length === 0 ? EmptyState({ icon: 'fa-ship', title: t('dash.empty.no_calls') }) : `
               <div class="sp-table-wrapper">
                 <table class="sp-table">
-                  <thead><tr><th>Buque</th><th>Puerto</th><th>Atraque</th><th>Estado</th><th>ETA</th><th>Duración</th></tr></thead>
+                  <thead><tr><th>${t('dash.col.vessel')}</th><th>${t('dash.col.port')}</th><th>${t('dash.col.berth')}</th><th>${t('dash.col.status')}</th><th>${t('dash.col.eta')}</th><th>${t('dash.col.duration')}</th></tr></thead>
                   <tbody>
                     ${portCalls.map(pc => `
                       <tr data-nav-page="port-calls">
@@ -223,7 +224,7 @@ export class DashboardPage {
     PORTS.forEach(p => {
       const color = p.status === 'maintenance' ? '#6c757d' : p.occupancyPct >= 80 ? '#dc3545' : p.occupancyPct >= 50 ? '#ffa500' : '#00A651';
       const m = window.L.circleMarker([p.location.lat, p.location.lon], { radius: 10, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.85 }).addTo(map);
-      m.bindPopup(`<strong>${p.name}</strong><br>Estado: ${p.status === 'active' ? 'Activo' : 'Mantenimiento'}<br>Ocupación: <b>${p.occupancyPct}%</b><br>Libres: <b>${p.freeBerths}/${p.totalBerths}</b>`);
+      m.bindPopup(`<strong>${p.name}</strong><br>${t('dash.col.status')}: ${p.status === 'active' ? t('status.active') : t('status.maintenance')}<br>${t('dash.col.occupancy')}: <b>${p.occupancyPct}%</b><br>${t('dash.col.free')}: <b>${p.freeBerths}/${p.totalBerths}</b>`);
       m.on('click', () => window.spNavigate('port-detail', { portId: p.id }));
     });
   }
@@ -258,7 +259,7 @@ export class DashboardPage {
     if (barEl) {
       this._charts.bar = new window.Chart(barEl, {
         type: 'bar',
-        data: { labels: PORTS.map(p => p.shortName), datasets: [{ label: 'Libres', data: PORTS.map(p => p.freeBerths), backgroundColor: '#00A651cc' }, { label: 'Ocupados', data: PORTS.map(p => p.occupiedBerths), backgroundColor: '#dc3545cc' }, { label: 'Reservados', data: PORTS.map(p => p.reservedBerths), backgroundColor: '#ffa500cc' }] },
+        data: { labels: PORTS.map(p => p.shortName), datasets: [{ label: t('dash.col.free'), data: PORTS.map(p => p.freeBerths), backgroundColor: '#00A651cc' }, { label: t('status.occupied'), data: PORTS.map(p => p.occupiedBerths), backgroundColor: '#dc3545cc' }, { label: t('status.reserved'), data: PORTS.map(p => p.reservedBerths), backgroundColor: '#ffa500cc' }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } }, y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } } }, plugins: { legend: { labels: { color: textColor, font: { size: 11 }, boxWidth: 10 } } } }
       });
     }

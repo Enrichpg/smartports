@@ -341,9 +341,8 @@ export function initLangSelector() {
   sel.addEventListener('change', () => {
     setLang(sel.value);
     applyI18n(document);
-    // Re-render header title using current page key if possible
-    const badge = document.getElementById('conn-text');
-    if (badge) badge.textContent = t('conn.' + (badge.dataset.status || 'connecting'));
+    // Re-mount current page so dynamic content (KPIs, tables, charts) also translates
+    window.__smartPortApp?._route();
   });
 }
 

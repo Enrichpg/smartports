@@ -1,8 +1,8 @@
 # SmartPort Galicia — System Architecture
 
-**Version:** 1.5 (Iteración 12 - Grafana Dashboards & Admin APIs)
-**Date:** 2026-05-12
-**Status:** Active with Real-Time Layer + Synthetic Data + Grafana Analytics
+**Version:** 1.6 (Iteración 12 - i18n + UX Polish + Delivery)
+**Date:** 2026-05-13
+**Status:** Active — Pre-delivery, full feature set complete
 **Scope:** Multipurpose Galician port network (11+ ports, expandable to 128+)
 
 ---
@@ -20,7 +20,16 @@
 
 The architecture is designed for **real-time first**, **multipurpose scalability**, **FIWARE/NGSI-LD compliance**, and **automated analytics** from day one.
 
-### What's New in v1.5 (Iteración 12)
+### What's New in v1.6 (Iteración 12)
+- ✅ **Internacionalización (i18n)**: selector ES / GL / EN en navbar, persistencia localStorage, re-mount automático de página al cambiar idioma
+- ✅ **Dashboard traducido**: KPI cards, secciones, columnas de tabla y labels de Chart.js usan `t()` — 34 keys nuevas en 3 idiomas
+- ✅ **WebSocket badge fix**: listeners registrados antes del snapshot REST; `reconnect_failed` → badge "Desconectado" tras 10 reintentos
+- ✅ **Exportar CSV**: atraques (`/berths`) y escalas (`/port-calls`) — UTF-8 BOM, nombre dinámico, Blob download
+- ✅ **Exportar PDF (print)**: página de alertas con `window.print()` + CSS `@media print`, cabecera de impresión
+- ✅ **Documentos — Ver/Descargar**: genera Blob HTML con ficha oficial al vuelo; `window.open` para Ver, `<a download>` para Descargar
+- ✅ **Limpieza entrega**: `docs/ITERATION_*.md` y `docs/history/` excluidos del repo via `.gitignore`
+
+### What's New in v1.5 (Iteración 11 — Grafana & Alerts)
 - ✅ **Grafana Integration Activated**: Auto-provisioning of dashboards and datasources
 - ✅ **4 Pre-built Dashboards**: Berths, Weather, Alerts, System Health
 - ✅ **Admin API Endpoints**: `/api/v1/admin/grafana/*` for management
@@ -1803,7 +1812,37 @@ New threshold constants in `alert_service.py`:
 
 ---
 
-## 16. Version History
+## 16. Iteration 12 — UX Polish & Delivery Prep (2026-05-13)
+
+### 16.1 Internacionalización ES/GL/EN
+
+Selector de idioma añadido en la navbar (`<select class="lang-selector">`). Diccionario en `frontend/src/services/i18n.js` con 3 secciones: ES, GL, EN. Función `applyI18n(root)` recorre elementos `[data-i18n]` para traducir el shell estático. Al cambiar idioma, `initLangSelector()` llama a `window.__smartPortApp._route()` para re-montar la página actual con los nuevos strings.
+
+`dashboard.js` importa `t()` y usa keys `dash.*` para todos los títulos de KPI cards, secciones, cabeceras de tabla y labels de Chart.js.
+
+### 16.2 WebSocket Badge Fix
+
+`websocket-integrator.js.init()` reestructurado: `_setupWebSocketListeners()` y `wsManager.connect()` se llaman **antes** de `_loadInitialSnapshot()`, garantizando que los listeners están activos independientemente del resultado del snapshot REST.
+
+Nuevo listener `'reconnect_failed'` → `store.setConnectionStatus('disconnected')`: tras 10 reintentos fallidos el badge muestra "Desconectado" en lugar de quedarse en "Conectando...".
+
+### 16.3 Exportación de Datos
+
+| Función | Archivo | Implementación |
+|---------|---------|----------------|
+| CSV Atraques | `pages/berths.js` | `_exportCSV()`, Blob UTF-8 BOM, `a.download` |
+| CSV Escalas | `pages/port-calls.js` | `_exportCSV()`, 11 columnas, nombre dinámico |
+| PDF Alertas | `pages/alerts.js` + CSS | `window.print()`, `@media print` oculta nav/filtros |
+
+### 16.4 Gestión de Documentos
+
+Botones Ver y Descargar en `pages/documents.js` generan un Blob HTML con la ficha oficial del documento (metadatos, declaración, watermark corporativo). Ver → `window.open(..., '_blank')`; Descargar → `<a download="smartport-{type}-{vessel}.html">`.
+
+Evento delegado en el contenedor para sobrevivir re-renders de grid/tabla.
+
+---
+
+## 17. Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
@@ -1812,6 +1851,8 @@ New threshold constants in `alert_service.py`:
 | 1.2 | 2026-04-28 | Fixed duplicate section number (5.4→5.7), corrected nginx config notes, updated status |
 | 1.3 | 2026-05-04 | Iteration 10: Synthetic maritime ecosystem, WebSocket live, Three.js 3D view |
 | 1.4 | 2026-05-08 | Iteration 11: Prophet real, iot-agent fix, Grafana/TimescaleDB pipeline, alerts engine |
+| 1.5 | 2026-05-12 | Iteration 11 (cont.): Grafana dashboards, admin API, alerts engine rewrite |
+| 1.6 | 2026-05-13 | Iteration 12: i18n ES/GL/EN, WS badge fix, CSV/PDF export, documents view/download, delivery prep |
 
 ---
 

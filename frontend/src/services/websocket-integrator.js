@@ -23,26 +23,20 @@ class WebSocketIntegrator {
    * - Set up listeners
    */
   async init() {
+    // Set up listeners and connect first — independent of snapshot success
+    this._setupWebSocketListeners();
+    wsManager.connect();
+
+    // Load initial snapshot separately — failure is non-fatal
     try {
       console.log('[WSIntegrator] Initializing...');
-      
-      // Step 1: Load initial snapshot via REST
       await this._loadInitialSnapshot();
-      
-      // Step 2: Set up WebSocket listeners before connecting
-      this._setupWebSocketListeners();
-      
-      // Step 3: Connect WebSocket
-      wsManager.connect();
-      
-      this.isInitialized = true;
       console.log('[WSIntegrator] Initialization complete');
-      
     } catch (error) {
-      console.error('[WSIntegrator] Initialization error:', error);
-      store.setConnectionStatus('error');
-      store.setUIState({ websocketError: error.message });
+      console.error('[WSIntegrator] Snapshot error (non-fatal):', error);
     }
+
+    this.isInitialized = true;
   }
 
   /**
@@ -147,6 +141,11 @@ class WebSocketIntegrator {
       console.error('[WSIntegrator] WebSocket error:', error);
       store.setConnectionStatus('error');
       store.setUIState({ websocketError: error.error || error });
+    });
+
+    wsManager.subscribe('reconnect_failed', () => {
+      console.warn('[WSIntegrator] Max reconnection attempts reached — offline');
+      store.setConnectionStatus('disconnected');
     });
 
     // Event type listeners
