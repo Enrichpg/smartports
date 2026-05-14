@@ -87,6 +87,17 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Grafana initialization failed: {e}")
     
+    # Initialize LLM tools and agents
+    try:
+        if settings.enable_llm_assistant:
+            from llm.tools import register_all_tools
+            register_all_tools()
+            logger.info("✅ LLM tools registered for agents")
+        else:
+            logger.info("⚠️  LLM assistant disabled (enable with ENABLE_LLM_ASSISTANT=true)")
+    except Exception as e:
+        logger.warning(f"LLM initialization failed: {e}")
+    
     # TODO: Setup audit service with DB session once DB is initialized
     # This would be done in the database initialization code
     

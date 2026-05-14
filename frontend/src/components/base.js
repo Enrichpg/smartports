@@ -42,6 +42,11 @@ export function renderAppShell() {
             <i class="fas fa-file-alt"></i><span class="nav-label" data-i18n="nav.documents">Documentos</span>
           </a>
 
+          <div class="nav-section-label" data-i18n="nav.section.intelligence">Inteligencia</div>
+          <a class="sidebar-item" data-page="ai-agents" href="/ai-agents">
+            <i class="fas fa-robot"></i><span class="nav-label" data-i18n="nav.ai_agents">Agentes IA</span>
+          </a>
+
           <div class="nav-section-label" data-i18n="nav.section.analysis">Análisis</div>
           <a class="sidebar-item" data-page="analytics" href="/analytics">
             <i class="fas fa-chart-bar"></i><span class="nav-label" data-i18n="nav.analytics">Analytics</span>

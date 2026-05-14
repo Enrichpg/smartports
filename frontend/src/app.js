@@ -38,6 +38,7 @@ async function importPage(name) {
     settings:       () => import('./pages/settings.js').then(m => m.SettingsPage),
     maps:           () => import('./pages/maps.js').then(m => m.MapsPage),
     documents:      () => import('./pages/documents.js').then(m => m.DocumentsPage),
+    'ai-agents':    () => import('./pages/ai-agents.js').then(m => m.AIAgentsPage),
   };
   if (!loaders[name]) return null;
   _pageCache[name] = await loaders[name]();
@@ -58,6 +59,7 @@ const PAGE_TITLE_KEYS = {
   settings: 'page.settings',
   maps: 'page.maps',
   documents: 'page.documents',
+  'ai-agents': 'page.ai_agents',
 };
 
 export class SmartPortApp {
@@ -125,6 +127,7 @@ export class SmartPortApp {
     if (path === '/settings') { this._load('settings'); return; }
     if (path === '/maps') { this._load('maps'); return; }
     if (path === '/documents') { this._load('documents'); return; }
+    if (path === '/ai-agents') { this._load('ai-agents'); return; }
     this._load('dashboard');
   }
 

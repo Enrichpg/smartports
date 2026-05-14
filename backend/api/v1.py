@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from api.routes import ports, berths, availability, vessels, portcalls, alerts
-from api.routes import forecasts, recommendations, assistant
+from api.routes import forecasts, recommendations, assistant, agents
 from config import settings
 
 router = APIRouter()
@@ -20,6 +20,7 @@ router.include_router(alerts.router)
 router.include_router(forecasts.router)
 router.include_router(recommendations.router)
 router.include_router(assistant.router)
+router.include_router(agents.router)
 
 
 @router.get("/", name="API v1 Root")
@@ -31,7 +32,7 @@ async def api_v1_root():
         "timestamp": datetime.utcnow().isoformat(),
         "description": (
             "Real-time port operations: berth management, availability, "
-            "vessel authorization, port calls, alerts"
+            "vessel authorization, port calls, alerts, and AI agents"
         ),
         "endpoints": {
             "ports": "/api/v1/ports",
@@ -45,6 +46,15 @@ async def api_v1_root():
             "forecasts": "/api/v1/forecasts/occupancy",
             "recommendations": "/api/v1/recommendations/berth",
             "assistant": "/api/v1/assistant/chat",
+            "agents": {
+                "query": "/api/v1/agents/query",
+                "roles": "/api/v1/agents/roles",
+                "operations": "/api/v1/agents/operations",
+                "forecasting": "/api/v1/agents/forecasting",
+                "maintenance": "/api/v1/agents/maintenance",
+                "compliance": "/api/v1/agents/compliance",
+                "incident": "/api/v1/agents/incident",
+            },
         },
     }
 
