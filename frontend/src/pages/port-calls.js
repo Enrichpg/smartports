@@ -70,8 +70,8 @@ export class PortCallsPage {
     return `
       <div class="page-header">
         <div>
-          <div class="page-title"><i class="fas fa-calendar-alt"></i> Escalas Portuarias</div>
-          <div class="page-subtitle">${this._all.length} escalas registradas · Últimas 72 horas</div>
+          <div class="page-title"><i class="fas fa-calendar-alt"></i> ${t('page.port_calls')}</div>
+          <div class="page-subtitle">${this._all.length} ${t('portcalls.registered')}</div>
         </div>
         <button class="btn btn-sm btn-outline-secondary" id="pc-export-csv">
           <i class="fas fa-file-csv me-1"></i>${t('portcalls.export_csv')}
@@ -105,7 +105,7 @@ export class PortCallsPage {
             <div class="d-flex align-items-end gap-2">
               <div class="view-toggle">
                 <button class="view-toggle-btn active" id="pc-view-timeline" title="Timeline"><i class="fas fa-stream"></i></button>
-                <button class="view-toggle-btn" id="pc-view-table" title="Tabla"><i class="fas fa-table"></i></button>
+                <button class="view-toggle-btn" id="pc-view-table" title="${t('portcalls.view_table')}"><i class="fas fa-table"></i></button>
               </div>
             </div>
           </div>
@@ -181,13 +181,13 @@ export class PortCallsPage {
   _renderPagination() {
     const total = this._filtered.length;
     const pages = Math.ceil(total / this._perPage);
-    if (pages <= 1) return `<div style="font-size:0.82rem;color:var(--sp-text-muted);padding-top:12px">${total} escalas</div>`;
+    if (pages <= 1) return `<div style="font-size:0.82rem;color:var(--sp-text-muted);padding-top:12px">${total} ${t('nav.port_calls')}</div>`;
     const btns = [];
     btns.push(`<button class="sp-page-btn" id="pcpg-prev" ${this._page<=1?'disabled':''}><i class="fas fa-chevron-left"></i></button>`);
     for (let i=1;i<=Math.min(pages,7);i++) btns.push(`<button class="sp-page-btn ${i===this._page?'active':''}" data-pg="${i}">${i}</button>`);
     if (pages>7) btns.push(`<span style="padding:0 4px">...</span><button class="sp-page-btn ${pages===this._page?'active':''}" data-pg="${pages}">${pages}</button>`);
     btns.push(`<button class="sp-page-btn" id="pcpg-next" ${this._page>=pages?'disabled':''}><i class="fas fa-chevron-right"></i></button>`);
-    btns.push(`<span class="sp-per-page">Pág. ${this._page}/${pages}</span>`);
+    btns.push(`<span class="sp-per-page">${t('ui.page_of')} ${this._page}/${pages}</span>`);
     return `<div class="sp-pagination">${btns.join('')}</div>`;
   }
 

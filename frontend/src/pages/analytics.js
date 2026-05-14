@@ -280,10 +280,10 @@ export class AnalyticsPage {
             t('analytics.kpi.avg_occ', 'Ocupación'),
             t('dash.kpi.efficiency', 'Eficiencia'),
             t('alerts.type.SECURITY', 'Seguridad'),
-            'Puntualidad', 'Sostenibilidad', 'Capacidad',
+            t('analytics.radar.punctuality'), t('analytics.radar.sustainability'), t('analytics.radar.capacity'),
           ],
           datasets: [{
-            label: 'Red Portuaria',
+            label: t('analytics.label.network'),
             data: [59, 87, 92, 76, 68, 74],
             backgroundColor: 'rgba(0,82,204,0.2)', borderColor: '#0052CC',
             pointBackgroundColor: '#0052CC', borderWidth: 2,
@@ -305,7 +305,7 @@ export class AnalyticsPage {
         type: 'bar',
         data: {
           labels: Object.keys(durationByType).map(t => typeLabels[t] || t),
-          datasets: [{ label: 'Horas', data: Object.values(durationByType), backgroundColor: COLORS, borderRadius: 4, borderWidth: 0 }]
+          datasets: [{ label: t('analytics.label.hours'), data: Object.values(durationByType), backgroundColor: COLORS, borderRadius: 4, borderWidth: 0 }]
         },
         options: { ..._opts(), plugins: { legend: { display: false } } }
       });

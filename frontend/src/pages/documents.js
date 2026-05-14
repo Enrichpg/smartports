@@ -172,7 +172,7 @@ export class DocumentsPage {
     const url = URL.createObjectURL(blob);
     const w = window.open(url, '_blank');
     setTimeout(() => URL.revokeObjectURL(url), 15000);
-    if (!w) window.showToast('Permite ventanas emergentes para ver documentos', 'warning');
+    if (!w) window.showToast(t('docs.popup_warning'), 'warning');
   }
 
   _downloadDocument(doc) {

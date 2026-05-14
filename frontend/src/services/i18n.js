@@ -27,10 +27,12 @@ const TRANSLATIONS = {
     'nav.section.ops':    'Operaciones',
     'nav.section.analysis': 'Análisis',
     'nav.section.admin':  'Administración',
+    'nav.section.intelligence': 'Inteligencia',
 
     // ── Page titles ──────────────────────────
     'page.dashboard':     'Dashboard',
     'page.ports':         'Puertos de Galicia',
+    'page.ai_agents':     'Agentes IA',
     'page.port_detail':   'Detalle de Puerto',
     'page.berths':        'Atraques',
     'page.berth_detail':  'Detalle de Atraque',
@@ -176,6 +178,9 @@ const TRANSLATIONS = {
     'portcalls.col.eta':             'ETA',
     'portcalls.col.duration':        'Duración',
     'portcalls.col.cargo':           'Carga',
+    'portcalls.registered':          'escalas registradas · Últimas 72 h',
+    'portcalls.view_table':          'Tabla',
+    'portcalls.view_timeline':       'Línea de tiempo',
 
     // ── Vessels ──────────────────────────────
     'vessels.export_csv':            'Exportar CSV',
@@ -256,6 +261,11 @@ const TRANSLATIONS = {
     'analytics.type.general':        'General',
     'analytics.type.cruise':         'Crucero',
     'analytics.type.fishing':        'Pesca',
+    'analytics.radar.punctuality':   'Puntualidad',
+    'analytics.radar.sustainability': 'Sostenibilidad',
+    'analytics.radar.capacity':      'Capacidad',
+    'analytics.label.network':       'Red Portuaria',
+    'analytics.label.hours':         'Horas',
 
     // ── Alerts ───────────────────────────────
     'alerts.export_pdf':             'Exportar PDF',
@@ -318,6 +328,7 @@ const TRANSLATIONS = {
     'docs.col.size':                 'Tamaño',
     'docs.field.emission':           'Emisión:',
     'docs.field.expires':            'Vence:',
+    'docs.popup_warning':            'Permite ventanas emergentes para ver documentos',
 
     // ── Berths ───────────────────────────────
     'berths.export_csv':             'Exportar CSV',
@@ -353,10 +364,12 @@ const TRANSLATIONS = {
     'nav.section.ops':    'Operacións',
     'nav.section.analysis': 'Análise',
     'nav.section.admin':  'Administración',
+    'nav.section.intelligence': 'Intelixencia',
 
     // ── Page titles ──────────────────────────
     'page.dashboard':     'Panel de control',
     'page.ports':         'Portos de Galicia',
+    'page.ai_agents':     'Axentes IA',
     'page.port_detail':   'Detalle do Porto',
     'page.berths':        'Amarres',
     'page.berth_detail':  'Detalle do Amarre',
@@ -502,6 +515,9 @@ const TRANSLATIONS = {
     'portcalls.col.eta':             'ETA',
     'portcalls.col.duration':        'Duración',
     'portcalls.col.cargo':           'Carga',
+    'portcalls.registered':          'escalas rexistradas · Últimas 72 h',
+    'portcalls.view_table':          'Táboa',
+    'portcalls.view_timeline':       'Liña de tempo',
 
     // ── Vessels ──────────────────────────────
     'vessels.export_csv':            'Exportar CSV',
@@ -582,6 +598,11 @@ const TRANSLATIONS = {
     'analytics.type.general':        'Xeral',
     'analytics.type.cruise':         'Cruceiro',
     'analytics.type.fishing':        'Pesca',
+    'analytics.radar.punctuality':   'Puntualidade',
+    'analytics.radar.sustainability': 'Sostentabilidade',
+    'analytics.radar.capacity':      'Capacidade',
+    'analytics.label.network':       'Rede Portuaria',
+    'analytics.label.hours':         'Horas',
 
     // ── Alerts ───────────────────────────────
     'alerts.export_pdf':             'Exportar PDF',
@@ -644,6 +665,7 @@ const TRANSLATIONS = {
     'docs.col.size':                 'Tamaño',
     'docs.field.emission':           'Emisión:',
     'docs.field.expires':            'Vence:',
+    'docs.popup_warning':            'Permite xanelas emerxentes para ver documentos',
 
     // ── Berths ───────────────────────────────
     'berths.export_csv':             'Exportar CSV',
@@ -679,10 +701,12 @@ const TRANSLATIONS = {
     'nav.section.ops':    'Operations',
     'nav.section.analysis': 'Analysis',
     'nav.section.admin':  'Administration',
+    'nav.section.intelligence': 'Intelligence',
 
     // ── Page titles ──────────────────────────
     'page.dashboard':     'Dashboard',
     'page.ports':         'Galician Ports',
+    'page.ai_agents':     'AI Agents',
     'page.port_detail':   'Port Detail',
     'page.berths':        'Berths',
     'page.berth_detail':  'Berth Detail',
@@ -828,6 +852,9 @@ const TRANSLATIONS = {
     'portcalls.col.eta':             'ETA',
     'portcalls.col.duration':        'Duration',
     'portcalls.col.cargo':           'Cargo',
+    'portcalls.registered':          'registered port calls · Last 72 h',
+    'portcalls.view_table':          'Table',
+    'portcalls.view_timeline':       'Timeline',
 
     // ── Vessels ──────────────────────────────
     'vessels.export_csv':            'Export CSV',
@@ -908,6 +935,11 @@ const TRANSLATIONS = {
     'analytics.type.general':        'General',
     'analytics.type.cruise':         'Cruise',
     'analytics.type.fishing':        'Fishing',
+    'analytics.radar.punctuality':   'Punctuality',
+    'analytics.radar.sustainability': 'Sustainability',
+    'analytics.radar.capacity':      'Capacity',
+    'analytics.label.network':       'Port Network',
+    'analytics.label.hours':         'Hours',
 
     // ── Alerts ───────────────────────────────
     'alerts.export_pdf':             'Export PDF',
@@ -970,6 +1002,7 @@ const TRANSLATIONS = {
     'docs.col.size':                 'Size',
     'docs.field.emission':           'Issued:',
     'docs.field.expires':            'Expires:',
+    'docs.popup_warning':            'Allow pop-ups to view documents',
 
     // ── Berths ───────────────────────────────
     'berths.export_csv':             'Export CSV',

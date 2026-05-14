@@ -206,13 +206,13 @@ export class AlertsPage {
   _renderPagination() {
     const total = this._filtered.length;
     const pages = Math.ceil(total / this._perPage);
-    if (pages <= 1) return `<div style="font-size:0.82rem;color:var(--sp-text-muted);padding-top:12px">${total} alertas</div>`;
+    if (pages <= 1) return `<div style="font-size:0.82rem;color:var(--sp-text-muted);padding-top:12px">${total} ${t('nav.alerts')}</div>`;
     const btns = [];
     btns.push(`<button class="sp-page-btn" id="apg-prev" ${this._page <= 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`);
     for (let i = 1; i <= Math.min(pages, 7); i++) btns.push(`<button class="sp-page-btn ${i === this._page ? 'active' : ''}" data-pg="${i}">${i}</button>`);
     if (pages > 7) btns.push(`<span style="padding:0 4px">...</span><button class="sp-page-btn ${pages === this._page ? 'active' : ''}" data-pg="${pages}">${pages}</button>`);
     btns.push(`<button class="sp-page-btn" id="apg-next" ${this._page >= pages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`);
-    btns.push(`<span class="sp-per-page">Pág. ${this._page}/${pages}</span>`);
+    btns.push(`<span class="sp-per-page">${t('ui.page_of')} ${this._page}/${pages}</span>`);
     return `<div class="sp-pagination">${btns.join('')}</div>`;
   }
 
