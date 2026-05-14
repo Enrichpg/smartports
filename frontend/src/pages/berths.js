@@ -6,6 +6,7 @@ import { apiClient } from '../services/api.js';
 import { EmptyState, LoadingSkeleton, StatusBadge } from '../components/base.js';
 import { getAllBerths, PORTS } from '../services/mock-data.js';
 import { formatDate } from '../utils/helpers.js';
+import { t } from '../services/i18n.js';
 
 export class BerthsPage {
   constructor() {
@@ -54,36 +55,36 @@ export class BerthsPage {
     return `
       <div class="page-header">
         <div>
-          <div class="page-title"><i class="fas fa-ship"></i> Atraques</div>
-          <div class="page-subtitle">${this._all.length} atraques en la red portuaria de Galicia</div>
+          <div class="page-title"><i class="fas fa-ship"></i> ${t('page.berths')}</div>
+          <div class="page-subtitle">${this._all.length} ${t('berths.col.name').toLowerCase()} · ${t('nav.ports')}</div>
         </div>
         <button class="btn btn-sm btn-outline-secondary" id="berths-export-csv">
-          <i class="fas fa-file-csv me-1"></i>Exportar CSV
+          <i class="fas fa-file-csv me-1"></i>${t('berths.export_csv')}
         </button>
       </div>
       <div class="row g-3 mb-3">
-        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-free"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${free}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Libres</div></div></div></div>
-        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-occupied"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${occ}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Ocupados</div></div></div></div>
-        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-reserved"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${res}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Reservados</div></div></div></div>
-        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-maintenance"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${mnt}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Mantenimiento</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-free"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${free}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('berths.kpi.free')}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-occupied"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${occ}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('berths.kpi.occupied')}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-reserved"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${res}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('berths.kpi.reserved')}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="sp-card" style="cursor:pointer" id="filter-maintenance"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${mnt}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('berths.kpi.maintenance')}</div></div></div></div>
       </div>
       <div class="sp-filters">
-        <div class="sp-filter-search"><label>Buscar</label><input class="form-control form-control-sm" id="berths-search" placeholder="Nombre, buque..."></div>
+        <div class="sp-filter-search"><label>${t('ui.search')}</label><input class="form-control form-control-sm" id="berths-search" placeholder="${t('berths.col.name')}, ${t('berths.col.vessel')}..."></div>
         <div class="sp-filter-group">
-          <label>Estado</label>
+          <label>${t('berths.col.status')}</label>
           <select class="form-select form-select-sm" id="berths-status">
-            <option value="">Todos</option><option value="free">Libre</option><option value="occupied">Ocupado</option><option value="reserved">Reservado</option><option value="maintenance">Mantenimiento</option>
+            <option value="">${t('ui.all')}</option><option value="free">${t('berths.kpi.free')}</option><option value="occupied">${t('berths.kpi.occupied')}</option><option value="reserved">${t('berths.kpi.reserved')}</option><option value="maintenance">${t('berths.kpi.maintenance')}</option>
           </select>
         </div>
         <div class="sp-filter-group">
-          <label>Puerto</label>
+          <label>${t('berths.col.port')}</label>
           <select class="form-select form-select-sm" id="berths-port">
-            <option value="">Todos</option>
+            <option value="">${t('ui.all')}</option>
             ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
           </select>
         </div>
         <div class="sp-filter-group">
-          <label>Por página</label>
+          <label>${t('ui.per_page')}</label>
           <select class="form-select form-select-sm" id="berths-perpage">
             <option value="10">10</option><option value="25" selected>25</option><option value="50">50</option>
           </select>
@@ -95,14 +96,14 @@ export class BerthsPage {
 
   _renderTable() {
     const items = this._paginate(this._filtered);
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-ship', title: 'Sin atraques', message: 'No hay atraques con los filtros aplicados' });
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-ship', title: t('ui.no_data'), message: t('ui.no_data') });
     return `
       <div class="sp-card">
         <div class="sp-table-wrapper">
           <table class="sp-table">
             <thead><tr>
-              <th>Atraque</th><th>Puerto</th><th>Estado</th><th>Tipo</th>
-              <th>Eslora máx.</th><th>Calado</th><th>Buque actual</th><th>ETD</th>
+              <th>${t('berths.col.name')}</th><th>${t('berths.col.port')}</th><th>${t('berths.col.status')}</th><th>${t('berths.col.type')}</th>
+              <th>${t('berths.col.length')}</th><th>${t('berths.col.depth')}</th><th>${t('berths.col.vessel')}</th><th>${t('berths.col.etd')}</th>
             </tr></thead>
             <tbody>
               ${items.map(b => `
@@ -163,7 +164,7 @@ export class BerthsPage {
   }
 
   _exportCSV() {
-    const headers = ['ID', 'Nombre', 'Puerto', 'Estado', 'Tipo', 'Eslora max (m)', 'Calado (m)', 'Buque actual', 'ETD'];
+    const headers = ['ID', t('berths.col.name'), t('berths.col.port'), t('berths.col.status'), t('berths.col.type'), `${t('berths.col.length')} (m)`, `${t('berths.col.depth')} (m)`, t('berths.col.vessel'), t('berths.col.etd')];
     const rows = this._filtered.map(b => [
       b.id, b.name, b.portName, b.status, b.type, b.length, b.depth,
       b.vesselName || '', b.etd || '',
@@ -211,6 +212,8 @@ export class BerthsPage {
 }
 
 function _statusLabel(s) {
-  const m = { free: 'Libre', occupied: 'Ocupado', reserved: 'Reservado', maintenance: 'Mantenimiento' };
-  return m[s] || s;
+  return {
+    free: t('berths.kpi.free'), occupied: t('berths.kpi.occupied'),
+    reserved: t('berths.kpi.reserved'), maintenance: t('berths.kpi.maintenance'),
+  }[s] || s;
 }

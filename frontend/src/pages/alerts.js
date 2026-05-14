@@ -6,14 +6,24 @@ import { apiClient } from '../services/api.js';
 import { EmptyState, LoadingSkeleton } from '../components/base.js';
 import { generateAlerts, PORTS } from '../services/mock-data.js';
 import { formatDate } from '../utils/helpers.js';
+import { t } from '../services/i18n.js';
 
-const SEV_LABELS = { critical: 'Crítica', high: 'Alta', medium: 'Media', low: 'Baja' };
+function SEV_LABELS() {
+  return {
+    critical: t('alerts.sev.critical'), high: t('alerts.sev.high'),
+    medium: t('alerts.sev.medium'), low: t('alerts.sev.low'),
+  };
+}
 const SEV_COLORS = { critical: '#dc3545', high: '#fd7e14', medium: '#ffc107', low: '#17a2b8' };
-const TYPE_LABELS = {
-  SECURITY: 'Seguridad', OPERATIONAL: 'Operacional', ENVIRONMENTAL: 'Ambiental',
-  TECHNICAL: 'Técnica', WEATHER_WIND: 'Meteorológica', VESSEL_DELAYED: 'Buque retrasado',
-  WEATHER_WAVE: 'Oleaje', WEATHER_VISIBILITY: 'Visibilidad', ETA_DEVIATION: 'Desviación ETA',
-};
+function TYPE_LABELS() {
+  return {
+    SECURITY: t('alerts.type.SECURITY'), OPERATIONAL: t('alerts.type.OPERATIONAL'),
+    ENVIRONMENTAL: t('alerts.type.ENVIRONMENTAL'), TECHNICAL: t('alerts.type.TECHNICAL'),
+    WEATHER_WIND: t('alerts.type.WEATHER_WIND'), VESSEL_DELAYED: t('alerts.type.VESSEL_DELAYED'),
+    WEATHER_WAVE: t('alerts.type.WEATHER_WAVE'), WEATHER_VISIBILITY: t('alerts.type.WEATHER_VISIBILITY'),
+    ETA_DEVIATION: t('alerts.type.ETA_DEVIATION'),
+  };
+}
 
 export class AlertsPage {
   constructor() {
@@ -79,58 +89,59 @@ export class AlertsPage {
     const resolved = this._all.filter(a => a.status === 'resolved').length;
     const critical = this._all.filter(a => a.severity === 'critical' && a.status === 'active').length;
     const high = this._all.filter(a => a.severity === 'high' && a.status === 'active').length;
+    const sl = SEV_LABELS(); const tl = TYPE_LABELS();
 
     return `
       <div class="page-header">
         <div>
-          <div class="page-title"><i class="fas fa-exclamation-triangle"></i> Centro de Alertas</div>
-          <div class="page-subtitle">${this._all.length} alertas registradas · Sistema de monitoreo continuo</div>
+          <div class="page-title"><i class="fas fa-exclamation-triangle"></i> ${t('page.alerts')}</div>
+          <div class="page-subtitle">${this._all.length} · ${t('dash.section.alerts')}</div>
         </div>
         <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
-          <i class="fas fa-print me-1"></i>Exportar PDF
+          <i class="fas fa-print me-1"></i>${t('alerts.export_pdf')}
         </button>
       </div>
-      <div class="print-header">SmartPort Galicia — Informe de Alertas · ${new Date().toLocaleDateString('es-ES', { dateStyle: 'long' })}</div>
+      <div class="print-header">SmartPort Galicia — ${t('page.alerts')} · ${new Date().toLocaleDateString('es-ES', { dateStyle: 'long' })}</div>
 
       <div class="row g-3 mb-3">
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #dc3545" id="af-active"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Activas</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #fd7e14" id="af-critical"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#fd7e14">${critical + high}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Crítica/Alta</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #00A651" id="af-resolved"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${resolved}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Resueltas</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #6c757d" id="af-all"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${this._all.length}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Total</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #dc3545" id="af-active"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('alerts.kpi.active')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #fd7e14" id="af-critical"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#fd7e14">${critical + high}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('alerts.kpi.critical_high')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #00A651" id="af-resolved"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${resolved}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('alerts.kpi.resolved')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer;border-left:3px solid #6c757d" id="af-all"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${this._all.length}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('alerts.kpi.total')}</div></div></div></div>
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-lg-8">
           <div class="sp-filters" style="margin-bottom:0">
-            <div class="sp-filter-search"><label>Buscar</label><input class="form-control form-control-sm" id="a-search" placeholder="Mensaje, puerto..."></div>
+            <div class="sp-filter-search"><label>${t('ui.search')}</label><input class="form-control form-control-sm" id="a-search" placeholder="${t('alerts.col.message')}, ${t('alerts.col.port')}..."></div>
             <div class="sp-filter-group">
-              <label>Severidad</label>
+              <label>${t('alerts.col.severity')}</label>
               <select class="form-select form-select-sm" id="a-sev">
-                <option value="">Todas</option>
-                ${Object.entries(SEV_LABELS).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
+                <option value="">${t('ui.all')}</option>
+                ${Object.entries(sl).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
               </select>
             </div>
             <div class="sp-filter-group">
-              <label>Estado</label>
+              <label>${t('alerts.col.status')}</label>
               <select class="form-select form-select-sm" id="a-status">
-                <option value="active" selected>Activas</option>
-                <option value="resolved">Resueltas</option>
-                <option value="ignored">Ignoradas</option>
-                <option value="">Todas</option>
+                <option value="active" selected>${t('alerts.status_opts.active')}</option>
+                <option value="resolved">${t('alerts.status_opts.resolved')}</option>
+                <option value="ignored">${t('alerts.status_opts.ignored')}</option>
+                <option value="">${t('alerts.status_opts.all')}</option>
               </select>
             </div>
             <div class="sp-filter-group">
-              <label>Puerto</label>
+              <label>${t('alerts.col.port')}</label>
               <select class="form-select form-select-sm" id="a-port">
-                <option value="">Todos</option>
+                <option value="">${t('ui.all')}</option>
                 ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
               </select>
             </div>
             <div class="sp-filter-group">
-              <label>Tipo</label>
+              <label>${t('alerts.col.type')}</label>
               <select class="form-select form-select-sm" id="a-type">
-                <option value="">Todos</option>
-                ${Object.entries(TYPE_LABELS).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
+                <option value="">${t('ui.all')}</option>
+                ${Object.entries(tl).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -146,39 +157,40 @@ export class AlertsPage {
 
   _renderList() {
     const items = this._paginate(this._filtered);
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-check-circle', title: 'Sin alertas', message: 'No hay alertas con los filtros actuales' });
+    const sl = SEV_LABELS(); const tl = TYPE_LABELS();
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-check-circle', title: t('ui.no_data'), message: t('ui.no_data') });
     return `
       <div class="sp-card">
         <div class="sp-table-wrapper">
           <table class="sp-table">
-            <thead><tr><th style="width:110px">Severidad</th><th>Mensaje</th><th>Tipo</th><th>Puerto</th><th>Timestamp</th><th>Estado</th><th style="width:100px">Acciones</th></tr></thead>
+            <thead><tr><th style="width:110px">${t('alerts.col.severity')}</th><th>${t('alerts.col.message')}</th><th>${t('alerts.col.type')}</th><th>${t('alerts.col.port')}</th><th>${t('alerts.col.timestamp')}</th><th>${t('alerts.col.status')}</th><th style="width:100px">${t('alerts.col.actions')}</th></tr></thead>
             <tbody>
               ${items.map(a => `
                 <tr class="${a.status === 'resolved' ? 'opacity-75' : ''}">
                   <td>
                     <span style="display:inline-flex;align-items:center;gap:6px">
                       <span style="width:8px;height:8px;border-radius:50%;background:${SEV_COLORS[a.severity] || '#6c757d'};flex-shrink:0"></span>
-                      <strong style="font-size:0.8rem">${SEV_LABELS[a.severity] || a.severity}</strong>
+                      <strong style="font-size:0.8rem">${sl[a.severity] || a.severity}</strong>
                     </span>
                   </td>
                   <td>
                     <div style="font-weight:600;font-size:0.85rem">${a.message}</div>
                     ${a.assignedTo ? `<div style="font-size:0.72rem;color:var(--sp-text-muted)"><i class="fas fa-user me-1"></i>${a.assignedTo}</div>` : ''}
                   </td>
-                  <td><span style="font-size:0.78rem">${TYPE_LABELS[a.type] || a.type}</span></td>
+                  <td><span style="font-size:0.78rem">${tl[a.type] || a.type}</span></td>
                   <td><span style="font-size:0.83rem">${a.portName}</span></td>
                   <td><span style="font-size:0.78rem">${formatDate(a.timestamp, 'medium')}</span></td>
                   <td>
                     <span class="sp-badge ${a.status === 'resolved' ? 'active' : a.status === 'ignored' ? 'maintenance' : 'occupied'}" style="font-size:0.68rem">
-                      ${a.status === 'resolved' ? 'Resuelta' : a.status === 'ignored' ? 'Ignorada' : 'Activa'}
+                      ${a.status === 'resolved' ? t('alerts.alert_resolved') : a.status === 'ignored' ? t('alerts.alert_ignored') : t('alerts.alert_active')}
                     </span>
                   </td>
                   <td>
                     ${a.status === 'active' ? `
-                      <button class="btn btn-xs btn-outline-success me-1" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('Alerta ${a.id} marcada como resuelta','success')">
+                      <button class="btn btn-xs btn-outline-success me-1" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('${t('alerts.alert_resolved')}','success')">
                         <i class="fas fa-check"></i>
                       </button>
-                      <button class="btn btn-xs btn-outline-secondary" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('Alerta asignada','info')">
+                      <button class="btn btn-xs btn-outline-secondary" style="padding:2px 8px;font-size:0.72rem" onclick="window.showToast('${t('toast.info')}','info')">
                         <i class="fas fa-user-plus"></i>
                       </button>` : `<span style="font-size:0.72rem;color:var(--sp-text-muted)">${a.resolvedAt ? formatDate(a.resolvedAt, 'short') : '—'}</span>`}
                   </td>
@@ -224,11 +236,12 @@ export class AlertsPage {
     const el = document.getElementById('a-chart');
     if (!el) return;
     const sevs = ['critical', 'high', 'medium', 'low'];
+    const sl = SEV_LABELS();
     const data = sevs.map(s => this._all.filter(a => a.severity === s).length);
     this._charts.sev = new window.Chart(el, {
       type: 'doughnut',
       data: {
-        labels: sevs.map(s => SEV_LABELS[s]),
+        labels: sevs.map(s => sl[s]),
         datasets: [{ data, backgroundColor: Object.values(SEV_COLORS), borderWidth: 0 }]
       },
       options: {

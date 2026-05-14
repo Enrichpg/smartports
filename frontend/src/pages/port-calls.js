@@ -6,9 +6,23 @@ import { apiClient } from '../services/api.js';
 import { EmptyState, LoadingSkeleton } from '../components/base.js';
 import { generatePortCalls, PORTS } from '../services/mock-data.js';
 import { formatDate } from '../utils/helpers.js';
+import { t } from '../services/i18n.js';
 
-const STATE_LABELS = { active: 'Activa', authorized: 'Autorizada', pending: 'Pendiente', completed: 'Completada', rejected: 'Rechazada' };
-const TYPE_LABELS = { container: 'Contenedor', bulk: 'Graneles', tanker: 'Tanquero', roro: 'Ro-Ro', general: 'Carga general', cruise: 'Crucero', fishing: 'Pesca' };
+function STATE_LABELS() {
+  return {
+    active: t('portcalls.state.active'), authorized: t('portcalls.state.authorized'),
+    pending: t('portcalls.state.pending'), completed: t('portcalls.state.completed'),
+    rejected: t('portcalls.state.rejected'),
+  };
+}
+function TYPE_LABELS() {
+  return {
+    container: t('portcalls.type.container'), bulk: t('portcalls.type.bulk'),
+    tanker: t('portcalls.type.tanker'), roro: t('portcalls.type.roro'),
+    general: t('portcalls.type.general'), cruise: t('portcalls.type.cruise'),
+    fishing: t('portcalls.type.fishing'),
+  };
+}
 
 export class PortCallsPage {
   constructor() {
@@ -60,31 +74,31 @@ export class PortCallsPage {
           <div class="page-subtitle">${this._all.length} escalas registradas · Últimas 72 horas</div>
         </div>
         <button class="btn btn-sm btn-outline-secondary" id="pc-export-csv">
-          <i class="fas fa-file-csv me-1"></i>Exportar CSV
+          <i class="fas fa-file-csv me-1"></i>${t('portcalls.export_csv')}
         </button>
       </div>
       <div class="row g-3 mb-3">
-        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-active" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${byState.active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Activas</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-authorized" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#17a2b8">${byState.authorized}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Autorizadas</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-pending" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${byState.pending}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Pendientes</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-completed" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${byState.completed}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Completadas</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-active" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${byState.active}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('portcalls.kpi.active')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-authorized" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#17a2b8">${byState.authorized}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('portcalls.kpi.authorized')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-pending" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${byState.pending}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('portcalls.kpi.pending')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" id="pcf-completed" style="cursor:pointer"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#6c757d">${byState.completed}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('portcalls.kpi.completed')}</div></div></div></div>
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-lg-8">
           <div class="sp-filters" style="margin-bottom:0">
-            <div class="sp-filter-search"><label>Buscar buque</label><input class="form-control form-control-sm" id="pc-search" placeholder="Nombre del buque..."></div>
+            <div class="sp-filter-search"><label>${t('portcalls.col.vessel')}</label><input class="form-control form-control-sm" id="pc-search" placeholder="${t('portcalls.col.vessel')}..."></div>
             <div class="sp-filter-group">
-              <label>Estado</label>
+              <label>${t('portcalls.col.state')}</label>
               <select class="form-select form-select-sm" id="pc-state">
-                <option value="">Todos</option>
-                ${Object.entries(STATE_LABELS).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
+                <option value="">${t('ui.all')}</option>
+                ${Object.entries(STATE_LABELS()).map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}
               </select>
             </div>
             <div class="sp-filter-group">
-              <label>Puerto</label>
+              <label>${t('portcalls.col.port')}</label>
               <select class="form-select form-select-sm" id="pc-port">
-                <option value="">Todos</option>
+                <option value="">${t('ui.all')}</option>
                 ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
               </select>
             </div>
@@ -107,7 +121,8 @@ export class PortCallsPage {
 
   _renderTimeline() {
     const items = this._paginate(this._filtered);
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-calendar', title: 'Sin escalas', message: 'No hay escalas con los filtros aplicados' });
+    const sl = STATE_LABELS(); const tl = TYPE_LABELS();
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-calendar', title: t('ui.no_data'), message: t('ui.no_data') });
     return `
       <div class="sp-timeline">
         ${items.map(pc => `
@@ -119,7 +134,7 @@ export class PortCallsPage {
                   <div class="timeline-title"><i class="fas fa-ship me-2"></i>${pc.vesselName}</div>
                   <div class="timeline-subtitle">${pc.portName} · ${pc.berthName}</div>
                 </div>
-                <span class="sp-badge ${pc.state}">${STATE_LABELS[pc.state] || pc.state}</span>
+                <span class="sp-badge ${pc.state}">${sl[pc.state] || pc.state}</span>
               </div>
               <div class="timeline-meta">
                 <span><i class="fas fa-arrow-right"></i> ETA: ${formatDate(pc.eta, 'medium')}</span>
@@ -127,7 +142,7 @@ export class PortCallsPage {
                 <span><i class="fas fa-clock"></i> ${pc.durationHours}h</span>
                 <span><i class="fas fa-boxes"></i> ${pc.cargo}</span>
                 <span><i class="fas fa-weight"></i> ${(pc.grossTonnage || 0).toLocaleString('es-ES')} GT</span>
-                <span title="${TYPE_LABELS[pc.vesselType] || pc.vesselType}"><i class="fas fa-tag"></i> ${TYPE_LABELS[pc.vesselType] || pc.vesselType}</span>
+                <span title="${tl[pc.vesselType] || pc.vesselType}"><i class="fas fa-tag"></i> ${tl[pc.vesselType] || pc.vesselType}</span>
               </div>
             </div>
           </div>`).join('')}
@@ -138,19 +153,20 @@ export class PortCallsPage {
 
   _renderTableView() {
     const items = this._paginate(this._filtered);
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-calendar', title: 'Sin escalas' });
+    const sl = STATE_LABELS(); const tl = TYPE_LABELS();
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-calendar', title: t('ui.no_data') });
     return `
       <div class="sp-card">
         <div class="sp-table-wrapper">
           <table class="sp-table">
-            <thead><tr><th>Buque</th><th>Puerto</th><th>Atraque</th><th>Estado</th><th>ETA</th><th>Duración</th><th>Carga</th></tr></thead>
+            <thead><tr><th>${t('portcalls.col.vessel')}</th><th>${t('portcalls.col.port')}</th><th>${t('portcalls.col.berth')}</th><th>${t('portcalls.col.state')}</th><th>${t('portcalls.col.eta')}</th><th>${t('portcalls.col.duration')}</th><th>${t('portcalls.col.cargo')}</th></tr></thead>
             <tbody>
               ${items.map(pc => `
                 <tr>
-                  <td><strong>${pc.vesselName}</strong><br><small class="text-muted">${TYPE_LABELS[pc.vesselType] || pc.vesselType}</small></td>
+                  <td><strong>${pc.vesselName}</strong><br><small class="text-muted">${tl[pc.vesselType] || pc.vesselType}</small></td>
                   <td>${pc.portName}</td>
                   <td>${pc.berthName}</td>
-                  <td><span class="sp-badge ${pc.state}">${STATE_LABELS[pc.state] || pc.state}</span></td>
+                  <td><span class="sp-badge ${pc.state}">${sl[pc.state] || pc.state}</span></td>
                   <td>${formatDate(pc.eta, 'medium')}</td>
                   <td>${pc.durationHours}h</td>
                   <td>${pc.cargo}</td>
@@ -204,16 +220,18 @@ export class PortCallsPage {
     if (!window.Chart) return;
     const el = document.getElementById('pc-state-chart');
     if (!el) return;
+    const sl = STATE_LABELS();
     const byState = ['active','authorized','pending','completed'].map(s => this._all.filter(pc => pc.state===s).length);
     this._charts.state = new window.Chart(el, {
       type: 'doughnut',
-      data: { labels: ['Activa','Autorizada','Pendiente','Completada'], datasets: [{ data: byState, backgroundColor: ['#00A651','#17a2b8','#ffa500','#6c757d'], borderWidth: 0 }] },
+      data: { labels: [sl.active, sl.authorized, sl.pending, sl.completed], datasets: [{ data: byState, backgroundColor: ['#00A651','#17a2b8','#ffa500','#6c757d'], borderWidth: 0 }] },
       options: { responsive:true, maintainAspectRatio:false, cutout:'70%', plugins:{ legend:{ position:'right', labels:{ font:{size:10}, boxWidth:8, color: document.documentElement.getAttribute('data-bs-theme')==='dark'?'#8b949e':'#6c757d' } } } }
     });
   }
 
   _exportCSV() {
-    const headers = ['ID', 'Buque', 'Tipo', 'Puerto', 'Atraque', 'Estado', 'ETA', 'ETD', 'Duracion (h)', 'Carga', 'GT'];
+    const sl = STATE_LABELS(); const tl = TYPE_LABELS();
+    const headers = ['ID', t('portcalls.col.vessel'), t('portcalls.col.state'), t('portcalls.col.port'), t('portcalls.col.berth'), t('portcalls.col.state'), 'ETA', 'ETD', `${t('portcalls.col.duration')} (h)`, t('portcalls.col.cargo'), 'GT'];
     const rows = this._filtered.map(pc => [
       pc.id, pc.vesselName, pc.vesselType, pc.portName, pc.berthName, pc.state,
       pc.eta || '', pc.etd || '', pc.durationHours, pc.cargo || '', pc.grossTonnage || 0,

@@ -4,9 +4,16 @@
 
 import { EmptyState, LoadingSkeleton } from '../components/base.js';
 import { generateDocuments, PORTS } from '../services/mock-data.js';
+import { t } from '../services/i18n.js';
 
 const TYPE_ICONS = { manifest: 'fa-file-alt', certificate: 'fa-certificate', inspection: 'fa-clipboard-check', permit: 'fa-stamp', insurance: 'fa-shield-alt' };
-const STATUS_STYLES = { valid: { cls: 'active', label: 'Válido' }, pending: { cls: 'reserved', label: 'Pendiente' }, expired: { cls: 'maintenance', label: 'Caducado' } };
+function STATUS_STYLES() {
+  return {
+    valid: { cls: 'active', label: t('docs.status.valid') },
+    pending: { cls: 'reserved', label: t('docs.status.pending') },
+    expired: { cls: 'maintenance', label: t('docs.status.expired') },
+  };
+}
 
 export class DocumentsPage {
   constructor() {
@@ -34,49 +41,49 @@ export class DocumentsPage {
 
     return `
       <div class="page-header">
-        <div class="page-title"><i class="fas fa-folder-open"></i> Documentos</div>
-        <div class="page-subtitle">Centro de documentación portuaria</div>
+        <div class="page-title"><i class="fas fa-folder-open"></i> ${t('page.documents')}</div>
+        <div class="page-subtitle">${t('docs.subtitle')}</div>
       </div>
 
       <div class="row g-3 mb-3">
-        <div class="col-6 col-md-3"><div class="sp-card"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:var(--sp-primary)">${this._all.length}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Total documentos</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-valid"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${valid}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Válidos</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-pending"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${pending}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Pendientes</div></div></div></div>
-        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-expired"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${expired}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">Caducados</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:var(--sp-primary)">${this._all.length}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('docs.kpi.total')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-valid"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#00A651">${valid}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('docs.kpi.valid')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-pending"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#ffa500">${pending}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('docs.kpi.pending')}</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="sp-card" style="cursor:pointer" id="df-expired"><div class="sp-card-body text-center"><div style="font-size:1.8rem;font-weight:700;color:#dc3545">${expired}</div><div style="font-size:0.78rem;color:var(--sp-text-muted)">${t('docs.kpi.expired')}</div></div></div></div>
       </div>
 
       <div class="sp-filters">
-        <div class="sp-filter-search"><label>Buscar</label><input class="form-control form-control-sm" id="d-search" placeholder="Título, buque..."></div>
+        <div class="sp-filter-search"><label>${t('ui.search')}</label><input class="form-control form-control-sm" id="d-search" placeholder="${t('docs.col.document')}, ${t('docs.col.vessel')}..."></div>
         <div class="sp-filter-group">
-          <label>Tipo</label>
+          <label>${t('docs.col.type')}</label>
           <select class="form-select form-select-sm" id="d-type">
-            <option value="">Todos</option>
-            ${types.map(t => `<option value="${t}">${_typeLabel(t)}</option>`).join('')}
+            <option value="">${t('ui.all')}</option>
+            ${types.map(tp => `<option value="${tp}">${_typeLabel(tp)}</option>`).join('')}
           </select>
         </div>
         <div class="sp-filter-group">
-          <label>Estado</label>
+          <label>${t('docs.col.status')}</label>
           <select class="form-select form-select-sm" id="d-status">
-            <option value="">Todos</option>
-            <option value="valid">Válido</option>
-            <option value="pending">Pendiente</option>
-            <option value="expired">Caducado</option>
+            <option value="">${t('ui.all')}</option>
+            <option value="valid">${t('docs.status.valid')}</option>
+            <option value="pending">${t('docs.status.pending')}</option>
+            <option value="expired">${t('docs.status.expired')}</option>
           </select>
         </div>
         <div class="sp-filter-group">
-          <label>Puerto</label>
+          <label>${t('docs.col.port')}</label>
           <select class="form-select form-select-sm" id="d-port">
-            <option value="">Todos</option>
+            <option value="">${t('ui.all')}</option>
             ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
           </select>
         </div>
         <div class="d-flex align-items-end gap-2">
           <div class="view-toggle">
             <button class="view-toggle-btn active" id="d-view-grid" title="Grid"><i class="fas fa-th-large"></i></button>
-            <button class="view-toggle-btn" id="d-view-table" title="Tabla"><i class="fas fa-table"></i></button>
+            <button class="view-toggle-btn" id="d-view-table" title="${t('ui.table')}"><i class="fas fa-table"></i></button>
           </div>
           <button class="btn btn-sm btn-primary" onclick="window.showToast('Función disponible próximamente','info')">
-            <i class="fas fa-upload me-1"></i>Subir
+            <i class="fas fa-upload me-1"></i>${t('docs.btn.upload')}
           </button>
         </div>
       </div>
@@ -86,9 +93,10 @@ export class DocumentsPage {
   }
 
   _renderGrid() {
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-folder-open', title: 'Sin documentos', message: 'No hay documentos con los filtros aplicados' });
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-folder-open', title: t('ui.no_data'), message: t('ui.no_data') });
+    const ss = STATUS_STYLES();
     return `<div class="row g-3">${this._filtered.map(doc => {
-      const s = STATUS_STYLES[doc.status] || STATUS_STYLES.pending;
+      const s = ss[doc.status] || ss.pending;
       const icon = TYPE_ICONS[doc.type] || 'fa-file';
       const isExpired = doc.status === 'expired';
       return `
@@ -109,16 +117,16 @@ export class DocumentsPage {
                 <div><i class="fas fa-anchor me-1"></i>${doc.portName}</div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.75rem">
-                <span><span class="text-muted">Emisión:</span> ${doc.issueDate}</span>
-                <span class="${isExpired ? 'text-danger fw-semibold' : ''}"><span class="text-muted">Vence:</span> ${doc.expiryDate}</span>
+                <span><span class="text-muted">${t('docs.field.emission')}</span> ${doc.issueDate}</span>
+                <span class="${isExpired ? 'text-danger fw-semibold' : ''}"><span class="text-muted">${t('docs.field.expires')}</span> ${doc.expiryDate}</span>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center">
                 <span class="sp-badge ${s.cls}" style="font-size:0.68rem;padding:2px 8px">${s.label}</span>
                 <span style="font-size:0.72rem;color:var(--sp-text-muted)">${doc.size} · ${doc.version}</span>
               </div>
               <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-sm btn-outline-primary flex-fill" data-doc-action="view" data-doc-id="${doc.id}"><i class="fas fa-eye me-1"></i>Ver</button>
-                <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}"><i class="fas fa-download"></i></button>
+                <button class="btn btn-sm btn-outline-primary flex-fill" data-doc-action="view" data-doc-id="${doc.id}"><i class="fas fa-eye me-1"></i>${t('docs.btn.view')}</button>
+                <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}" title="${t('docs.btn.download')}"><i class="fas fa-download"></i></button>
               </div>
             </div>
           </div>
@@ -127,15 +135,16 @@ export class DocumentsPage {
   }
 
   _renderTable() {
-    if (!this._filtered.length) return EmptyState({ icon: 'fa-folder-open', title: 'Sin documentos' });
+    if (!this._filtered.length) return EmptyState({ icon: 'fa-folder-open', title: t('ui.no_data') });
+    const ss = STATUS_STYLES();
     return `
       <div class="sp-card">
         <div class="sp-table-wrapper">
           <table class="sp-table">
-            <thead><tr><th>Documento</th><th>Tipo</th><th>Buque</th><th>Puerto</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th>Tamaño</th><th></th></tr></thead>
+            <thead><tr><th>${t('docs.col.document')}</th><th>${t('docs.col.type')}</th><th>${t('docs.col.vessel')}</th><th>${t('docs.col.port')}</th><th>${t('docs.col.status')}</th><th>${t('docs.col.issue_date')}</th><th>${t('docs.col.expiry')}</th><th>${t('docs.col.size')}</th><th></th></tr></thead>
             <tbody>
               ${this._filtered.map(doc => {
-                const s = STATUS_STYLES[doc.status] || STATUS_STYLES.pending;
+                const s = ss[doc.status] || ss.pending;
                 return `
                   <tr>
                     <td><strong>${doc.title}</strong><br><small class="text-muted">${doc.version}</small></td>
@@ -147,8 +156,8 @@ export class DocumentsPage {
                     <td class="${doc.status === 'expired' ? 'text-danger fw-semibold' : ''}">${doc.expiryDate}</td>
                     <td>${doc.size}</td>
                     <td>
-                      <button class="btn btn-sm btn-outline-primary me-1" data-doc-action="view" data-doc-id="${doc.id}"><i class="fas fa-eye"></i></button>
-                      <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}"><i class="fas fa-download"></i></button>
+                      <button class="btn btn-sm btn-outline-primary me-1" data-doc-action="view" data-doc-id="${doc.id}" title="${t('docs.btn.view')}"><i class="fas fa-eye"></i></button>
+                      <button class="btn btn-sm btn-outline-secondary" data-doc-action="download" data-doc-id="${doc.id}" title="${t('docs.btn.download')}"><i class="fas fa-download"></i></button>
                     </td>
                   </tr>`;
               }).join('')}
@@ -322,5 +331,9 @@ export class DocumentsPage {
 }
 
 function _typeLabel(type) {
-  return { manifest: 'Manifiesto', certificate: 'Certificado', inspection: 'Inspección', permit: 'Permiso', insurance: 'Seguro' }[type] || type;
+  return {
+    manifest: t('docs.type.manifest'), certificate: t('docs.type.certificate'),
+    inspection: t('docs.type.inspection'), permit: t('docs.type.permit'),
+    insurance: t('docs.type.insurance'),
+  }[type] || type;
 }

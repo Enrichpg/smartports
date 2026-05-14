@@ -2,6 +2,7 @@
  * Settings Page — User preferences, notifications, and system configuration
  */
 
+import { setLang, applyI18n, getCurrentLang } from '../services/i18n.js';
 
 export class SettingsPage {
   constructor() {
@@ -11,8 +12,10 @@ export class SettingsPage {
 
   _loadPrefs() {
     try {
-      return JSON.parse(localStorage.getItem('sp-settings') || '{}');
-    } catch { return {}; }
+      const p = JSON.parse(localStorage.getItem('sp-settings') || '{}');
+      if (!p.language) p.language = getCurrentLang();
+      return p;
+    } catch { return { language: getCurrentLang() }; }
   }
 
   _savePrefs() {
@@ -239,13 +242,22 @@ export class SettingsPage {
         this._prefs[id.replace('-', '')] = e.target.checked;
       });
     });
-    container.querySelector('#s-lang')?.addEventListener('change', e => { this._prefs.language = e.target.value; });
+    container.querySelector('#s-lang')?.addEventListener('change', e => {
+      this._prefs.language = e.target.value;
+      setLang(e.target.value);
+      const headerSel = document.getElementById('lang-selector');
+      if (headerSel) headerSel.value = e.target.value;
+      applyI18n(document);
+      window.__smartPortApp?._route();
+    });
     container.querySelector('#s-alert-threshold')?.addEventListener('change', e => { this._prefs.alertThreshold = e.target.value; });
     container.querySelector('#s-default-port')?.addEventListener('change', e => { this._prefs.defaultPort = e.target.value; });
 
     // Save
     container.querySelector('#s-save')?.addEventListener('click', () => {
       this._savePrefs();
+      setLang(this._prefs.language || 'es');
+      applyI18n(document);
       window.showToast('Configuración guardada correctamente', 'success');
     });
 

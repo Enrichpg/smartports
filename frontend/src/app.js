@@ -17,7 +17,7 @@ import {
   initLangSelector,
   pushNotification,
 } from './components/base.js';
-import { initI18n, applyI18n } from './services/i18n.js';
+import { initI18n, applyI18n, t } from './services/i18n.js';
 
 // Lazy page loader — avoids importing everything on startup
 let _pageCache = {};
@@ -44,20 +44,20 @@ async function importPage(name) {
   return _pageCache[name];
 }
 
-const PAGE_TITLES = {
-  dashboard: 'Dashboard',
-  ports: 'Puertos de Galicia',
-  'port-detail': 'Detalle de Puerto',
-  berths: 'Atraques',
-  'berth-detail': 'Detalle de Atraque',
-  'port-calls': 'Escalas',
-  alerts: 'Centro de Alertas',
-  analytics: 'Analytics',
-  vessels: 'Buques',
-  users: 'Equipos',
-  settings: 'Configuración',
-  maps: 'Mapa Interactivo',
-  documents: 'Documentos',
+const PAGE_TITLE_KEYS = {
+  dashboard: 'page.dashboard',
+  ports: 'page.ports',
+  'port-detail': 'page.port_detail',
+  berths: 'page.berths',
+  'berth-detail': 'page.berth_detail',
+  'port-calls': 'page.port_calls',
+  alerts: 'page.alerts',
+  analytics: 'page.analytics',
+  vessels: 'page.vessels',
+  users: 'page.users',
+  settings: 'page.settings',
+  maps: 'page.maps',
+  documents: 'page.documents',
 };
 
 export class SmartPortApp {
@@ -133,7 +133,7 @@ export class SmartPortApp {
     this.currentPage = null;
 
     updateActiveNav(pageName);
-    setHeaderTitle(PAGE_TITLES[pageName] || pageName);
+    setHeaderTitle(t(PAGE_TITLE_KEYS[pageName] || pageName, pageName));
 
     const container = document.getElementById('page-content');
     if (container) {

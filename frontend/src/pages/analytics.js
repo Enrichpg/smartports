@@ -6,6 +6,7 @@ import { apiClient } from '../services/api.js';
 import { LoadingSkeleton } from '../components/base.js';
 import { PORTS, generateOccupancyHistory, generatePortCalls, generateAlerts, getKPISummary } from '../services/mock-data.js';
 import { formatDate } from '../utils/helpers.js';
+import { t } from '../services/i18n.js';
 
 export class AnalyticsPage {
   constructor() {
@@ -51,44 +52,44 @@ export class AnalyticsPage {
     return `
       <div class="page-header">
         <div class="page-title"><i class="fas fa-chart-line"></i> Analytics</div>
-        <div class="page-subtitle">Análisis operativo de la red portuaria de Galicia</div>
+        <div class="page-subtitle">${t('analytics.subtitle')}</div>
       </div>
 
       <div class="row g-3 mb-4">
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
             <div style="font-size:1.6rem;font-weight:700;color:var(--sp-primary)">${kpi.avgOccupancyPct || kpi.avgOccupancy || 59}%</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Ocupación media</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.avg_occ')}</div>
           </div></div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
-            <div style="font-size:1.6rem;font-weight:700;color:#00A651">${kpi.freeBerths || kpi.freeBerths || 21}</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Atraques libres</div>
+            <div style="font-size:1.6rem;font-weight:700;color:#00A651">${kpi.freeBerths || 21}</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.free_berths')}</div>
           </div></div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
             <div style="font-size:1.6rem;font-weight:700;color:#17a2b8">${kpi.portCallsToday || 12}</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Escalas hoy</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.calls_today')}</div>
           </div></div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
             <div style="font-size:1.6rem;font-weight:700;color:#ffa500">${kpi.avgStayHours || 28}h</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Estancia media</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.avg_stay')}</div>
           </div></div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
             <div style="font-size:1.6rem;font-weight:700;color:#dc3545">${kpi.activeAlerts || 8}</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Alertas activas</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.alerts')}</div>
           </div></div>
         </div>
         <div class="col-6 col-md-4 col-xl-2">
           <div class="sp-card"><div class="sp-card-body text-center">
             <div style="font-size:1.6rem;font-weight:700;color:#6f42c1">${((kpi.estimatedRevenue || 284500) / 1000).toFixed(0)}K€</div>
-            <div style="font-size:0.75rem;color:var(--sp-text-muted)">Ingresos est.</div>
+            <div style="font-size:0.75rem;color:var(--sp-text-muted)">${t('analytics.kpi.revenue')}</div>
           </div></div>
         </div>
       </div>
@@ -96,23 +97,23 @@ export class AnalyticsPage {
       <!-- Filters -->
       <div class="sp-filters mb-4">
         <div class="sp-filter-group">
-          <label>Puerto</label>
+          <label>${t('dash.col.port')}</label>
           <select class="form-select form-select-sm" id="an-port">
-            <option value="">Todos los puertos</option>
+            <option value="">${t('analytics.filter.all_ports')}</option>
             ${PORTS.map(p => `<option value="${p.id}">${p.shortName}</option>`).join('')}
           </select>
         </div>
         <div class="sp-filter-group">
-          <label>Período</label>
+          <label>${t('settings.interval', 'Período')}</label>
           <select class="form-select form-select-sm" id="an-period">
-            <option value="7">Últimos 7 días</option>
-            <option value="30" selected>Últimos 30 días</option>
-            <option value="90">Últimos 90 días</option>
+            <option value="7">${t('analytics.period.7d')}</option>
+            <option value="30" selected>${t('analytics.period.30d')}</option>
+            <option value="90">${t('analytics.period.90d')}</option>
           </select>
         </div>
         <div class="d-flex align-items-end">
-          <button class="btn btn-sm btn-outline-secondary" onclick="window.showToast('Exportando informe PDF...','info')">
-            <i class="fas fa-file-pdf me-1"></i>Exportar
+          <button class="btn btn-sm btn-outline-secondary" id="an-export-csv">
+            <i class="fas fa-file-csv me-1"></i>${t('analytics.export_csv')}
           </button>
         </div>
       </div>
@@ -121,13 +122,13 @@ export class AnalyticsPage {
       <div class="row g-3 mb-3">
         <div class="col-lg-8">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-area"></i> Evolución de Ocupación por Puerto (%)</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-chart-area"></i> ${t('analytics.chart.occ_trend')}</span></div>
             <div class="sp-card-body"><canvas id="an-occupancy-trend" height="130"></canvas></div>
           </div>
         </div>
         <div class="col-lg-4">
           <div class="sp-card h-100">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-ship"></i> Distribución por Tipo de Buque</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-ship"></i> ${t('analytics.chart.vessel_type')}</span></div>
             <div class="sp-card-body d-flex align-items-center justify-content-center"><canvas id="an-vessel-type" height="180"></canvas></div>
           </div>
         </div>
@@ -137,13 +138,13 @@ export class AnalyticsPage {
       <div class="row g-3 mb-3">
         <div class="col-lg-6">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-calendar-check"></i> Escalas por Puerto (últimas 4 semanas)</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-calendar-check"></i> ${t('analytics.chart.portcalls')}</span></div>
             <div class="sp-card-body"><canvas id="an-portcalls-bar" height="140"></canvas></div>
           </div>
         </div>
         <div class="col-lg-6">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-exclamation-triangle"></i> Alertas por Severidad y Puerto</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-exclamation-triangle"></i> ${t('analytics.chart.alerts')}</span></div>
             <div class="sp-card-body"><canvas id="an-alerts-bar" height="140"></canvas></div>
           </div>
         </div>
@@ -153,13 +154,13 @@ export class AnalyticsPage {
       <div class="row g-3 mb-3">
         <div class="col-lg-4">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-spider"></i> Perfil Operativo</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-spider"></i> ${t('analytics.chart.radar')}</span></div>
             <div class="sp-card-body d-flex align-items-center justify-content-center"><canvas id="an-radar" height="200"></canvas></div>
           </div>
         </div>
         <div class="col-lg-8">
           <div class="sp-card">
-            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-clock"></i> Duración Media de Escala por Tipo de Buque (h)</span></div>
+            <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-clock"></i> ${t('analytics.chart.duration')}</span></div>
             <div class="sp-card-body"><canvas id="an-duration-bar" height="140"></canvas></div>
           </div>
         </div>
@@ -167,10 +168,10 @@ export class AnalyticsPage {
 
       <!-- Table: Top port calls -->
       <div class="sp-card">
-        <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-table"></i> Top Escalas por Tonelaje (Último Mes)</span></div>
+        <div class="sp-card-header"><span class="sp-card-title"><i class="fas fa-table"></i> ${t('analytics.table.title')}</span></div>
         <div class="sp-table-wrapper">
           <table class="sp-table">
-            <thead><tr><th>#</th><th>Buque</th><th>Puerto</th><th>Atraque</th><th>Tipo</th><th>Tonelaje</th><th>Duración</th><th>Estado</th></tr></thead>
+            <thead><tr><th>#</th><th>${t('analytics.col.vessel')}</th><th>${t('analytics.col.port')}</th><th>${t('analytics.col.berth')}</th><th>${t('analytics.col.type')}</th><th>${t('analytics.col.tonnage')}</th><th>${t('analytics.col.duration')}</th><th>${t('analytics.col.status')}</th></tr></thead>
             <tbody id="an-top-table"></tbody>
           </table>
         </div>
@@ -217,7 +218,12 @@ export class AnalyticsPage {
     // 2. Vessel type donut
     const typeCount = {};
     portCalls.forEach(pc => { typeCount[pc.vesselType] = (typeCount[pc.vesselType] || 0) + 1; });
-    const typeLabels = { container: 'Contenedor', bulk: 'Graneles', tanker: 'Tanquero', roro: 'Ro-Ro', general: 'General', cruise: 'Crucero', fishing: 'Pesca' };
+    const typeLabels = {
+      container: t('analytics.type.container'), bulk: t('analytics.type.bulk'),
+      tanker: t('analytics.type.tanker'), roro: t('analytics.type.roro'),
+      general: t('analytics.type.general'), cruise: t('analytics.type.cruise'),
+      fishing: t('analytics.type.fishing'),
+    };
     const el2 = document.getElementById('an-vessel-type');
     if (el2) {
       this._charts.vesselType = new window.Chart(el2, {
@@ -270,7 +276,12 @@ export class AnalyticsPage {
       this._charts.radar = new window.Chart(el5, {
         type: 'radar',
         data: {
-          labels: ['Ocupación', 'Eficiencia', 'Seguridad', 'Puntualidad', 'Sostenibilidad', 'Capacidad'],
+          labels: [
+            t('analytics.kpi.avg_occ', 'Ocupación'),
+            t('dash.kpi.efficiency', 'Eficiencia'),
+            t('alerts.type.SECURITY', 'Seguridad'),
+            'Puntualidad', 'Sostenibilidad', 'Capacidad',
+          ],
           datasets: [{
             label: 'Red Portuaria',
             data: [59, 87, 92, 76, 68, 74],
@@ -304,8 +315,16 @@ export class AnalyticsPage {
     const tbody = document.getElementById('an-top-table');
     if (tbody) {
       const sorted = [...portCalls].sort((a, b) => (b.grossTonnage || 0) - (a.grossTonnage || 0)).slice(0, 8);
-      const stateLabel = { active: 'Activa', authorized: 'Autorizada', pending: 'Pendiente', completed: 'Completada' };
-      const vtLabel = { container: 'Contenedor', bulk: 'Graneles', tanker: 'Tanquero', roro: 'Ro-Ro', general: 'General', cruise: 'Crucero', fishing: 'Pesca' };
+      const stateLabel = {
+        active: t('portcalls.state.active'), authorized: t('portcalls.state.authorized'),
+        pending: t('portcalls.state.pending'), completed: t('portcalls.state.completed'),
+      };
+      const vtLabel = {
+        container: t('analytics.type.container'), bulk: t('analytics.type.bulk'),
+        tanker: t('analytics.type.tanker'), roro: t('analytics.type.roro'),
+        general: t('analytics.type.general'), cruise: t('analytics.type.cruise'),
+        fishing: t('analytics.type.fishing'),
+      };
       tbody.innerHTML = sorted.map((pc, i) => `
         <tr>
           <td>${i + 1}</td>
@@ -320,7 +339,46 @@ export class AnalyticsPage {
     }
   }
 
+  _exportCSV(portCalls, kpi) {
+    const headers = [
+      t('analytics.col.vessel'), t('analytics.col.port'), t('analytics.col.berth'),
+      t('analytics.col.type'), t('analytics.col.tonnage'), t('analytics.col.duration'),
+      t('analytics.col.status'),
+    ];
+    const typeLabels = {
+      container: t('analytics.type.container'), bulk: t('analytics.type.bulk'),
+      tanker: t('analytics.type.tanker'), roro: t('analytics.type.roro'),
+      general: t('analytics.type.general'), cruise: t('analytics.type.cruise'),
+      fishing: t('analytics.type.fishing'),
+    };
+    const stateLabels = {
+      active: t('portcalls.state.active'), authorized: t('portcalls.state.authorized'),
+      pending: t('portcalls.state.pending'), completed: t('portcalls.state.completed'),
+    };
+    const rows = [...portCalls]
+      .sort((a, b) => (b.grossTonnage || 0) - (a.grossTonnage || 0))
+      .map(pc => [
+        pc.vesselName, pc.portName, pc.berthName,
+        typeLabels[pc.vesselType] || pc.vesselType,
+        pc.grossTonnage || 0,
+        pc.durationHours + 'h',
+        stateLabels[pc.state] || pc.state,
+      ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `smartport-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    window.showToast(t('analytics.export_csv') + ' OK', 'success');
+  }
+
   _bindEvents(container) {
+    container.querySelector('#an-export-csv')?.addEventListener('click', () => {
+      const portCalls = generatePortCalls(60);
+      this._exportCSV(portCalls, {});
+    });
     container.querySelector('#an-period')?.addEventListener('change', e => {
       this._period = e.target.value;
       const history = generateOccupancyHistory(parseInt(this._period));
@@ -334,7 +392,8 @@ export class AnalyticsPage {
     });
     container.querySelector('#an-port')?.addEventListener('change', e => {
       this._portFilter = e.target.value;
-      window.showToast(`Filtrando por ${this._portFilter ? PORTS.find(p => p.id === this._portFilter)?.shortName : 'todos los puertos'}`, 'info');
+      const portName = this._portFilter ? PORTS.find(p => p.id === this._portFilter)?.shortName : t('analytics.filter.all_ports');
+      window.showToast(`${t('ui.filter')}: ${portName}`, 'info');
     });
   }
 
