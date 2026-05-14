@@ -1,8 +1,18 @@
 # SmartPort Galicia Operations Center
 
+[![GitHub](https://img.shields.io/badge/GitHub-Enrichpg%2Fsmartports-blue?logo=github&logoColor=white)](https://github.com/Enrichpg/smartports)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Status](https://img.shields.io/badge/Status-Active-success.svg)](https://github.com/Enrichpg/smartports/releases)
+
 **An intelligent, real-time operational management platform for the Galician port network.**
 
+**Public Repository:** [github.com/Enrichpg/smartports](https://github.com/Enrichpg/smartports)
+
 ---
+
+### Enrique Pardo García - enrique.pardo.garcia@udc.es
+### Sergio Varela Rodríguez - sergio.varela1@udc.es
 
 ## 🎯 Quick Overview
 

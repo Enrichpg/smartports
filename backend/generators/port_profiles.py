@@ -14,6 +14,16 @@ class PortProfile:
     vessel_count_est: int
 
 def load_port_profiles() -> List[PortProfile]:
+    """Load Galician port profiles as dataclass objects.
+    
+    Returns:
+        List[PortProfile]: List of port profiles. Access fields via attributes:
+            - profile.name (not profile['name'])
+            - profile.coordinates
+            - profile.port_type
+        
+        To convert to dict: asdict(profile) from dataclasses
+    """
     return [
         PortProfile("a-coruna", "Puerto de A Coruña", [-8.3936, 43.3613], "A Coruña", "commercial", "Autoridad Portuaria de A Coruña", 50, 700),
         PortProfile("vigo", "Puerto de Vigo", [-8.7670, 42.2362], "Vigo", "commercial_fishing", "Autoridad Portuaria de Vigo", 60, 800),

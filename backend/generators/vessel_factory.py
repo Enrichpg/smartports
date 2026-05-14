@@ -12,10 +12,15 @@ class VesselFactory:
         self.vessel_counter += 1
         vessel_id = f"urn:ngsi-ld:Vessel:galicia-{archetype}-{self.vessel_counter}"
         now = datetime.utcnow().isoformat() + "Z"
+        imo = f"IMO{random.randint(1000000, 9999999)}"
+        mmsi = f"{random.randint(200000000, 799999999)}"
         
         return {
             "id": vessel_id,
             "type": "Vessel",
+            "imo": {"type": "Property", "value": imo},
+            "mmsi": {"type": "Property", "value": mmsi},
+            "vesselType": {"type": "Property", "value": archetype},
             "name": {"type": "Property", "value": f"Vessel-{self.vessel_counter}"},
             "state": {"type": "Property", "value": state or random.choice(["DOCKED", "MOVING", "ANCHORED"])},
             "location": {"type": "GeoProperty", "value": {"type": "Point", "coordinates": [random.uniform(-10, -7), random.uniform(42, 44)]}},
